@@ -142,15 +142,33 @@
         <button id="rotateBtn" onclick={() => { game.rotateTool(); game.renderDesigner(); }}>회전: 가로</button>
       </div>
       <div id="toolBar" class="toolBar">
-        <button class="toolBtn" data-tool="red" title="빨간 점 마나" onclick={() => { game.setTool('red'); game.renderDesigner(); }}>🔴</button>
-        <button class="toolBtn" data-tool="blueGen" title="파란 마나 생성기" onclick={() => { game.setTool('blueGen'); game.renderDesigner(); }}>🔵</button>
-        <button class="toolBtn" data-tool="wire" title="도선" onclick={() => { game.setTool('wire'); game.renderDesigner(); }}>➕</button>
-        <button class="toolBtn" data-tool="circle" title="1칸 회로" onclick={() => { game.setTool('circle'); game.renderDesigner(); }}>⭕</button>
-        <button class="toolBtn" data-tool="oval" title="2칸 타원" onclick={() => { game.setTool('oval'); game.renderDesigner(); }}>🥚</button>
-        <button class="toolBtn" data-tool="kernel" title="2x2 핵" onclick={() => { game.setTool('kernel'); game.renderDesigner(); }}>⬛</button>
-        <button class="toolBtn" data-tool="mixed2" title="2칸 혼합 회로" onclick={() => { game.setTool('mixed2'); game.renderDesigner(); }}>🔶</button>
-        <button class="toolBtn" data-tool="mixedCore" title="9칸 혼합 핵" onclick={() => { game.setTool('mixedCore'); game.renderDesigner(); }}>🌀</button>
-        <button class="toolBtn" data-tool="eraser" title="지우개" onclick={() => { game.setTool('eraser'); game.renderDesigner(); }}>🧹</button>
+        <button class="toolBtn" data-tool="red" title="빨간 점 마나" onclick={() => { game.setTool('red'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon red"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="blueGen" title="파란 마나 생성기" onclick={() => { game.setTool('blueGen'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon blueGen"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="wire" title="도선" onclick={() => { game.setTool('wire'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon wire"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="circle" title="1칸 회로" onclick={() => { game.setTool('circle'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon circle"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="oval" title="2칸 타원" onclick={() => { game.setTool('oval'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon oval"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="kernel" title="2x2 핵" onclick={() => { game.setTool('kernel'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon kernel"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="mixed2" title="2칸 혼합 회로" onclick={() => { game.setTool('mixed2'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon mixed2"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="mixedCore" title="9칸 혼합 핵" onclick={() => { game.setTool('mixedCore'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon mixedCore"></span></span>
+        </button>
+        <button class="toolBtn" data-tool="eraser" title="지우개" onclick={() => { game.setTool('eraser'); game.renderDesigner(); }}>
+          <span class="toolIconSvg"><span class="toolIcon eraser"></span></span>
+        </button>
       </div>
       <div id="toolInfo" class="toolInfo">도구를 선택하고 설계판을 클릭하세요</div>
       <div class="boardWrap"><div id="designBoard" class="designBoard"></div></div>
