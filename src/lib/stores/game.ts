@@ -4,7 +4,7 @@
 import { Store } from '$lib/game/core/Store';
 import * as Storage from '$lib/game/core/Storage';
 import { setLanguage, t } from '$lib/game/i18n';
-import { MAPS, MAX_MANA, STAR_THRESHOLDS, TOOL_ORDER } from '$lib/game/constants';
+import { MAPS, MAX_MANA, STAR_THRESHOLDS, TOOL_ORDER, UNLOCK_ALL_MAPS_CODE, SPAWN_TIMER_BATTLE_START, MAX_SPELL_NAME_LENGTH } from '$lib/game/constants';
 import { BattleRenderer } from '$lib/game/battle/BattleRenderer';
 import { getCurrentTarget, pickMonsterAt } from '$lib/game/battle/TargetingSystem';
 import { clone } from '$lib/game/utils/helpers';
@@ -157,7 +157,7 @@ export class GameManager {
     this.designer.components = this.designer.components.filter(
       c => c.x + c.w <= this.designer.width && c.y + c.h <= this.designer.height,
     );
-    if (before !== this.designer.components.length) showToast('프레임 밖 부품을 제거했습니다.');
+    if (before !== this.designer.components.length) showToast(t('trimmed.outside'));
   }
 
   /** 현재 설계를 지정한 슬롯에 저장합니다 */
@@ -179,7 +179,7 @@ export class GameManager {
     b.score = 0; b.mana = MAX_MANA; b.baseHp = 20; b.survival = 0;
     b.monsters = []; b.casts = []; b.effects = [];
     b.cooldowns = [0, 0, 0, 0, 0]; b.selectedTargetId = null;
-    b.spawnTimer = 10; b.nextMonsterId = 1; b.nextCastId = 1;
+    b.spawnTimer = SPAWN_TIMER_BATTLE_START; b.nextMonsterId = 1; b.nextCastId = 1;
     b.activeRunMapId = this.currentMap.id;
     b.activeRunMode = this.selectedRunMode;
     b.bossInterval = this.currentMap.bossInterval || 30;
@@ -242,8 +242,8 @@ export class GameManager {
     this.recordRun();
     const a2 = this.store.isMapUnlocked(2), a3 = this.store.isMapUnlocked(3), as = this.totalStars;
     const afterRegen = this.effectiveManaRegen;
-    if (!b2 && a2) showToast('Map 2 unlocked!', 'good');
-    else if (!b3 && a3) showToast('Map 3 unlocked!', 'good');
+    if (!b2 && a2) showToast(t('map2.unlocked'), 'good');
+    else if (!b3 && a3) showToast(t('map3.unlocked'), 'good');
     else if (bs < as) showToast(t('star.earned', as), 'good');
     if (beforeRegen < afterRegen) showToast(t('mana.bonus.activated', afterRegen), 'good');
   }
@@ -353,7 +353,7 @@ export class GameManager {
     this.store.loadFromStorage();
     this.state = 'design';
     gameRx.syncFull(this);
-    showToast('데이터가 초기화되었습니다.', 'good');
+    showToast(t('data.cleared'), 'good');
   }
 
   // ── Phase 3.5: v1.5 State & Logic Migration ──────────────
@@ -361,12 +361,12 @@ export class GameManager {
   /** 마나 보너스 ON/OFF를 토글합니다 (별 5개 이상 필요) */
   toggleManaBonus() {
     if (this.store.totalStars < 5) {
-      showToast('별 5개 이상부터 마나 보너스를 사용할 수 있습니다.', 'bad');
+      showToast(t('mana.bonus.require.stars'), 'bad');
       return;
     }
     this.store.manaBonusEnabled = !this.store.manaBonusEnabled;
     Storage.saveManaBonusEnabled(this.store.manaBonusEnabled);
-    showToast(`마나 보너스 ${this.store.manaBonusEnabled ? 'ON' : 'OFF'}`, this.store.manaBonusEnabled ? 'good' : 'bad');
+    showToast(t('mana.bonus.toggled', this.store.manaBonusEnabled ? 'ON' : 'OFF'), this.store.manaBonusEnabled ? 'good' : 'bad');
     gameRx.syncFull(this);
   }
 
@@ -384,8 +384,8 @@ export class GameManager {
 
   /** 테스트용 치트 코드: 1111 입력 시 모든 맵과 별 9개 해금 */
   tryUnlockAllMaps(code: string): boolean {
-    if (code.trim() !== '1111') {
-      showToast('비밀번호가 틀렸습니다.', 'bad');
+    if (code.trim() !== UNLOCK_ALL_MAPS_CODE) {
+      showToast(t('wrong.password'), 'bad');
       return false;
     }
     this.store.unlocks = { '1': true, '2': true, '3': true };
@@ -401,7 +401,7 @@ export class GameManager {
     Storage.saveUnlocks(this.store.unlocks);
     Storage.saveRecords(this.store.records);
     gameRx.syncFull(this);
-    showToast('테스트 모드: 모든 맵과 별 9개 해금', 'good');
+    showToast(t('test.mode.unlocked'), 'good');
     return true;
   }
 
@@ -411,7 +411,7 @@ export class GameManager {
     this.store.decks[index] = clone(this.store.slots);
     Storage.saveDecks(this.store.decks);
     const name = this.store.deckNames[index] || `덱 ${index + 1}`;
-    showToast(`현재 5개 슬롯을 ${name}에 저장했습니다.`, 'good');
+    showToast(t('deck.saved', name), 'good');
   }
 
   /** 지정한 덱 인덱스의 술식을 현재 슬롯으로 불러옵니다 */
@@ -419,23 +419,23 @@ export class GameManager {
     if (index < 0 || index >= 10) return;
     const deck = this.store.decks[index] || [null, null, null, null, null];
     if (!deck.some(Boolean)) {
-      showToast('이 덱은 비어 있습니다.', 'bad');
+      showToast(t('deck.empty'), 'bad');
       return;
     }
     this.store.slots = deck.map(spell => spell ? Storage.normalizeSpell(spell) : null);
     Storage.saveSlots(this.store.slots);
     gameRx.syncFull(this);
     const name = this.store.deckNames[index] || `덱 ${index + 1}`;
-    showToast(`${name}을(를) 불러왔습니다.`, 'good');
+    showToast(t('deck.loaded', name), 'good');
   }
 
   /** 덱 이름을 변경합니다 (최대 18자) */
   renameDeck(index: number, name: string) {
     if (index < 0 || index >= 10) return;
-    const trimmed = (name || '').trim().slice(0, 18) || `덱 ${index + 1}`;
+    const trimmed = (name || '').trim().slice(0, MAX_SPELL_NAME_LENGTH) || `덱 ${index + 1}`;
     this.store.deckNames[index] = trimmed;
     Storage.saveDeckNames(this.store.deckNames);
-    showToast('덱 이름을 저장했습니다.', 'good');
+    showToast(t('deck.name.saved'), 'good');
   }
 }
 

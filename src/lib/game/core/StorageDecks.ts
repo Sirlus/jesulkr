@@ -48,7 +48,7 @@ export function loadDeckNames(): string[] {
     if (!Array.isArray(saved)) return names;
     for (let i = 0; i < 10; i++) {
       const name = String(saved[i] || '').trim();
-      if (name) names[i] = name.slice(0, 18);
+      if (name) names[i] = name.slice(0, C.MAX_SPELL_NAME_LENGTH);
     }
   } catch { /* ignore */ }
   return names;

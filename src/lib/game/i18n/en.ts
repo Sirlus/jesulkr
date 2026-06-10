@@ -97,6 +97,22 @@ const en: Record<string, string> = {
   'boss.appeared': 'HP 500 boss appeared!',
   'mana.bonus.activated': '5 stars reached: mana regen {0}/sec',
   'star.earned': 'Star earned! ★ {0}/9',
+  'trimmed.outside': 'Removed components outside the frame.',
+  'map2.unlocked': 'Map 2 unlocked!',
+  'map3.unlocked': 'Map 3 unlocked!',
+  'mana.bonus.require.stars': 'Mana bonus requires 5+ stars.',
+  'mana.bonus.toggled': 'Mana bonus {0}',
+  'data.cleared': 'Data cleared.',
+  'wrong.password': 'Wrong password.',
+  'test.mode.unlocked': 'Test mode: all maps and 9 stars unlocked',
+  'deck.saved': 'Saved 5 slots to {0}.',
+  'deck.loaded': 'Loaded {0}.',
+  'deck.empty': 'This deck is empty.',
+  'deck.name.saved': 'Deck name saved.',
+  'invalid.slot': 'Invalid slot.',
+  'invalid.spell': 'Invalid spell.',
+  'slot.saved': 'Saved to slot {0}.',
+  'slot.loaded': 'Loaded slot {0}.',
 };
 
 export default en;

@@ -10,6 +10,9 @@ import { showToast } from '$lib/game/ui/Toast';
 
 /** requestAnimationFrame 기반 게임 루프를 시작합니다 */
 export function startLoop(gm: GameManager) {
+  if (gm.animId) cancelAnimationFrame(gm.animId);
+  gm.lastTime = 0;
+  gm.accumulator = 0;
   const loop = (timestamp: number) => {
     if (!gm.lastTime) gm.lastTime = timestamp;
     const dt = Math.min(0.1, (timestamp - gm.lastTime) / 1000);
@@ -29,12 +32,9 @@ export function startLoop(gm: GameManager) {
         map: gm.currentMap,
       };
       const result = updateBattleTick(
-        gm.battle.score, gm.battle.mana, gm.battle.baseHp, gm.battle.survival,
-        gm.battle.monsters, gm.battle.casts, gm.battle.effects,
-        gm.battle.cooldowns, gm.battle.selectedTargetId,
-        gm.battle.spawnTimer, gm.battle.nextMonsterId, gm.battle.nextCastId,
-        gm.battle.nextBossAt, gm.battle.bossInterval,
-        gm.effectiveManaRegen, ctx,
+        gm.battle,
+        gm.effectiveManaRegen,
+        ctx,
       );
       gm.battle.score = result.score;
       gm.battle.mana = result.mana;

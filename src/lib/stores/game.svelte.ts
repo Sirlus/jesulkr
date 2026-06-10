@@ -11,6 +11,7 @@
 // │  HUD 텍스트 + 쿨타임 바 width 만       │
 // └────────────────────────────────────────┘
 // ============================================================
+import type { GameManager } from './game';
 import { t } from '$lib/game/i18n';
 import { updateHUD } from '$lib/game/ui/HUD';
 import { renderSlots, updateCooldownBars } from '$lib/game/ui/SlotPanel';
@@ -19,7 +20,7 @@ import * as Storage from '$lib/game/core/Storage';
 
 class GameReactiveState {
   // ── Full sync: state transitions, slot save/load, designer ops ──
-  syncFull(gm: any) {
+  syncFull(gm: GameManager) {
     const s = gm.store;
     const b = s.battle;
     const isDesign = s.state === 'design';
@@ -60,7 +61,7 @@ class GameReactiveState {
   }
 
   // ── Partial sync: per-frame lightweight HUD + cooldowns ──
-  syncPartial(gm: any) {
+  syncPartial(gm: GameManager) {
     const s = gm.store;
     const b = s.battle;
     updateHUD(

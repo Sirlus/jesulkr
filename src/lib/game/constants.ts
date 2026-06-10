@@ -34,6 +34,11 @@ export const CELL = 58;
 export const GAP = 4;
 export const MAX_FRAME = 11;
 export const MANA_BONUS_STAR_COUNT = 5;
+export const MAX_SPELL_NAME_LENGTH = 18;
+export const TOAST_DURATION_MS = 1400;
+export const UNLOCK_ALL_MAPS_CODE = '1111';
+export const SPAWN_TIMER_BATTLE_START = 10;
+export const SPAWN_TIMER_DEFAULT = 12;
 
 // ── Star Thresholds ───────────────────────────────────────────
 export const STAR_THRESHOLDS: Record<number, number[]> = {

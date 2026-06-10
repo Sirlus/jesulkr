@@ -3,6 +3,7 @@
 // ============================================================
 import { $ } from '../utils/dom';
 import { t } from '../i18n';
+import { TOAST_DURATION_MS } from '../constants';
 
 let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -13,5 +14,5 @@ export function showToast(text: string, type?: 'good' | 'bad'): void {
   el.className = 'show';
   if (type) el.classList.add(type);
   if (timer) clearTimeout(timer);
-  timer = setTimeout(() => { el.className = ''; }, 1400);
+  timer = setTimeout(() => { el.className = ''; }, TOAST_DURATION_MS);
 }

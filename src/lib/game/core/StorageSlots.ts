@@ -42,7 +42,7 @@ export function normalizeSpell(raw: unknown): SpellData | null {
   if (!stats.valid) return null;
   return {
     id: r.id || `loaded_${Date.now()}`,
-    name: String(r.name || '이름 없는 술식').slice(0, 18),
+    name: String(r.name || '이름 없는 술식').slice(0, C.MAX_SPELL_NAME_LENGTH),
     width, height, components,
     castTime: stats.castTime,
     manaCost: stats.manaCost,

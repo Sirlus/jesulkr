@@ -97,6 +97,22 @@ const ko: Record<string, string> = {
   'boss.appeared': 'HP 500 보스 등장!',
   'mana.bonus.activated': '별 5개 달성: 초당 마나 {0}',
   'star.earned': '별 획득! ★ {0}/9',
+  'trimmed.outside': '프레임 밖 부품을 제거했습니다.',
+  'map2.unlocked': '맵 2이(가) 해금되었습니다!',
+  'map3.unlocked': '맵 3이(가) 해금되었습니다!',
+  'mana.bonus.require.stars': '별 5개 이상부터 마나 보너스를 사용할 수 있습니다.',
+  'mana.bonus.toggled': '마나 보너스 {0}',
+  'data.cleared': '데이터가 초기화되었습니다.',
+  'wrong.password': '비밀번호가 틀렸습니다.',
+  'test.mode.unlocked': '테스트 모드: 모든 맵과 별 9개 해금',
+  'deck.saved': '현재 5개 슬롯을 {0}에 저장했습니다.',
+  'deck.loaded': '{0}을(를) 불러왔습니다.',
+  'deck.empty': '이 덱은 비어 있습니다.',
+  'deck.name.saved': '덱 이름을 저장했습니다.',
+  'invalid.slot': '잘못된 슬롯입니다.',
+  'invalid.spell': '유효한 술식이 아닙니다.',
+  'slot.saved': '{0}번 슬롯에 저장했습니다.',
+  'slot.loaded': '{0}번 슬롯을 불러왔습니다.',
 };
 
 export default ko;
