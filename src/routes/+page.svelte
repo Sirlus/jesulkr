@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { game } from '$lib/stores/game';
-  import { gameRx } from '$lib/stores/game.svelte';
   import * as Storage from '$lib/game/core/Storage';
   import '$lib/game/style.css';
 
@@ -139,34 +138,34 @@
       <div class="row">
         <label>프레임 가로 <select id="frameW" onchange={(e) => game.setFrame(Number((e.target as HTMLSelectElement).value), game.designer.height)}></select></label>
         <label>세로 <select id="frameH" onchange={(e) => game.setFrame(game.designer.width, Number((e.target as HTMLSelectElement).value))}></select></label>
-        <button id="rotateBtn" onclick={() => { game.rotateTool(); game.renderDesigner(); }}>회전: 가로</button>
+        <button id="rotateBtn" onclick={() => { game.rotateTool(); }}>회전: 가로</button>
       </div>
       <div id="toolBar" class="toolBar">
-        <button class="toolBtn" data-tool="red" title="빨간 점 마나" onclick={() => { game.setTool('red'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="red" title="빨간 점 마나" onclick={() => { game.setTool('red'); }}>
           <span class="toolIconSvg"><span class="toolIcon red"></span></span>
         </button>
-        <button class="toolBtn" data-tool="blueGen" title="파란 마나 생성기" onclick={() => { game.setTool('blueGen'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="blueGen" title="파란 마나 생성기" onclick={() => { game.setTool('blueGen'); }}>
           <span class="toolIconSvg"><span class="toolIcon blueGen"></span></span>
         </button>
-        <button class="toolBtn" data-tool="wire" title="도선" onclick={() => { game.setTool('wire'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="wire" title="도선" onclick={() => { game.setTool('wire'); }}>
           <span class="toolIconSvg"><span class="toolIcon wire"></span></span>
         </button>
-        <button class="toolBtn" data-tool="circle" title="1칸 회로" onclick={() => { game.setTool('circle'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="circle" title="1칸 회로" onclick={() => { game.setTool('circle'); }}>
           <span class="toolIconSvg"><span class="toolIcon circle"></span></span>
         </button>
-        <button class="toolBtn" data-tool="oval" title="2칸 타원" onclick={() => { game.setTool('oval'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="oval" title="2칸 타원" onclick={() => { game.setTool('oval'); }}>
           <span class="toolIconSvg"><span class="toolIcon oval"></span></span>
         </button>
-        <button class="toolBtn" data-tool="kernel" title="2x2 핵" onclick={() => { game.setTool('kernel'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="kernel" title="2x2 핵" onclick={() => { game.setTool('kernel'); }}>
           <span class="toolIconSvg"><span class="toolIcon kernel"></span></span>
         </button>
-        <button class="toolBtn" data-tool="mixed2" title="2칸 혼합 회로" onclick={() => { game.setTool('mixed2'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="mixed2" title="2칸 혼합 회로" onclick={() => { game.setTool('mixed2'); }}>
           <span class="toolIconSvg"><span class="toolIcon mixed2"></span></span>
         </button>
-        <button class="toolBtn" data-tool="mixedCore" title="9칸 혼합 핵" onclick={() => { game.setTool('mixedCore'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="mixedCore" title="9칸 혼합 핵" onclick={() => { game.setTool('mixedCore'); }}>
           <span class="toolIconSvg"><span class="toolIcon mixedCore"></span></span>
         </button>
-        <button class="toolBtn" data-tool="eraser" title="지우개" onclick={() => { game.setTool('eraser'); game.renderDesigner(); }}>
+        <button class="toolBtn" data-tool="eraser" title="지우개" onclick={() => { game.setTool('eraser'); }}>
           <span class="toolIconSvg"><span class="toolIcon eraser"></span></span>
         </button>
       </div>

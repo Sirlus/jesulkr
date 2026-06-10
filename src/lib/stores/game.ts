@@ -17,6 +17,7 @@ import { renderSlots, updateCooldownBars } from '$lib/game/ui/SlotPanel';
 import { renderDesigner, eraseComponent } from './DesignerRenderer';
 import { saveSpell, loadSpell, clearDesign } from './SpellManager';
 import { startLoop } from './GameLoop';
+import { gameRx } from './game.svelte';
 
 /** 게임의 중앙 제어 싱글톤. 모든 상태 변경과 상호작용의 진입점 */
 export class GameManager {
@@ -58,14 +59,9 @@ export class GameManager {
   get totalStars() { return this.store.totalStars; }
   get effectiveManaRegen() { return this.store.effectiveManaRegen; }
 
-  /** 상태 변경 시 UI 클래스 토글 및 전체 갱신 */
+  /** 상태 변경 시 UI 자동 갱신 (gameRx.syncFull에 위임) */
   onStateChange() {
-    const isDesign = this.store.state === 'design';
-    const dp = document.getElementById('designerPanel');
-    if (dp) dp.classList.toggle('hidden', !isDesign);
-    document.body.classList.toggle('mode-design', isDesign);
-    document.body.classList.toggle('mode-play', !isDesign);
-    this.refreshAll();
+    gameRx.syncFull(this);
   }
 
   /** Canvas를 초기화하고 전투 렌더링 루프를 시작합니다 */
@@ -80,11 +76,11 @@ export class GameManager {
 
   // ── Designer ─────────────────────────────────────────────
   /** 설계 도구를 변경합니다 (예: 'circle', 'red', 'eraser') */
-  setTool(tool: string) { this.designer.tool = tool; }
+  setTool(tool: string) { this.designer.tool = tool; gameRx.syncFull(this); }
   /** 회전 가능한 도구(oval, mixed2)의 방향을 토글합니다 */
-  rotateTool() { this.designer.rotation = this.designer.rotation === 0 ? 1 : 0; }
+  rotateTool() { this.designer.rotation = this.designer.rotation === 0 ? 1 : 0; gameRx.syncFull(this); }
   /** 설계판 크기를 변경하고 설계판 밖 부품을 제거합니다 */
-  setFrame(w: number, h: number) { this.designer.width = w; this.designer.height = h; this.trimComponents(); }
+  setFrame(w: number, h: number) { this.designer.width = w; this.designer.height = h; this.trimComponents(); gameRx.syncFull(this); }
 
   /** 마우스 위치에 현재 선택한 도구를 배치합니다. 성공 여부를 반환합니다 */
   placeComponent(e: MouseEvent): boolean {
@@ -99,7 +95,7 @@ export class GameManager {
     if (canPlaceComponent(comp, this.designer.components, this.designer.width, this.designer.height)) {
       this.designer.components.push(comp);
       this.designer.nextId++;
-      this.renderDesigner();
+      gameRx.syncFull(this);
       return true;
     }
     return false;
@@ -220,7 +216,6 @@ export class GameManager {
     const changed = (next.score !== rec.score) || (next.time !== rec.time);
     Storage.setMapRecord(this.records, Number(id), mode, next);
     if (changed) Storage.saveRecords(this.records);
-    this.store.emit('records');
     return changed;
   }
 
@@ -295,7 +290,7 @@ export class GameManager {
     // Hide the modal immediately so the user sees the game UI
     const modal = document.getElementById('languageModal');
     if (modal) modal.classList.add('hidden');
-    this.refreshAll();
+    gameRx.syncFull(this);
   }
 
   /** 전투를 일시정지하거나 재개합니다 */
@@ -342,7 +337,7 @@ export class GameManager {
     Storage.clearAllStorage();
     this.store.loadFromStorage();
     this.state = 'design';
-    this.refreshAll();
+    gameRx.syncFull(this);
     showToast('데이터가 초기화되었습니다.', 'good');
   }
 }

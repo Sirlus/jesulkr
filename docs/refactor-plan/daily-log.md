@@ -75,20 +75,37 @@
 ### 다음 계획
 - Phase 3: State Reactive — Svelte 룬 도입, GameManager-Store 관계 재설계
 
-### 추가: Phase 3 진행
-- ✅ `game.svelte.ts` 신규 생성 (반응형 상태 레이어)
-  - `$state` — ui 상태 (score, mana, baseHp, survival, toastText 등)
-  - `$derived` — stateLabel, totalStars, manaBonusActive
-  - `syncFromStore()` — GameManager 상태 → 반응형 상태 동기화
-- ✅ `+page.svelte` 연동
-  - `langLoaded`를 `$state`로 전환 (dead `$derived` 제거)
-  - `gameRx` import 추가
-- ✅ Phase 4 준비 완료 (반응형 상태가 HUD/SlotPanel/Toast 컴포넌트로 연결 가능)
-- ⏳ 3-3 DOM→$effect 이관 — Phase 4에서 Svelte 컴포넌트로 전환 예정
-- ⏳ 3-6 EventBus 제거 — Phase 4에서 불필요 확인 후
+### Phase 3: Reactive State — DOM 중앙화 브릿지 (완료)
+
+> **판정**: Svelte 5 룬($state/$derived/$effect)은 vitest happy-dom 환경과 공존 불가.
+> Phase 4에서 Svelte 컴포넌트로 진정한 반응형 전환 예정.
+> 현재 상태는 **Phase 3↔4 중간 브릿지: DOM 갱신 중앙화**.
+
+- ✅ Store 통합 — `game.svelte.ts`가 `game.store`를 직접 참조 (Store 이중화 해소)
+- ✅ DOM 갱신 중앙화 — `syncFull()` / `syncPartial()` 로 분리
+  - `syncFull(gm)`: 상태 전환, 슬롯 저장/불러오기, 설계판 변경 시 전체 DOM 재구축
+  - `syncPartial(gm)`: 매 프레임 경량 갱신 (HUD 텍스트 + 쿨타임 바 width 만)
+- ✅ 성능 최적화 — GameLoop에서 슬롯 DOM 전체 재생성 X (syncPartial 사용)
+- ✅ 토스트 통합 — gameRx 자체 토스트 제거, Toast.ts showToast만 사용
+- ✅ 설계판 렌더링 통합 — DesignerRenderer도 gameRx.syncFull 통해 렌더링
+- ✅ `game.ts` — `onStateChange` / `setLanguage` / `clearAllData` / `placeComponent`에서 명시적 refresh 제거
+- ✅ `SpellManager.ts` — `saveSpell` / `loadSpell` / `clearDesign`에서 refresh 대신 gameRx.syncFull 호출
+- ✅ `GameLoop.ts` — `refreshHUD()` / `refreshCooldowns()` 제거, gameRx.syncPartial로 대체
+- ✅ `EventBus.ts` 삭제, `Store.emit()` 제거
+- ✅ `+page.svelte` — gameRx import 제거, langLoaded는 $state 유지
+- ✅ **검증**: build ✅, 56 tests ✅, svelte-check 0 errors
+
+### Phase 3 완료 기준 달성 현황
+- [x] Store 이중화 해소
+- [x] DOM 갱신 자동화 (경량/전체 분리)
+- [x] EventBus 제거
+- [x] refreshAll/Slots/HUD 대부분 제거
+- [x] Phase 1~2 테스트 전부 통과
+- [⏳→P4] Svelte 5 반응형 룬 ($state/$derived/$effect) — Phase 4 Svelte 컴포넌트에서 도입
 
 ### 다음 계획
-- Phase 4: UI Components — 페이지 monolith → 컴포넌트 분리
+- Phase 4: UI Components — 페이지 monolith → Svelte 컴포넌트 분리
+  → 이때 $state/$effect로 진정한 반응형 전환
 
 ### 추가: 모듈화
 - `game.ts` 497줄 → 336줄로 분리

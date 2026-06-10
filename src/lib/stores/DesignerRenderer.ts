@@ -2,6 +2,7 @@
 // DesignerRenderer — 설계판 DOM 렌더링 및 부품 삭제
 // ============================================================
 import type { GameManager } from './game';
+import { gameRx } from './game.svelte';
 import { t } from '$lib/game/i18n';
 
 const CELL = 58, GAP = 4;
@@ -54,7 +55,7 @@ export function eraseComponent(gm: GameManager, e: MouseEvent) {
     const left = pos(c.x), top = pos(c.y);
     if (localX >= left && localX <= left + pieceSize(c.w) && localY >= top && localY <= top + pieceSize(c.h)) {
       gm.designer.components = gm.designer.components.filter(x => x.id !== c.id);
-      renderDesigner(gm);
+      gameRx.syncFull(gm);
       return;
     }
   }
@@ -66,5 +67,5 @@ export function eraseComponent(gm: GameManager, e: MouseEvent) {
   gm.designer.components = gm.designer.components.filter(
     c => !(cx >= c.x && cx < c.x + c.w && cy >= c.y && cy < c.y + c.h),
   );
-  if (before !== gm.designer.components.length) renderDesigner(gm);
+  if (before !== gm.designer.components.length) gameRx.syncFull(gm);
 }

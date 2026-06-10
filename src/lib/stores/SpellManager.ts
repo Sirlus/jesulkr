@@ -6,6 +6,7 @@ import * as Storage from '$lib/game/core/Storage';
 import { t } from '$lib/game/i18n';
 import { clone } from '$lib/game/utils/helpers';
 import { showToast } from '$lib/game/ui/Toast';
+import { gameRx } from './game.svelte';
 
 /** 현재 설계를 지정한 슬롯에 저장합니다 */
 export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
@@ -27,7 +28,7 @@ export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
   };
   gm.store.slots[slotIndex] = spell;
   Storage.saveSlots(gm.slots);
-  gm.refreshSlots();
+  gameRx.syncFull(gm);
   showToast(`${slotIndex + 1}번 슬롯에 저장했습니다.`, 'good');
 }
 
@@ -45,7 +46,7 @@ export function loadSpell(gm: GameManager, slotIndex: number) {
   if (slotSelect) slotSelect.value = String(slotIndex);
   if (gm.state !== 'design') gm.store.returnStateAfterDesign = gm.state;
   gm.state = 'design';
-  gm.renderDesigner();
+  // gameRx.sync will render designer (called from onStateChange)
   showToast(`${slotIndex + 1}번 슬롯을 불러왔습니다.`, 'good');
 }
 
@@ -55,5 +56,5 @@ export function clearDesign(gm: GameManager) {
   gm.designer.nextId = 1;
   const nameInput = document.getElementById('spellName') as HTMLInputElement;
   if (nameInput) nameInput.value = '';
-  gm.renderDesigner();
+  gameRx.syncFull(gm);
 }

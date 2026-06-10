@@ -5,7 +5,6 @@ import type {
   GameState, RunMode, Language, Monster, CastProjectile, VisualEffect,
   SpellData, KeyBinding, Records, MapDef,
 } from '../types';
-import { eventBus } from './EventBus';
 import { MAPS, MAX_MANA, BASE_MANA_REGEN, STAR_MANA_REGEN, MANA_BONUS_STAR_COUNT } from '../constants';
 import * as Storage from './Storage';
 import { getMapProgressScore, getMapStars, getMapRecord, setMapRecord } from './StorageRecords';
@@ -158,8 +157,4 @@ export class Store {
     return getMapProgressScore(this.records, id);
   }
 
-  // ── Emit change ──────────────────────────────────────────
-  emit(slice: string): void {
-    eventBus.emitStateChange(slice);
-  }
 }
