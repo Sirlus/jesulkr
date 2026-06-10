@@ -4,17 +4,19 @@
 import { Store } from '$lib/game/core/Store';
 import * as Storage from '$lib/game/core/Storage';
 import { setLanguage, t } from '$lib/game/i18n';
-import { MAPS, TICK_SEC, MAX_MANA } from '$lib/game/constants';
-import { updateBattleTick, type BattleContext } from '$lib/game/battle/BattleEngine';
+import { MAPS, MAX_MANA } from '$lib/game/constants';
 import { BattleRenderer } from '$lib/game/battle/BattleRenderer';
 import { getCurrentTarget, pickMonsterAt } from '$lib/game/battle/TargetingSystem';
 import { clone } from '$lib/game/utils/helpers';
 import { calculateSpellStats } from '$lib/game/designer/StatsCalculator';
-import { createComponentFromGridCoord, canPlaceComponent, componentAt } from '$lib/game/designer/Components';
+import { createComponentFromGridCoord, canPlaceComponent } from '$lib/game/designer/Components';
 import type { GameState } from '$lib/game/types';
 import { showToast } from '$lib/game/ui/Toast';
 import { updateHUD } from '$lib/game/ui/HUD';
 import { renderSlots, updateCooldownBars } from '$lib/game/ui/SlotPanel';
+import { renderDesigner, eraseComponent } from './DesignerRenderer';
+import { saveSpell, loadSpell, clearDesign } from './SpellManager';
+import { startLoop } from './GameLoop';
 
 /** 게임의 중앙 제어 싱글톤. 모든 상태 변경과 상호작용의 진입점 */
 export class GameManager {
@@ -73,6 +75,9 @@ export class GameManager {
     this.startLoop();
   }
 
+  /** requestAnimationFrame 기반 게임 루프를 시작합니다 */
+  startLoop() { startLoop(this); }
+
   // ── Designer ─────────────────────────────────────────────
   /** 설계 도구를 변경합니다 (예: 'circle', 'red', 'eraser') */
   setTool(tool: string) { this.designer.tool = tool; }
@@ -101,6 +106,15 @@ export class GameManager {
   }
 
 
+  /** 현재 설계의 통계를 반환합니다 */
+  spellStats() {
+    return calculateSpellStats({
+      width: this.designer.width,
+      height: this.designer.height,
+      components: this.designer.components,
+    });
+  }
+
   /** 현재 설계의 통계를 계산하여 HUD에 표시합니다 */
   updateStatsDisplay() {
     const stats = this.spellStats();
@@ -119,6 +133,30 @@ export class GameManager {
     const sb = document.getElementById('saveBtn') as HTMLButtonElement;
     if (sb) sb.disabled = !stats.valid;
   }
+
+  /** 우클릭 또는 지우개 클릭으로 부품을 삭제합니다 */
+  eraseComponent(e: MouseEvent) { eraseComponent(this, e); }
+
+  /** 설계판 DOM을 그립니다 */
+  renderDesigner() { renderDesigner(this); }
+
+  /** 프레임 크기를 벗어난 부품을 제거합니다 */
+  trimComponents() {
+    const before = this.designer.components.length;
+    this.designer.components = this.designer.components.filter(
+      c => c.x + c.w <= this.designer.width && c.y + c.h <= this.designer.height,
+    );
+    if (before !== this.designer.components.length) showToast('프레임 밖 부품을 제거했습니다.');
+  }
+
+  /** 현재 설계를 지정한 슬롯에 저장합니다 */
+  saveSpell(name: string, slotIndex: number) { saveSpell(this, name, slotIndex); }
+
+  /** 지정한 슬롯의 술식을 설계판으로 불러옵니다 */
+  loadSpell(slotIndex: number) { loadSpell(this, slotIndex); }
+
+  /** 설계판의 모든 부품을 제거합니다 */
+  clearDesign() { clearDesign(this); }
 
   // ── Battle ───────────────────────────────────────────────
   /** 전투를 시작합니다. 저장된 술식이 없으면 토스트 메시지를 출력합니다 */
@@ -167,6 +205,24 @@ export class GameManager {
     });
   }
 
+
+  /** 현재 전투 런의 기록을 저장합니다 */
+  recordRun() {
+    if (!this.battle.battleStarted) return false;
+    const id = String(this.battle.activeRunMapId || '');
+    if (!id || !MAPS[Number(id)]) return false;
+    const mode = this.battle.activeRunMode === 'pure' ? 'pure' : 'assist';
+    const rec = Storage.getMapRecord(this.records, Number(id), mode);
+    const next = {
+      score: Math.max(rec.score || 0, this.battle.score || 0),
+      time: Math.max(rec.time || 0, this.battle.survival || 0),
+    };
+    const changed = (next.score !== rec.score) || (next.time !== rec.time);
+    Storage.setMapRecord(this.records, Number(id), mode, next);
+    if (changed) Storage.saveRecords(this.records);
+    this.store.emit('records');
+    return changed;
+  }
 
   /** 전투 종료 후 맵/별 해금 상태를 확인하고 토스트를 출력합니다 */
   checkUnlocks() {
