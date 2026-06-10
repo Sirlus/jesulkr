@@ -49,6 +49,13 @@ export function renderSlots(
         modeRow.innerHTML =
           `<span>${t('cast.mode')}</span>` +
           `<button class="autoSwitch ${isAuto ? 'on' : ''}" data-auto-slot="${i}" type="button">${isAuto ? t('auto') : t('manual')}</button>`;
+        const autoBtn = modeRow.querySelector<HTMLButtonElement>('button[data-auto-slot]');
+        if (autoBtn) {
+          autoBtn.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            onToggleAuto(i);
+          });
+        }
       }
       card.appendChild(modeRow);
 
