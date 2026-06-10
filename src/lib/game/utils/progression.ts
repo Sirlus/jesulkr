@@ -10,9 +10,10 @@ export function getTotalStars(
   battle: BattleState,
   state: GameState,
   activeRunMapId: number | null,
+  includeCurrentRun: boolean = true,
 ): number {
   let total = 0;
-  const runId = (state === 'battle' || state === 'paused' || state === 'gameover') && battle.battleStarted
+  const runId = includeCurrentRun && (state === 'battle' || state === 'paused' || state === 'gameover') && battle.battleStarted
     ? Number(activeRunMapId || 0) : 0;
 
   for (const id of [1, 2, 3]) {

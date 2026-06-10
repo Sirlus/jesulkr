@@ -59,6 +59,22 @@
 ### 다음 계획
 - Phase 2: Core Logic — 몬스터 속도, 별 조건 등 원작 정합성 복원
 
+### 추가: Phase 2 진행
+- 2-1 ✅ 몬스터 속도 survival 연동 (`42 + survival * 0.45 + random`)
+- 2-2 ✅ 맵 2 별 임계값 확인 (이미 정확: 55000/65000/75000)
+- 2-3 ✅ `getTotalStars`에 `includeCurrentRun` 파라미터 추가
+- 2-4 ✅ `effectiveManaRegen` 일관성 확인
+- 2-5 ✅ 보스 등장 토스트 (`boss.appeared`)
+- 2-6 ✅ 마나 재생 복원 토스트 (`mana.bonus.activated`, `star.earned`)
+- 2-7 ✅ `castSlot` 순서 유지 (state → spell → cooldown → mana → target)
+- 2-8 ✅ `spawnTimer` 초기값 10 확인
+- 2-11 ✅ `clearAllData()` + `Storage.clearAllStorage()` 구현
+- ✅ `bun run build` 통과, `bun run test` 53 tests 통과
+- ✅ i18n 키 추가 (ko + en): `boss.appeared`, `mana.bonus.activated`, `star.earned`
+
+### 다음 계획
+- Phase 3: State Reactive — Svelte 룬 도입, GameManager-Store 관계 재설계
+
 ### 추가: 모듈화
 - `game.ts` 497줄 → 336줄로 분리
 - `GameLoop.ts` (73줄) — `startLoop()` 

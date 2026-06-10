@@ -49,6 +49,9 @@ export function startLoop(gm: GameManager) {
       gm.battle.nextCastId = result.nextCastId;
       gm.battle.nextBossAt = result.nextBossAt;
       gm.battle.bossInterval = result.bossInterval;
+      if (result.bossSpawned) {
+        showToast(t('boss.appeared'), 'bad');
+      }
       if (result.isGameOver) {
         gm.battle.baseHp = 0;
         gm.recordRun();

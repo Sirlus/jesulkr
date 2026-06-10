@@ -63,6 +63,8 @@ const en: Record<string, string> = {
   'star.requirements': 'Star Requirements',
   'spell.needed': 'Spell Needed',
   'cooldown': 'Cooldown',
+  'cooldown.active': 'Still on cooldown.',
+  'battle.only': 'Spells can only be used during battle.',
   'normal.damage': 'Normal Damage',
   'special.damage': 'Special Damage',
   'normal': 'Normal',
@@ -92,6 +94,9 @@ const en: Record<string, string> = {
   'total.normal.damage': 'Total Normal Damage',
   'none': 'None',
   'start': 'Start',
+  'boss.appeared': 'HP 500 boss appeared!',
+  'mana.bonus.activated': '5 stars reached: mana regen {0}/sec',
+  'star.earned': 'Star earned! ★ {0}/9',
 };
 
 export default en;

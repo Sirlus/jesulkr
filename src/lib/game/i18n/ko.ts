@@ -63,6 +63,8 @@ const ko: Record<string, string> = {
   'star.requirements': '별 조건',
   'spell.needed': '술식 필요',
   'cooldown': '쿨타임',
+  'cooldown.active': '아직 쿨타임입니다.',
+  'battle.only': '전투 중에만 술식을 사용할 수 있습니다.',
   'normal.damage': '일반 데미지',
   'special.damage': '특수 데미지',
   'normal': '일반',
@@ -92,6 +94,9 @@ const ko: Record<string, string> = {
   'total.normal.damage': '총 일반 데미지',
   'none': '없음',
   'start': '시작',
+  'boss.appeared': 'HP 500 보스 등장!',
+  'mana.bonus.activated': '별 5개 달성: 초당 마나 {0}',
+  'star.earned': '별 획득! ★ {0}/9',
 };
 
 export default ko;

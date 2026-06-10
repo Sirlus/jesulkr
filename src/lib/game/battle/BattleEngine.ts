@@ -25,17 +25,18 @@ export interface TickResult {
   cooldowns: number[]; selectedTargetId: number | null;
   spawnTimer: number; nextMonsterId: number; nextCastId: number;
   nextBossAt: number; bossInterval: number;
-  isGameOver: boolean; killedAny: boolean;
+  isGameOver: boolean; killedAny: boolean; bossSpawned: boolean;
 }
 
 function spawnOneMonster(
   monsters: Monster[], forcedHp: number | null, boss: boolean,
   canvasWidth: number, nextId: number, minHp: number, maxHp: number,
+  survival: number,
 ): Monster[] {
   const lane = Math.floor(Math.random() * LANES);
   const laneW = canvasWidth / LANES;
   const hp = forcedHp ?? (minHp + Math.floor(Math.random() * (maxHp - minHp + 1)));
-  const speed = boss ? 25 : (42 + Math.random() * 18);
+  const speed = boss ? 25 : (42 + survival * 0.45 + Math.random() * 18);
   monsters.push({
     id: nextId, lane,
     x: laneW * lane + laneW / 2,
@@ -70,6 +71,7 @@ export function updateBattleTick(
   let nhp = baseHp;
   let nsv = survival;
   let ka = false;
+  let bs = false;
   let casts2 = [...casts];
 
   // 1. Mana regen
@@ -102,7 +104,8 @@ export function updateBattleTick(
 
   // 4. Boss spawn
   if (ctx.map.repeatingBoss && nsv >= nba) {
-    spawnOneMonster(m, ctx.map.bossHp || 500, true, ctx.canvasWidth, mId++, ctx.map.minHp, ctx.map.maxHp);
+    spawnOneMonster(m, ctx.map.bossHp || 500, true, ctx.canvasWidth, mId++, ctx.map.minHp, ctx.map.maxHp, nsv);
+    bs = true;
     bi *= (ctx.map.bossIntervalDecay || 0.84);
     nba += bi;
   }
@@ -110,7 +113,7 @@ export function updateBattleTick(
   // 5. Monster spawn
   st--;
   if (st <= 0) {
-    spawnOneMonster(m, null, false, ctx.canvasWidth, mId++, ctx.map.minHp, ctx.map.maxHp);
+    spawnOneMonster(m, null, false, ctx.canvasWidth, mId++, ctx.map.minHp, ctx.map.maxHp, nsv);
     const interval = 1.35 - nsv * 0.008;
     st = Math.max(1, Math.floor(interval / TICK_SEC * (0.75 + Math.random() * 0.5)));
   }
@@ -170,6 +173,6 @@ export function updateBattleTick(
     cooldowns: cds, selectedTargetId: sid,
     spawnTimer: st, nextMonsterId: mId, nextCastId: cId,
     nextBossAt: nba, bossInterval: bi,
-    isGameOver: nhp <= 0, killedAny: ka,
+    isGameOver: nhp <= 0, killedAny: ka, bossSpawned: bs,
   };
 }

@@ -186,10 +186,10 @@ export class GameManager {
 
   /** 지정한 슬롯의 술식을 수동 발사합니다 */
   castSlot(index: number) {
-    if (this.state !== 'battle') { showToast(t('not.enough.mana'), 'bad'); return; }
+    if (this.state !== 'battle') { showToast(t('battle.only'), 'bad'); return; }
     const spell = this.slots[index];
     if (!spell) { showToast(t('no.spell'), 'bad'); return; }
-    if (this.battle.cooldowns[index] > 0) { showToast(t('cooldown'), 'bad'); return; }
+    if (this.battle.cooldowns[index] > 0) { showToast(t('cooldown.active'), 'bad'); return; }
     if (this.battle.mana < spell.manaCost) { showToast(t('not.enough.mana'), 'bad'); return; }
     const target = getCurrentTarget(this.battle.monsters, this.battle.selectedTargetId);
     if (!target) { showToast(t('no.target'), 'bad'); return; }
@@ -228,11 +228,14 @@ export class GameManager {
   checkUnlocks() {
     if (!this.battle.activeRunMapId) return;
     const b2 = this.store.isMapUnlocked(2), b3 = this.store.isMapUnlocked(3), bs = this.totalStars;
+    const beforeRegen = this.effectiveManaRegen;
     this.recordRun();
     const a2 = this.store.isMapUnlocked(2), a3 = this.store.isMapUnlocked(3), as = this.totalStars;
+    const afterRegen = this.effectiveManaRegen;
     if (!b2 && a2) showToast('Map 2 unlocked!', 'good');
     else if (!b3 && a3) showToast('Map 3 unlocked!', 'good');
-    else if (bs < as) showToast(`Star earned! ${as}/9`, 'good');
+    else if (bs < as) showToast(t('star.earned', as), 'good');
+    if (beforeRegen < afterRegen) showToast(t('mana.bonus.activated', afterRegen), 'good');
   }
 
   /** 현재 게임 상태를 현재 언어의 라벨로 반환합니다 */
@@ -330,6 +333,18 @@ export class GameManager {
   isMapUnlocked(id: number): boolean { return this.store.isMapUnlocked(id); }
   /** 해당 맵의 획득 별 개수를 반환합니다 */
   getMapStars(id: number): number { return this.store.getMapStars(id); }
+
+  /** 모든 저장 데이터를 삭제하고 초기 상태로 복원합니다 */
+  clearAllData() {
+    this.battle.battleStarted = false;
+    this.battle.activeRunMapId = null;
+    this.battle.activeRunMode = null;
+    Storage.clearAllStorage();
+    this.store.loadFromStorage();
+    this.state = 'design';
+    this.refreshAll();
+    showToast('데이터가 초기화되었습니다.', 'good');
+  }
 }
 
 export const game = new GameManager();
