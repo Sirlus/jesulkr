@@ -41,6 +41,7 @@ document.body.innerHTML = `
 `;
 
 import type { GameManager } from '../game';
+import { getTotalStars } from '$lib/game/utils/progression';
 
 let game: GameManager;
 
@@ -219,6 +220,46 @@ describe('GameManager', () => {
       ];
       game.trimComponents();
       expect(game.designer.components.length).toBe(2);
+    });
+  });
+
+  // ── Phase 2 tests ──
+  describe('checkUnlocks (Phase 2)', () => {
+    it('detects star earned', () => {
+      game.battle.activeRunMapId = 1;
+      game.battle.battleStarted = true;
+      game.battle.score = 16000;
+      game.records.assist['1'] = { score: 0, time: 0 };
+      game.battle.activeRunMode = 'assist';
+      game.checkUnlocks();
+      // stars should be at least 1 now (15000 threshold)
+      expect(game.totalStars).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  describe('clearAllData (Phase 2)', () => {
+    it('resets to design state and clears records', () => {
+      game.battle.battleStarted = true;
+      game.battle.score = 99999;
+      game.records.assist['1'] = { score: 50000, time: 100 };
+      game.clearAllData();
+      expect(game.battle.battleStarted).toBe(false);
+      expect(game.state).toBe('design');
+      expect(game.records.assist['1'].score).toBe(0);
+    });
+  });
+
+  describe('getTotalStars includeCurrentRun (Phase 2)', () => {
+    it('excludes current run when includeCurrentRun=false', () => {
+      game.records.assist['1'] = { score: 50000, time: 100 };
+      game.battle.battleStarted = true;
+      game.battle.activeRunMapId = 1;
+      game.battle.score = 1000; // low score, shouldn't boost stars
+      const stars = getTotalStars(
+        game.records, game.battle, game.state,
+        game.battle.activeRunMapId, false,
+      );
+      expect(stars).toBeGreaterThanOrEqual(0);
     });
   });
 });

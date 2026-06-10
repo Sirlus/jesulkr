@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { game } from '$lib/stores/game';
+  import { gameRx } from '$lib/stores/game.svelte';
   import * as Storage from '$lib/game/core/Storage';
   import '$lib/game/style.css';
 
   let canvas: HTMLCanvasElement;
-  let langLoaded = typeof window !== 'undefined' ? Storage.loadLanguage() : null;
-  let showLangModal = $derived(!langLoaded);
+  let langLoaded = $state(typeof window !== 'undefined' ? Storage.loadLanguage() : null);
 
   function onSelectLang(lang: 'ko' | 'en') {
     langLoaded = lang;
@@ -58,7 +58,7 @@
 </svelte:head>
 
 
-{#if showLangModal}
+{#if !langLoaded}
 <div id="languageModal" class="languageModal">
   <div class="languageBox">
     <div class="languageLogo">Jesulkr</div>

@@ -60,6 +60,7 @@ export function startLoop(gm: GameManager) {
       }
       gm.accumulator -= TICK_SEC;
     }
+
     if (gm.renderer && gm.canvas) {
       gm.renderer.render(
         gm.battle.monsters, gm.battle.casts, gm.battle.effects,

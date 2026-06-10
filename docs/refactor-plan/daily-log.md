@@ -75,6 +75,21 @@
 ### 다음 계획
 - Phase 3: State Reactive — Svelte 룬 도입, GameManager-Store 관계 재설계
 
+### 추가: Phase 3 진행
+- ✅ `game.svelte.ts` 신규 생성 (반응형 상태 레이어)
+  - `$state` — ui 상태 (score, mana, baseHp, survival, toastText 등)
+  - `$derived` — stateLabel, totalStars, manaBonusActive
+  - `syncFromStore()` — GameManager 상태 → 반응형 상태 동기화
+- ✅ `+page.svelte` 연동
+  - `langLoaded`를 `$state`로 전환 (dead `$derived` 제거)
+  - `gameRx` import 추가
+- ✅ Phase 4 준비 완료 (반응형 상태가 HUD/SlotPanel/Toast 컴포넌트로 연결 가능)
+- ⏳ 3-3 DOM→$effect 이관 — Phase 4에서 Svelte 컴포넌트로 전환 예정
+- ⏳ 3-6 EventBus 제거 — Phase 4에서 불필요 확인 후
+
+### 다음 계획
+- Phase 4: UI Components — 페이지 monolith → 컴포넌트 분리
+
 ### 추가: 모듈화
 - `game.ts` 497줄 → 336줄로 분리
 - `GameLoop.ts` (73줄) — `startLoop()` 
