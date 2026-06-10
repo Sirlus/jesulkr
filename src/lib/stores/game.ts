@@ -293,7 +293,7 @@ export class GameManager {
     const x = (e.clientX - rect.left) * this.canvas.width / rect.width;
     const y = (e.clientY - rect.top) * this.canvas.height / rect.height;
     const picked = pickMonsterAt(this.battle.monsters, x, y);
-    if (picked) { this.battle.selectedTargetId = picked.id; showToast(`Target: HP ${picked.hp}`); }
+    if (picked) { this.battle.selectedTargetId = picked.id; showToast(t('target.hp', picked.hp)); }
   }
 
   /** 게임 언어를 변경하고 localStorage에 저장합니다 */

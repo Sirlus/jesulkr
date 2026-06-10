@@ -113,6 +113,7 @@ const en: Record<string, string> = {
   'invalid.spell': 'Invalid spell.',
   'slot.saved': 'Saved to slot {0}.',
   'slot.loaded': 'Loaded slot {0}.',
+  'target.hp': 'Target: HP {0}',
 };
 
 export default en;

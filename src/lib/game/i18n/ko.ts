@@ -113,6 +113,7 @@ const ko: Record<string, string> = {
   'invalid.spell': '유효한 술식이 아닙니다.',
   'slot.saved': '{0}번 슬롯에 저장했습니다.',
   'slot.loaded': '{0}번 슬롯을 불러왔습니다.',
+  'target.hp': '대상: HP {0}',
 };
 
 export default ko;

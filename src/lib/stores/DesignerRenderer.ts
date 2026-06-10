@@ -36,7 +36,7 @@ export function renderDesigner(gm: GameManager) {
   if (fw) fw.value = String(gm.designer.width);
   if (fh) fh.value = String(gm.designer.height);
   const rb = document.getElementById('rotateBtn');
-  if (rb) rb.textContent = gm.designer.rotation === 0 ? '회전: 가로' : '회전: 세로';
+  if (rb) rb.textContent = gm.designer.rotation === 0 ? t('rotate.horizontal') : t('rotate.vertical');
   gm.updateStatsDisplay();
 }
 
