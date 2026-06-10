@@ -3,7 +3,7 @@
 // ============================================================
 import type {
   GameState, RunMode, Language, Monster, CastProjectile, VisualEffect,
-  BattleState, SpellData, KeyBinding, Records, MapDef,
+  SpellData, KeyBinding, Records, MapDef,
 } from '../types';
 import { eventBus } from './EventBus';
 import { MAPS, MAX_MANA, BASE_MANA_REGEN, STAR_MANA_REGEN, MANA_BONUS_STAR_COUNT } from '../constants';

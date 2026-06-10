@@ -58,3 +58,10 @@
 
 ### 다음 계획
 - Phase 2: Core Logic — 몬스터 속도, 별 조건 등 원작 정합성 복원
+
+### 추가: 모듈화
+- `game.ts` 497줄 → 336줄로 분리
+- `GameLoop.ts` (73줄) — `startLoop()` 
+- `DesignerRenderer.ts` (70줄) — `renderDesigner()`, `eraseComponent()`
+- `SpellManager.ts` (59줄) — `saveSpell()`, `loadSpell()`, `clearDesign()`
+- GameManager는 얇은 파사드로 유지, 모든 public API는 `+page.svelte`와 호환

@@ -5,7 +5,7 @@
  * Tests the 7 newly implemented methods.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 
 // Set up localStorage mock BEFORE any imports that use it
 const store: Record<string, string> = {};

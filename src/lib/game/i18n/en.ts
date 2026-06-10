@@ -92,8 +92,6 @@ const en: Record<string, string> = {
   'total.normal.damage': 'Total Normal Damage',
   'none': 'None',
   'start': 'Start',
-  'scatter': 'Scatter',
-  'pause': 'Pause',
 };
 
 export default en;

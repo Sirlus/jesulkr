@@ -308,7 +308,7 @@ export class GameManager {
       this.state = this.store.returnStateAfterDesign && this.store.returnStateAfterDesign !== 'design'
         ? this.store.returnStateAfterDesign : fb;
     } else {
-      if (this.state !== 'design') this.store.returnStateAfterDesign = this.state;
+      this.store.returnStateAfterDesign = this.state;
       this.state = 'design';
     }
   }

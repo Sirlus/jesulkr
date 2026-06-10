@@ -134,7 +134,7 @@ export function updateBattleTick(
   for (const c of casts2) {
     c.remainingTicks--;
     if (c.remainingTicks <= 0) {
-      let target = m.find(x => x.id === c.targetId && x.hp > 0);
+      let target = m.find(x => x.id === c.targetId && x.hp > 0) ?? null;
       if (!target) target = getAutoTarget(m);
       if (target) {
         target.hp -= c.spell.damage;

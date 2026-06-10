@@ -92,7 +92,6 @@ const ko: Record<string, string> = {
   'total.normal.damage': '총 일반 데미지',
   'none': '없음',
   'start': '시작',
-  'scatter': '분산',
 };
 
 export default ko;
