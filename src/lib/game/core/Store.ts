@@ -1,0 +1,165 @@
+// ============================================================
+// Central Store — state container with change notifications
+// ============================================================
+import type {
+  GameState, RunMode, Language, Monster, CastProjectile, VisualEffect,
+  BattleState, SpellData, KeyBinding, Records, MapDef,
+} from '../types';
+import { eventBus } from './EventBus';
+import { MAPS, MAX_MANA, BASE_MANA_REGEN, STAR_MANA_REGEN, MANA_BONUS_STAR_COUNT } from '../constants';
+import * as Storage from './Storage';
+import { getMapProgressScore, getMapStars, getMapRecord, setMapRecord } from './StorageRecords';
+import { isMapUnlocked, getFirstUnlockedMap } from './StorageUnlocks';
+import { getTotalStars } from '../utils/progression';
+import { defaultUnlocks, defaultSlotAutoModes } from '../utils/helpers';
+
+// ── Designer State ────────────────────────────────────────────
+export interface DesignerState {
+  width: number;
+  height: number;
+  components: import('../types').Component[];
+  tool: string;
+  rotation: number;
+  nextId: number;
+  previewX: number | null;
+  previewY: number | null;
+  spellName: string;
+}
+
+function createDesignerState(): DesignerState {
+  return {
+    width: 2,
+    height: 2,
+    components: [],
+    tool: 'red',
+    rotation: 0,
+    nextId: 1,
+    previewX: null,
+    previewY: null,
+    spellName: '',
+  };
+}
+
+// ── Battle State ──────────────────────────────────────────────
+export interface BattleState {
+  score: number;
+  mana: number;
+  baseHp: number;
+  survival: number;
+  monsters: Monster[];
+  casts: CastProjectile[];
+  effects: VisualEffect[];
+  cooldowns: number[];
+  selectedTargetId: number | null;
+  spawnTimer: number;
+  nextMonsterId: number;
+  nextCastId: number;
+  accumulator: number;
+  lastTime: number;
+  battleStarted: boolean;
+  battleSpeed: number;
+  activeRunMapId: number | null;
+  activeRunMode: string | null;
+  nextBossAt: number;
+  bossInterval: number;
+}
+
+function createBattleState(): BattleState {
+  return {
+    score: 0, mana: MAX_MANA, baseHp: 20, survival: 0,
+    monsters: [], casts: [], effects: [],
+    cooldowns: [0, 0, 0, 0, 0],
+    selectedTargetId: null,
+    spawnTimer: 12, nextMonsterId: 1, nextCastId: 1,
+    accumulator: 0, lastTime: 0,
+    battleStarted: false, battleSpeed: 1,
+    activeRunMapId: null, activeRunMode: null,
+    nextBossAt: Infinity, bossInterval: 30,
+  };
+}
+
+// ── Full Store ────────────────────────────────────────────────
+export class Store {
+  state: GameState = 'design';
+  returnStateAfterDesign: GameState = 'ready';
+
+  slots: (SpellData | null)[] = [null, null, null, null, null];
+  slotAutoModes: boolean[] = defaultSlotAutoModes();
+  autoManaReserve: number = 0;
+  manaBonusEnabled: boolean = true;
+
+  currentMap: MapDef = MAPS[1]!;
+  selectedRunMode: string = 'assist';
+
+  unlocks: Record<string, boolean> = defaultUnlocks();
+  records: Records = { assist: {}, pure: {} };
+  decks: (SpellData | null)[][] = [];
+  deckNames: string[] = [];
+
+  keyBindings: KeyBinding[] = Storage.defaultKeyBindings();
+  controlBindings: Record<string, KeyBinding> = Storage.defaultControlBindings();
+  keyCaptureTarget: import('../types').KeyTarget | null = null;
+
+  language: Language = 'ko';
+
+  designer = createDesignerState();
+  battle = createBattleState();
+
+  // ── Derived ──────────────────────────────────────────────
+  get effectiveManaRegen(): number {
+    const total = getTotalStars(this.records, this.battle, this.state, this.battle.activeRunMapId);
+    return (total >= MANA_BONUS_STAR_COUNT && this.manaBonusEnabled) ? STAR_MANA_REGEN : BASE_MANA_REGEN;
+  }
+
+  get totalStars(): number {
+    return getTotalStars(this.records, this.battle, this.state, this.battle.activeRunMapId);
+  }
+
+  // ── Initialization ───────────────────────────────────────
+  loadFromStorage(): void {
+    this.slots = Storage.loadSlots();
+    this.slotAutoModes = Storage.loadSlotAutoModes();
+    this.autoManaReserve = Storage.loadAutoManaReserve();
+    this.manaBonusEnabled = Storage.loadManaBonusEnabled();
+    this.language = (Storage.loadLanguage() as Language) || 'ko';
+    this.selectedRunMode = Storage.loadSelectedRunMode();
+    this.unlocks = Storage.loadUnlocks();
+    this.records = Storage.loadRecords();
+    this.decks = Storage.loadDecks();
+    this.deckNames = Storage.loadDeckNames();
+    this.keyBindings = Storage.loadKeyBindings();
+    this.controlBindings = Storage.loadControlBindings();
+    this.currentMap = MAPS[1]!;
+  }
+
+  // ── Slot helpers ─────────────────────────────────────────
+  hasSavedSpell(): boolean {
+    return this.slots.some(Boolean);
+  }
+
+  hasSavedDeck(): boolean {
+    return this.decks.some(deck => Array.isArray(deck) && deck.some(Boolean));
+  }
+
+  // ── Map helpers ──────────────────────────────────────────
+  isMapUnlocked(id: number): boolean {
+    return isMapUnlocked(id, this.unlocks, this.records);
+  }
+
+  getFirstUnlockedMap(): MapDef {
+    return getFirstUnlockedMap(this.unlocks, this.records, MAPS);
+  }
+
+  getMapStars(id: number, scoreOverride?: number): number {
+    return getMapStars(this.records, id, scoreOverride);
+  }
+
+  getMapProgressScore(id: number): number {
+    return getMapProgressScore(this.records, id);
+  }
+
+  // ── Emit change ──────────────────────────────────────────
+  emit(slice: string): void {
+    eventBus.emitStateChange(slice);
+  }
+}
