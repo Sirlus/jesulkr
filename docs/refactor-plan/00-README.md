@@ -25,6 +25,7 @@
 | 1 | Foundation | 빌드 고치고, 7개 메서드 구현해서 게임 루프 복원 | 2~3일 | 실행 가능한 게임 |
 | 2 | Core Logic | 몬스터 속도, 별 조건 등 원작 정합성 완전 복원 | 1~2일 | 원작과 동일한 게임성 |
 | 3 | State Reactive | Svelte 룬 도입, GameManager-Store 관계 재설계 | 3~4일 | 반응형 상태 관리 |
+| 3.5 | v1.5 Migration | v1.5 상태·로직·저장 통합 (도구 해금, 마나 토글, 튜토리얼 등) | 1~2일 | v1.5 게임로직 기반 |
 | 4 | UI Components | 페이지 monolith → 컴포넌트 분리 | 5~7일 | 선언적 UI |
 | 5 | Features | 맵 모달, 덱, 키 설정 등 누락 기능 구현 | 4~5일 | 완전한 기능 세트 |
 | 6 | Quality | 테스트, 접근성, 성능, 문서화 | 3~4일 | 프로덕션 품질 |
@@ -39,6 +40,8 @@ Phase 0 (선행조건)
 Phase 1 (Foundation) ──→ Phase 2 (Core Logic)
     ↓                         ↓
 Phase 3 (State Reactive) ←──┘
+    ↓
+Phase 3.5 (v1.5 Migration)
     ↓
 Phase 4 (UI Components)
     ↓
@@ -58,9 +61,10 @@ main
   └── refactor/phase-1-foundation
         └── refactor/phase-2-core-logic
               └── refactor/phase-3-reactive
-                    └── refactor/phase-4-ui
-                          └── refactor/phase-5-features
-                                └── refactor/phase-6-quality
+                    └── refactor/phase-3.5-v1.5
+                          └── refactor/phase-4-ui
+                                └── refactor/phase-5-features
+                                      └── refactor/phase-6-quality
 ```
 
 각 Phase 완료 시 PR → squash merge. Phase 6 완료 후 `main`으로 최종 머지.

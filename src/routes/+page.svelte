@@ -24,7 +24,7 @@
         if (e.button !== 0) return;
         game.placeComponent(e);
       });
-      board.addEventListener('contextmenu', (e) => e.preventDefault(), { signal: ac.signal });
+      board.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
     canvas.addEventListener('click', (e) => game.onCanvasClick(e));

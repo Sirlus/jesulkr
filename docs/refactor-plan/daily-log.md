@@ -95,11 +95,17 @@
 - ✅ `+page.svelte` — gameRx import 제거, langLoaded는 $state 유지
 - ✅ **검증**: build ✅, 56 tests ✅, svelte-check 0 errors
 
+### 2차 검수 수정 (2026-06-10)
+- ✅ `game.setTool()` / `rotateTool()` / `setFrame()` 내부에서 `gameRx.syncFull()` 호출
+- ✅ `+page.svelte` 툴바 버튼 10개에서 `game.renderDesigner()` 직접 호출 제거
+- → +page.svelte는 순수 UI 이벤트 디스패처로 전환 완료
+
 ### Phase 3 완료 기준 달성 현황
 - [x] Store 이중화 해소
 - [x] DOM 갱신 자동화 (경량/전체 분리)
 - [x] EventBus 제거
 - [x] refreshAll/Slots/HUD 대부분 제거
+- [x] +page.svelte에서 직접 DOM 렌더링 호출 제거
 - [x] Phase 1~2 테스트 전부 통과
 - [⏳→P4] Svelte 5 반응형 룬 ($state/$derived/$effect) — Phase 4 Svelte 컴포넌트에서 도입
 

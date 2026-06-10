@@ -258,7 +258,7 @@ if (result.isGameOver) {
 - [ ] `EventBus` 제거
 - [ ] Phase 1~2 테스트 모두 통과 (회귀 없음)
 
-## 산출물
+## 산출물 (계획)
 
 | 파일 | 설명 |
 |------|------|
@@ -268,3 +268,69 @@ if (result.isGameOver) {
 | `src/lib/game/ui/HUD.ts` | → $effect로 이관 (Phase 4에서 제거) |
 | `src/lib/game/ui/SlotPanel.ts` | → $effect로 이관 (Phase 4에서 제거) |
 | `src/lib/game/ui/Toast.ts` | → $effect + Toast.svelte (Phase 4에서 제거) |
+
+---
+
+## 실제 구현 결과 (DOM 중앙화 브릿지)
+
+> **판정**: Svelte 5 룬(`$state`/`$derived`/`$effect`)은 vitest happy-dom 환경과 공존 불가.
+> Phase 4에서 Svelte 컴포넌트 템플릿으로 진정한 반응형 전환 예정.
+
+### 구현된 아키텍처
+
+```
+game.ts (GameManager)
+  ├── store ──────────────────► game.svelte.ts (gameRx)
+  ├── onStateChange() ────────► syncFull(this)   ← 상태 전환 시 전체 DOM
+  ├── setTool/rotateTool ─────► syncFull(this)   ← 설계판 변경 시
+  ├── placeComponent() ───────► syncFull(this)
+  ├── setLanguage() ──────────► syncFull(this)
+  ├── clearAllData() ─────────► syncFull(this)
+  └── (API unchanged)         ├── syncPartial(gm) ← GameLoop 매 프레임
+
+SpellManager.ts              → gameRx.syncFull(gm)  ← save/load/clear
+DesignerRenderer.ts          → gameRx.syncFull(gm)  ← eraseComponent
+GameLoop.ts                  → gameRx.syncPartial(gm) ← 매 프레임 (HUD+cooldown만)
++page.svelte                 → game.* 메서드만 호출 (렌더링 호출 없음)
+```
+
+### syncFull(gm) — 상태 변경 시
+- body class toggle (mode-design/mode-play)
+- designerPanel visibility
+- HUD 업데이트
+- Slot panel 전체 재렌더링
+- Cooldown bars
+- Start button 상태
+- Designer board 렌더링
+
+### syncPartial(gm) — 매 프레임
+- HUD 텍스트 업데이트 (점수/마나/기지HP/생존시간)
+- Cooldown bar width 업데이트
+
+### 삭제된 파일
+- `src/lib/game/core/EventBus.ts`
+
+### 실제 산출물
+
+| 파일 | 상태 | 설명 |
+|------|------|------|
+| `src/lib/stores/game.svelte.ts` | ✅ 생성 | DOM 중앙화 브릿지 (syncFull/syncPartial) |
+| `src/lib/stores/game.ts` | ✅ 수정 | setTool/rotateTool/setFrame에 syncFull 통합 |
+| `src/lib/stores/GameLoop.ts` | ✅ 수정 | refreshHUD/Cooldowns → syncPartial |
+| `src/lib/stores/SpellManager.ts` | ✅ 수정 | refresh → syncFull |
+| `src/lib/stores/DesignerRenderer.ts` | ✅ 수정 | renderDesigner 직접 호출 → syncFull |
+| `src/lib/game/core/Store.ts` | ✅ 수정 | EventBus import 제거, emit() 제거 |
+| `src/lib/game/core/EventBus.ts` | ✅ 삭제 | |
+| `src/routes/+page.svelte` | ✅ 수정 | 툴바 renderDesigner() 제거, gameRx import 제거 |
+
+### 완료 기준 달성
+
+| 기준 | 상태 | 비고 |
+|------|------|------|
+| game.svelte.ts 모듈 정상 동작 | ✅ | syncFull/syncPartial로 DOM 갱신 |
+| 상태 변경 시 HUD/슬롯/토스트 자동 갱신 | ⚠️ | 수동 syncFull() 호출 필요 (Phase 4에서 $effect로) |
+| refreshAll/Slots/HUD 호출 대부분 제거 | ✅ | syncFull/syncPartial로 대체 |
+| onStateChange() 메서드 제거 | ⚠️ | 유지 (syncFull 위임), Phase 4에서 $effect로 대체 |
+| EventBus 제거 | ✅ | 파일 삭제 + Store.emit() 제거 |
+| Phase 1~2 테스트 모두 통과 | ✅ | 56 tests |
+| $state/$derived/$effect 도입 | ⏳→P4 | vitest와 공존 불가, Phase 4 Svelte 컴포넌트에서 도입 |

@@ -107,36 +107,86 @@
 
 ---
 
-## Phase 3: State Reactive
+## Phase 3: State Reactive ✅ (DOM 중앙화 브릿지)
 
-### 3-1. Svelte 룬 상태
-- [ ] `src/lib/stores/gameState.svelte.ts` 생성
-- [ ] `DesignerState` 클래스 ($state)
-- [ ] `BattleState` 클래스 ($state)
-- [ ] `gameState` 객체 ($state, $derived)
+> **실제 구현**: vitest와 Svelte 5 룬 공존 불가로, $state/$derived/$effect 대신 syncFull/syncPartial 기반 DOM 중앙화.
+> 진정한 반응형 전환은 Phase 4에서 Svelte 컴포넌트 템플릿으로 달성.
 
-### 3-2. GameManager 리팩터링
-- [ ] `src/lib/stores/gameActions.ts` 생성 (순수 액션)
-- [ ] 기존 `GameManager` 상태 → `gameState` 이전
-- [ ] `legacyBridge.ts` 임시 동기화
+### 3-1. Store 통합
+- [x] `src/lib/stores/game.svelte.ts` 생성 (DOM 중앙화 브릿지)
+- [x] `gameRx`가 `game.store` 직접 참조 (Store 이중화 해소)
+- [x] `syncFull(gm)` — 상태 전환 시 전체 DOM 갱신
+- [x] `syncPartial(gm)` — 매 프레임 HUD + 쿨타임만 경량 갱신
+- [x] `EventBus.ts` 삭제, `Store.emit()` 제거
 
-### 3-3. Side-effect 자동화
-- [ ] `$effect`로 body class 토글
-- [ ] `$effect`로 Canvas 루프 제어
-- [ ] `onStateChange()` 제거
-- [ ] `refreshAll()` 제거
+### 3-2. 수동 refresh 제거
+- [x] `game.ts` — onStateChange/setLanguage/clearAllData/placeComponent/setTool/rotateTool/setFrame에서 refreshAll 제거, syncFull로 대체
+- [x] `SpellManager.ts` — saveSpell/loadSpell/clearDesign에서 refresh 대신 syncFull
+- [x] `GameLoop.ts` — refreshHUD/refreshCooldowns → syncPartial
+- [x] `DesignerRenderer.ts` — eraseComponent에서 renderDesigner() 대신 syncFull
+- [x] `+page.svelte` — 툴바 버튼에서 game.renderDesigner() 직접 호출 제거
 
-### 3-4. Canvas 루프 분리
-- [ ] `src/lib/game/battle/GameLoop.ts` 생성
-- [ ] `startLoop()` / `stopLoop()`
-- [ ] `+page.svelte`에서 루프 연결
+### 3-3. Svelte 5 룬
+- [⏳→P4] `$state` — Phase 4 Svelte 컴포넌트에서 도입
+- [⏳→P4] `$derived` — Phase 4 Svelte 컴포넌트에서 도입
+- [⏳→P4] `$effect` — Phase 4 Svelte 컴포넌트에서 도입
+- [x] `+page.svelte` langLoaded → `$state` (dead `$derived` 제거)
 
-### 3-5. 검증
-- [ ] 상태 변경 시 UI 자동 갱신
-- [ ] Canvas 렌더링 정상
-- [ ] 메모리 누수 없음 (루프 정지 확인)
-- [ ] `npm run check` 통과
-- [ ] `npm run test` 통과
+### 3-4. 검증
+- [x] build ✅
+- [x] svelte-check 0 errors ✅
+- [x] 56 tests (5 files) 모두 통과 ✅
+- [x] 메모리 누수 없음 (syncPartial은 텍스트+width만 갱신)
+
+---
+
+## Phase 3.5: v1.5 상태·게임로직 마이그레이션
+
+### 3.5-1. 마나 복원 복원 ON/OFF 토글
+- [ ] `Storage.ts` — `loadManaBonusEnabled` / `saveManaBonusEnabled` 동작 확인
+- [ ] `game.ts` — `toggleManaBonus()` 메서드 추가
+- [ ] `game.svelte.ts` — `syncFull`에 마나 복원 복원 상태 표시
+- [ ] `get effectiveManaRegen`이 토글 상태 반영 확인
+
+### 3.5-2. 도구 해금 로직
+- [ ] `progression.ts` — `requiredMapForTool(tool)` 추가
+- [ ] `progression.ts` — `isToolUnlocked(tool, unlocks, records)` 추가
+- [ ] `progression.ts` — `getLockedToolNamesFromComponents(components)` 추가
+- [ ] `game.ts` — `setTool()`에서 잠긴 도구 선택 시 첫 해금 도구로 폰백
+- [ ] `game.ts` — `saveSpell()`에서 잠긴 도구 포함 시 저장 차단 + 토스트
+
+### 3.5-3. 런 모드 저장/불러오기
+- [ ] `Storage.ts` — `saveSelectedRunMode` / `loadSelectedRunMode` 확인
+- [ ] `Store.ts` — `loadFromStorage()`에서 호출 여부 확인
+- [ ] 런 모드 변경 후 새로고침 시 유지 확인
+
+### 3.5-4. 튜토리얼 상태 저장/불러오기
+- [ ] `Storage.ts` — `TUTORIAL_SEEN_KEY = "jesulkr_tutorial_seen_v2"` 추가
+- [ ] `Storage.ts` — `loadTutorialSeen()` / `saveTutorialSeen()` 추가
+- [ ] `Store.ts` — `tutorialSeen` 필드 추가, `loadFromStorage()` 통합
+
+### 3.5-5. 모바일 감지 유틸
+- [ ] `mobile.ts` — `isMobileLayout()` / `shouldUseMobileLayout()` 신규
+- [ ] `+page.svelte` — `onMount`에서 `body.mobile-layout` 클래스 토글
+
+### 3.5-6. 설계 미리보기 좌표
+- [ ] `game.ts` — `setDesignerPreview(x, y)` / `clearDesignerPreview()` 추가
+- [ ] `game.svelte.ts` — `syncFull`에서 미리보기 좌표 반영
+
+### 3.5-7. 맵 잠금 해제 코드
+- [ ] `game.ts` — `tryUnlockAllMaps(code)` 추가
+- [ ] 올바른 코드 입력 시 모든 맵 해금 확인
+- [ ] 잘못된 코드 입력 시 토스트 확인
+
+### 3.5-8. 덱 관리 기반 메서드
+- [ ] `game.ts` — `saveDeck(index)` / `loadDeck(index)` / `renameDeck(index, name)` 추가
+- [ ] `Storage.ts` — 덱/덱이름 저장 함수 확인
+- [ ] 덱 저장/불러오기/이름 변경이 localStorage에 유지 확인
+
+### 3.5-9. 검증
+- [ ] `bun run test` → 56 tests 통과
+- [ ] `bun run build` → 빌드 통과
+- [ ] `bun run check` → 신규 오류 0개
 
 ---
 
