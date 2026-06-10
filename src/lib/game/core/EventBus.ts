@@ -1,0 +1,34 @@
+// ============================================================
+// Simple typed event bus (pub/sub)
+// ============================================================
+
+type Listener = (...args: any[]) => void;
+
+export class EventBus {
+  private listeners = new Map<string, Set<Listener>>();
+
+  on(event: string, fn: Listener): void {
+    if (!this.listeners.has(event)) this.listeners.set(event, new Set());
+    this.listeners.get(event)!.add(fn);
+  }
+
+  off(event: string, fn: Listener): void {
+    this.listeners.get(event)?.delete(fn);
+  }
+
+  emit(event: string, ...args: any[]): void {
+    this.listeners.get(event)?.forEach(fn => fn(...args));
+  }
+
+  /** Subscribe to any state change */
+  onStateChange(fn: (slice: string) => void): void {
+    this.on('state:changed', fn);
+  }
+
+  emitStateChange(slice: string): void {
+    this.emit('state:changed', slice);
+  }
+}
+
+/** Singleton */
+export const eventBus = new EventBus();
