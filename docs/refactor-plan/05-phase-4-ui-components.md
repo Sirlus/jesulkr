@@ -612,8 +612,8 @@ document.addEventListener('keydown', (e) => { /* ... */ });
 - [ ] `document.getElementById`로 직접 조작하는 코드가 0개 (Canvas 제외)
 - [ ] `innerHTML` 사용이 0개 (Canvas 2D context 제외)
 - [ ] `classList.toggle`이 0개 (Svelte `class:` 디렉티브로 대체)
-- [ ] `bun run check` 통과
-- [ ] `bun run test` 통과
+- [ ] `npm run check` 통과
+- [ ] `npm run test` 통과
 - [ ] 브라우저에서 모든 UI가 정상 동작
 
 ---

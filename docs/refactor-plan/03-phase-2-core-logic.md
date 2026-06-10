@@ -389,10 +389,10 @@ export function clearAllStorage(): void {
 - [ ] `getTotalStars(false)`가 현재 전투 점수를 제외하고 계산
 - [ ] 전투 시작 시 `spawnTimer = 10`
 - [ ] 저장 데이터 전체 삭제 후 초기 상태로 복원
-- [ ] `bun run test` 전체 통과
+- [ ] `npm run test` 전체 통과
 
 ---
-- [ ] `bun run test` 전체 통과
+- [ ] `npm run test` 전체 통과
 - [ ] `updateBattleTick` 시그니처 준비: 호출부를 `BattleTickState` 객체로 래핑 (Phase 6에서 최종 객체화)
 
 ---

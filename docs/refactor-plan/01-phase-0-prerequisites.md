@@ -41,21 +41,34 @@ echo "reference-v1.3.html" >> .gitignore
 ### 할 일
 
 - [ ] 현재 `package.json`의 scripts가 정상 동작하는지 확인
-- [ ] `bun install` 또는 `npm install` 실행
-- [ ] `bun run check` 실행 → TypeScript/Svelte 오류 기록
-- [ ] `bun run test` 실행 → 현재 테스트 통과 여부 확인
-- [ ] `bun run build` 실행 → 빌드 실패 원인 기록
+- [ ] `npm install` 실행 (또는 `bun install` — 환경에 따라)
+- [ ] `npm run check` 실행 → TypeScript/Svelte 오류 기록
+- [ ] `npm run test` 실행 → 현재 테스트 통과 여부 확인
+- [ ] `npm run build` 실행 → 빌드 실패 원인 기록
 
 ### 예상 결과물
 
 ```
-# 빌드 오류 로그 (예시)
+# 2026-06-10 실제 측정치
+npm run check → 29 errors, 4 warnings
+
+# 주요 오류
 [vite]: sveltekit() does not accept "adapter" option
 # → Phase 1-1에서 처리
 
 # 타입 오류 로그
-src/lib/stores/game.ts:85 - Property 'eraseComponent' does not exist
+src/lib/stores/game.ts:XX - Property 'eraseComponent' does not exist
+src/lib/stores/game.ts:XX - Property 'startLoop' does not exist
+src/lib/stores/game.ts:XX - Property 'spellStats' does not exist
 # → Phase 1-3에서 처리
+
+src/lib/game/battle/DamageResolver.ts:27
+  Type 'Monster | null' is not assignable to type 'Monster | undefined'.
+# → Phase 1-4에서 처리
+
+src/lib/game/i18n/ko.ts:95 / en.ts:95-96
+  An object literal cannot have multiple properties with the same name.
+# → Phase 1-4에서 처리
 ```
 
 ---
@@ -64,7 +77,7 @@ src/lib/stores/game.ts:85 - Property 'eraseComponent' does not exist
 
 ### 할 일
 
-- [ ] `pre-commit` 훅에 `bun run check`와 `bun run test` 추가 (선택사항)
+- [ ] `pre-commit` 훅에 `npm run check`와 `npm run test` 추가 (선택사항)
 - [ ] Phase 1~2 동안은 훅 비활성화 가능 (빈번한 커밋을 위해)
 
 ```bash

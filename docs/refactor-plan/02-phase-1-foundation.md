@@ -19,7 +19,7 @@
 - [ ] `kit.adapter` (adapter-static, `fallback: '404.html'`)
 - [ ] `kit.paths.base` (환경변수 `BASE_PATH` 기준)
 - [ ] `vite.config.ts`에서 `adapter`, `paths` 제거 → `sveltekit()` 플러그인만 남김
-- [ ] `bun run build` 통과 확인
+- [ ] `npm run build` 통과 확인
 
 ### 코드
 
@@ -44,14 +44,15 @@ export default config;
 
 ### 테스트
 
-- [ ] `bun run build` → exit code 0
+- [ ] `npm run build` → exit code 0
 - [ ] `tests/smoke/build.test.ts` 작성
 
 ---
 
-## 1-2. 7개 미구현 GameManager 메서드 구현
+## 1-2. 9개 미구현 GameManager 메서드 구현
 
-> 이 메서드들이 없으면 설계판의 모든 상호작용이 불가능합니다.
+> 이 메서드들이 없으면 설계판의 모든 상호작용과 전투 루프가 불가능합니다.  
+> (기존 문서에는 7개로 기재되었으나, `startLoop`와 `spellStats`를 포함해 9개입니다.)
 
 ### 1-2a. `eraseComponent(e: MouseEvent)`
 
@@ -88,7 +89,7 @@ export default config;
 
 | 원작 | `renderDesigner` |
 |------|------------------|
-| 호출 | `placeComponent`, `eraseComponent`, `clearDesign`, `loadSpell`, `setFrame` |
+| 호출 | `placeComponent`, `eraseComponent`, `clearDesign`, `loadSpell`, `setFrame`, `rotateTool`, `setTool` |
 
 - [ ] `#designBoard` innerHTML 리셋
 - [ ] `width × height` 그리드 (CELL=58px, GAP=4px)
@@ -112,7 +113,7 @@ export default config;
 
 - [ ] `battle.activeRunMapId` null 체크
 - [ ] `setMapRecord()` → `saveRecords()`
-- [ ] `renderMapCards()` / `updateHud()` 호출로 별 재계산 반영
+- [ ] 별 재계산 반영 (`Store.emit` 또는 직접 UI 갱신)
 
 ### 1-2g. `trimComponents()`
 
@@ -122,15 +123,67 @@ export default config;
 
 - [ ] `filter(c => c.x + c.w <= width && c.y + c.h <= height)`
 
+### 1-2h. `spellStats(): SpellStats`
+
+| 원작 | (직접 `calculateSpellStats` 호출) |
+|------|-----------------------------------|
+| 호출 | `game.ts` (`updateStatsDisplay`), `routes/test/+page.svelte:47` |
+
+- [ ] `calculateSpellStats({ width, height, components })` 호출
+- [ ] 결과 반환
+
+### 1-2i. `startLoop()`
+
+| 원작 | `requestAnimationFrame` 기반 게임 루프 |
+|------|----------------------------------------|
+| 호출 | `initCanvas()` line 73 |
+
+- [ ] `requestAnimationFrame` 등록
+- [ ] accumulator 기반 tick 계산 (`TICK_SEC = 1/20`)
+- [ ] `updateBattleTick()` 호출
+- [ ] `renderer.render()` 호출
+- [ ] `animId` 저장 및 정리
+
 ### 테스트
 
-- [ ] `src/lib/stores/__tests__/GameManager.test.ts` (15 cases)
+- [ ] `src/lib/stores/__tests__/GameManager.test.ts` (15+ cases)
+
+---
+
+## 1-3. 기타 즉시 수정 (타입 오류 해소)
+
+### 1-3a. `DamageResolver.ts` / `BattleEngine.ts` 타입 불일치
+
+| 파일 | 문제 | 조치 |
+|------|------|------|
+| `DamageResolver.ts:27` | `Monster \| null` → `Monster \| undefined` | `getAutoTarget`의 반환 타입을 `Monster \| null`로 통일하거나, `undefined` 체크로 변경 |
+| `BattleEngine.ts:138` | 동일 | 동일 |
+
+### 1-3b. `Store.ts` import 충돌
+
+| 파일 | 문제 | 조치 |
+|------|------|------|
+| `Store.ts:6` | `BattleState` import가 로컬 인터페이스 선언과 충돌 | import한 타입을 `import type { BattleState as TypesBattleState }` 등으로 alias 처리, 또는 로컬 인터페이스명 변경 |
+
+### 1-3c. i18n 중복 키
+
+| 파일 | 문제 | 조치 |
+|------|------|------|
+| `ko.ts:95` | `'start'` 또는 `'scatter'` 중복 | 중복된 항목 제거 |
+| `en.ts:95-96` | `'scatter'` / `'pause'` 중복 | 중복된 항목 제거 |
+
+### 1-3d. `toggleDesigner()` 타입 비교
+
+| 파일 | 문제 | 조치 |
+|------|------|------|
+| `game.ts:255` | `this.state !== 'design'`이 항상 true인 브랜치 | 타입 좁히기(Narrowing) 개선 또는 불필요한 분기 제거 |
 
 ---
 
 ## 완료 기준
 
-- [ ] `bun run build` 성공
+- [ ] `npm run check` 오류 0
+- [ ] `npm run build` 성공
 - [ ] 설계판 부품 배치/삭제 가능
 - [ ] 술식 저장/불러오기 가능
 - [ ] 전투 후 기록 저장됨
@@ -142,6 +195,6 @@ export default config;
 |------|------|
 | `svelte.config.js` | SvelteKit 빌드 설정 |
 | `vite.config.ts` | adapter/paths 제거 |
-| `src/lib/stores/game.ts` | 7개 메서드 구현 |
+| `src/lib/stores/game.ts` | 9개 메서드 구현 |
 | `src/lib/stores/__tests__/GameManager.test.ts` | 단위 테스트 |
 | `tests/smoke/build.test.ts` | 빌드 스모크 테스트 |

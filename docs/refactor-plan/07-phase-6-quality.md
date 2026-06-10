@@ -476,7 +476,7 @@ export function calculateSpellStats(model: SpellModel): SpellStats {
 
 - [ ] 기술 스택 테이블에 Svelte 5 룬 명시
 - [ ] 프로젝트 구조에 `src/lib/components/` 추가
-- [ ] 개발 스크립트에 `bun run check`, `bun run test` 추가
+- [ ] 개발 스크립트에 `npm run check`, `npm run test` 추가
 - [ ] 테스트 섹션에 테스트 커버리지 현황 추가
 
 ---
@@ -532,13 +532,13 @@ export default [
 ```yaml
 # .github/workflows/deploy.yml (추가 단계)
       - name: Type Check
-        run: bun run check
+        run: npm run check
 
       - name: Test
-        run: bun run test
+        run: npm run test
 
       - name: Lint
-        run: bun run lint
+        run: npm run lint
 ```
 
 ---
@@ -631,9 +631,9 @@ export function updateBattleTick(state: BattleTickState, regen: number, ctx: Bat
 
 ## 완료 기준
 
-- [ ] `bun run test` → 모든 테스트 통과 (70+ cases)
-- [ ] `bun run check` → 타입 오류 0
-- [ ] `bun run build` → 정상 빌드
+- [ ] `npm run test` → 모든 테스트 통과 (70+ cases)
+- [ ] `npm run check` → 타입 오류 0
+- [ ] `npm run build` → 정상 빌드
 - [ ] GameManager 컨트롤러 분리 완료
 - [ ] `updateBattleTick` 파라미터 객체화 완료
 - [ ] 불필요 의존성 제거 (sass-embedded, package-lock.json)

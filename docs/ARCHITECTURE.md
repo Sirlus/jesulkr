@@ -43,12 +43,14 @@ v1.3의 핵심 추가 요소:
 | 역할 | 설명 |
 |------|------|
 | `initClient()` | 브라우저 환경에서 localStorage 로드, 언어 설정 |
-| `initCanvas()` | Canvas 초기화 및 렌더 루프 시작 |
-| `startBattle()` | 전투 상태 초기화 및 시작 |
+| `initCanvas()` | Canvas 초기화 — 단, 낶부의 `startLoop()`가 미구현되어 실제 루프는 동작하지 않음 |
+| `startBattle()` | 전투 상태 초기화 및 시작 — `recordRun()` 호출 단계에서 런타임 오류 가능 |
 | `castSlot(i)` | i번 슬롯 수동 발사 |
 | `toggleDesigner()` | 설계 화면 ↔ 전투 화면 전환 |
 | `placeComponent()` | 설계판에 부품 배치 |
 | `setLanguage()` | 언어 변경 (ko/en) |
+
+> **미구현 진입점**: `eraseComponent`, `saveSpell`, `loadSpell`, `renderDesigner`, `clearDesign`, `recordRun`, `trimComponents`, `spellStats`, `startLoop`가 `game.ts`에 아직 정의되지 않았습니다. 이들은 `+page.svelte`와 테스트 페이지에서 호출되어 `svelte-check` 오류를 유발합니다.
 
 ### 2.2 Store (`src/lib/game/core/Store.ts`)
 
@@ -200,11 +202,18 @@ bun run test:watch  # 감시 모드
 
 ## 8. 빌드 및 배포
 
+> ⚠️ 현재 프로젝트에는 `svelte.config.js`가 없고, `adapter`/`paths`가 `vite.config.ts`의 `sveltekit()` 플러그인 안에 잘못 위치해 있습니다. SvelteKit 2.x 표준에 맞게 `svelte.config.js`를 신규 생성하고 `vite.config.ts`를 정리해야 빌드가 가능합니다.
+
 - **Adapter**: `@sveltejs/adapter-static`
 - **출력**: `build/` 디렉토리 (정적 HTML/JS/CSS)
 - **배포**: GitHub Pages, Cloudflare Pages, Vercel 등 임의 정적 호스팅 가능
 
 ```sh
-bun run build
+npm run build
 # build/ 디렉토리 업로드
 ```
+
+### 현재 빌드 상태
+
+- `npm run check` 기준 **29 errors, 4 warnings**
+- 주요 원인: `svelte.config.js` 부재, `vite.config.ts`의 `adapter`/`paths` 위치, GameManager 미구현 메서드 참조, i18n 중복 키, 타입 불일치

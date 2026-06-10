@@ -19,14 +19,14 @@
 ### 1-1. SvelteKit 설정 수리
 - [ ] `svelte.config.js` 생성
 - [ ] `vite.config.ts`에서 `adapter`/`paths` 제거
-- [ ] `bun run build` 성공
+- [ ] `npm run build` 성공
 
 ### 1-2. 패키지 매니저 정리
-- [ ] `package-lock.json` 제거
-- [ ] `sass-embedded` 제거
-- [ ] `bun install` 실행
+- [ ] `package-lock.json` 제거 (bun.lock 단독 사용 시)
+- [ ] `sass-embedded` 제거 (불필요 시)
+- [ ] `npm install` 실행
 
-### 1-3. GameManager 메서드 구현 (7개)
+### 1-3. GameManager 메서드 구현 (9개)
 - [ ] `eraseComponent(e)`
 - [ ] `saveSpell(name, slotIndex)`
 - [ ] `loadSpell(slotIndex)`
@@ -34,12 +34,20 @@
 - [ ] `clearDesign()`
 - [ ] `recordRun()`
 - [ ] `trimComponents()`
+- [ ] `spellStats()`
+- [ ] `startLoop()`
 
 ### 1-4. 헬퍼 메서드
 - [ ] `getBoardLocalFromPointer(e)`
 - [ ] `getNearestCellFromPointer(e)`
 - [ ] `componentAtPointer(e)`
 - [ ] `removeComponentAt(x, y)`
+
+### 1-4. 타입/빌드 오류 해소
+- [ ] `DamageResolver.ts` / `BattleEngine.ts` `getAutoTarget` 반환 타입 통일
+- [ ] `Store.ts` `BattleState` import 충돌 해소
+- [ ] `ko.ts` / `en.ts` 중복 키 제거
+- [ ] `toggleDesigner()` 불필요한 타입 비교 정리
 
 ### 1-5. 기타 수정
 - [ ] `updateStatsDisplay` 7개 카드로 확장
@@ -55,7 +63,8 @@
 - [ ] 슬롯 불러오기
 - [ ] 전투 시작 → 진행 → 게임 오버
 - [ ] 게임 오버 후 기록 저장 확인
-- [ ] `bun run test` 전체 통과
+- [ ] `npm run check` 오류 0
+- [ ] `npm run test` 전체 통과
 
 ---
 
@@ -66,8 +75,9 @@
 - [ ] `spawnOneMonster`에 `survival` 파라미터 추가
 
 ### 2-2. 데이터 정합성
-- [ ] 맵 2 별 조건 `[55000, 65000, 75000]` 수정
-- [ ] `README.md`, `GAME_DESIGN.md` 동기화
+- [ ] 맵 2 별 조건 `[55000, 65000, 75000]` 확인
+- [ ] `MAPS[2].desc` 텍스트를 별 조건과 동기화 (55,000 / 65,000 / 75,000점)
+- [ ] `README.md`, `GAME_DESIGN.md`, `CONSISTENCY_REPORT.md` 동기화
 
 ### 2-3. 상태 로직 개선
 - [ ] `getTotalStars`에 `includeCurrentRun` 파라미터 추가
@@ -90,9 +100,10 @@
 - [ ] 맵 2 별 3단계 75,000점
 - [ ] 보스 등장 시 토스트
 - [ ] 별 5개 달성 시 마나 토스트
-- [ ] `getTotalStars(false)`가 현재 전투 제외
+- [ ] `getTotalStars`가 현재 전투 상태를 올바르게 제외/포함
 - [ ] 저장 데이터 전체 삭제 후 복원
-- [ ] `bun run test` 전체 통과
+- [ ] `npm run check` 오류 0
+- [ ] `npm run test` 전체 통과
 
 ---
 
@@ -124,8 +135,8 @@
 - [ ] 상태 변경 시 UI 자동 갱신
 - [ ] Canvas 렌더링 정상
 - [ ] 메모리 누수 없음 (루프 정지 확인)
-- [ ] `bun run check` 통과
-- [ ] `bun run test` 통과
+- [ ] `npm run check` 통과
+- [ ] `npm run test` 통과
 
 ---
 
@@ -167,8 +178,8 @@
 - [ ] `innerHTML` 0개 (Canvas 제외)
 - [ ] `classList.toggle` 0개
 - [ ] 모든 UI 정상 동작
-- [ ] `bun run check` 통과
-- [ ] `bun run test` 통과
+- [ ] `npm run check` 통과
+- [ ] `npm run test` 통과
 
 ---
 
@@ -214,7 +225,8 @@
 - [ ] 키 설정 캡처/저장/초기화
 - [ ] 모바일 터치 배치
 - [ ] 드래그 연속 배치
-- [ ] `bun run test` 통과
+- [ ] `npm run check` 통과
+- [ ] `npm run test` 통과
 
 ---
 
@@ -247,7 +259,7 @@
 
 ### 6-5. 도구
 - [ ] ESLint 설정 (`eslint.config.js`)
-- [ ] `bun run lint` 통과 (오류 0, 경고 ≤ 10)
+- [ ] `npm run lint` 통과 (오류 0, 경고 ≤ 10)
 - [ ] CI workflow에 `check`, `test`, `lint` 추가
 
 ### 6-7. 아키텍처 개선
@@ -261,10 +273,10 @@
 - [ ] localStorage XSS 방어 확인
 
 ### 6-6. 최종 검증
-- [ ] `bun run build` 성공
-- [ ] `bun run check` 오류 0
-- [ ] `bun run test` 전체 통과
-- [ ] `bun run lint` 오류 0
+- [ ] `npm run build` 성공
+- [ ] `npm run check` 오류 0
+- [ ] `npm run test` 전체 통과
+- [ ] `npm run lint` 오류 0
 - [ ] axe-core a11y 오류 0
 - [ ] 브라우저에서 전체 플레이 가능
 - [ ] 모바일에서 설계/전투 동작
