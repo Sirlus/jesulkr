@@ -140,53 +140,53 @@
 
 ---
 
-## Phase 3.5: v1.5 상태·게임로직 마이그레이션
+## Phase 3.5: v1.5 상태·게임로직 마이그레이션 ✅
 
-### 3.5-1. 마나 복원 복원 ON/OFF 토글
-- [ ] `Storage.ts` — `loadManaBonusEnabled` / `saveManaBonusEnabled` 동작 확인
-- [ ] `game.ts` — `toggleManaBonus()` 메서드 추가
-- [ ] `game.svelte.ts` — `syncFull`에 마나 복원 복원 상태 표시
-- [ ] `get effectiveManaRegen`이 토글 상태 반영 확인
+### 3.5-1. 마나 복원 복원 ON/OFF 토글 ✅
+- [x] `Storage.ts` — `loadManaBonusEnabled` / `saveManaBonusEnabled` 동작 확인
+- [x] `game.ts` — `toggleManaBonus()` 메서드 추가
+- [x] `game.svelte.ts` — `syncFull`에 마나 복원 복원 상태 표시 (HUD에 effectiveManaRegen 반영됨)
+- [x] `get effectiveManaRegen`이 토글 상태 반영 확인
 
-### 3.5-2. 도구 해금 로직
-- [ ] `progression.ts` — `requiredMapForTool(tool)` 추가
-- [ ] `progression.ts` — `isToolUnlocked(tool, unlocks, records)` 추가
-- [ ] `progression.ts` — `getLockedToolNamesFromComponents(components)` 추가
-- [ ] `game.ts` — `setTool()`에서 잠긴 도구 선택 시 첫 해금 도구로 폰백
-- [ ] `game.ts` — `saveSpell()`에서 잠긴 도구 포함 시 저장 차단 + 토스트
+### 3.5-2. 도구 해금 로직 ✅
+- [x] `progression.ts` — `requiredMapForTool(tool)` 추가
+- [x] `progression.ts` — `isToolUnlocked(tool, unlocks, records)` 추가
+- [x] `progression.ts` — `getLockedToolNamesFromComponents(components, unlocks, records)` 추가
+- [x] `game.ts` — `setTool()`에서 잠긴 도구 선택 시 첫 해금 도구로 폰백
+- [⏳→P4] `game.ts` — `saveSpell()`에서 잠긴 도구 포함 시 저장 차단 (SpellManager 연동 필요)
 
-### 3.5-3. 런 모드 저장/불러오기
-- [ ] `Storage.ts` — `saveSelectedRunMode` / `loadSelectedRunMode` 확인
-- [ ] `Store.ts` — `loadFromStorage()`에서 호출 여부 확인
-- [ ] 런 모드 변경 후 새로고침 시 유지 확인
+### 3.5-3. 런 모드 저장/불러오기 ✅
+- [x] Storage.saveSelectedRunMode/loadSelectedRunMode 확인
+- [x] Store.loadFromStorage()에서 호출 확인
+- [x] 런 모드 변경 후 새로고침 시 유지 확인
 
-### 3.5-4. 튜토리얼 상태 저장/불러오기
-- [ ] `Storage.ts` — `TUTORIAL_SEEN_KEY = "jesulkr_tutorial_seen_v2"` 추가
-- [ ] `Storage.ts` — `loadTutorialSeen()` / `saveTutorialSeen()` 추가
-- [ ] `Store.ts` — `tutorialSeen` 필드 추가, `loadFromStorage()` 통합
+### 3.5-4. 튜토리얼 상태 저장/불러오기 ✅
+- [x] constants.ts — STORAGE_KEY_TUTORIAL_SEEN 추가
+- [x] StorageMisc.ts — loadTutorialSeen() / saveTutorialSeen() 추가
+- [x] Store.ts — tutorialSeen 필드 추가, loadFromStorage() 통합
 
-### 3.5-5. 모바일 감지 유틸
-- [ ] `mobile.ts` — `isMobileLayout()` / `shouldUseMobileLayout()` 신규
-- [ ] `+page.svelte` — `onMount`에서 `body.mobile-layout` 클래스 토글
+### 3.5-5. 모바일 감지 유틸 ✅
+- [x] mobile.ts — isMobileLayout() / shouldUseMobileLayout() / updateMobileLayout() 신규
+- [x] +page.svelte — onMount에서 updateMobileLayout() 호출
 
-### 3.5-6. 설계 미리보기 좌표
-- [ ] `game.ts` — `setDesignerPreview(x, y)` / `clearDesignerPreview()` 추가
-- [ ] `game.svelte.ts` — `syncFull`에서 미리보기 좌표 반영
+### 3.5-6. 설계 미리보기 좌표 ✅
+- [x] game.ts — setDesignerPreview(x, y) / clearDesignerPreview() 추가
+- [⏳→P4] game.svelte.ts — syncFull에서 미리보기 좌표 반영 (PlacementGhost.svelte)
 
-### 3.5-7. 맵 잠금 해제 코드
-- [ ] `game.ts` — `tryUnlockAllMaps(code)` 추가
-- [ ] 올바른 코드 입력 시 모든 맵 해금 확인
-- [ ] 잘못된 코드 입력 시 토스트 확인
+### 3.5-7. 맵 잠금 해제 코드 ✅
+- [x] game.ts — tryUnlockAllMaps(code) 추가
+- [x] 올바른 코드(1111) 입력 시 모든 맵 + 별 9개 해금
+- [x] 잘못된 코드 입력 시 토스트
 
-### 3.5-8. 덱 관리 기반 메서드
-- [ ] `game.ts` — `saveDeck(index)` / `loadDeck(index)` / `renameDeck(index, name)` 추가
-- [ ] `Storage.ts` — 덱/덱이름 저장 함수 확인
-- [ ] 덱 저장/불러오기/이름 변경이 localStorage에 유지 확인
+### 3.5-8. 덱 관리 기반 메서드 ✅
+- [x] game.ts — saveDeck(index) / loadDeck(index) / renameDeck(index, name) 추가
+- [x] Storage.ts — 덱/덱이름 저장 함수 확인 (StorageDecks.ts 기존 구현)
+- [x] 덱 저장/불러오기/이름 변경이 localStorage에 유지 확인
 
-### 3.5-9. 검증
-- [ ] `bun run test` → 56 tests 통과
-- [ ] `bun run build` → 빌드 통과
-- [ ] `bun run check` → 신규 오류 0개
+### 3.5-9. 검증 ✅
+- [x] npm run test → 56 tests 통과
+- [x] npm run build → 빌드 통과
+- [x] npm run check → 신규 오류 0개
 
 ---
 

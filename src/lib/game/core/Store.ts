@@ -100,6 +100,7 @@ export class Store {
   keyCaptureTarget: import('../types').KeyTarget | null = null;
 
   language: Language = 'ko';
+  tutorialSeen: boolean = false;
 
   designer = createDesignerState();
   battle = createBattleState();
@@ -121,6 +122,7 @@ export class Store {
     this.autoManaReserve = Storage.loadAutoManaReserve();
     this.manaBonusEnabled = Storage.loadManaBonusEnabled();
     this.language = (Storage.loadLanguage() as Language) || 'ko';
+    this.tutorialSeen = Storage.loadTutorialSeen();
     this.selectedRunMode = Storage.loadSelectedRunMode();
     this.unlocks = Storage.loadUnlocks();
     this.records = Storage.loadRecords();

@@ -15,6 +15,7 @@ export {
   loadAutoManaReserve, saveAutoManaReserve,
   loadManaBonusEnabled, saveManaBonusEnabled,
   loadLanguage, saveLanguage,
+  loadTutorialSeen, saveTutorialSeen,
   loadSelectedRunMode, saveSelectedRunMode,
   defaultSlotAutoModes,
 } from './StorageMisc';
@@ -29,6 +30,7 @@ export function clearAllStorage(): void {
     C.STORAGE_KEY_KEY_BINDINGS, C.STORAGE_KEY_CONTROL_BINDINGS,
     C.STORAGE_KEY_SLOT_AUTO, C.STORAGE_KEY_AUTO_MANA_RESERVE,
     C.STORAGE_KEY_MANA_BONUS, C.STORAGE_KEY_LANGUAGE,
+    C.STORAGE_KEY_TUTORIAL_SEEN,
     C.STORAGE_KEY_RUN_MODE, C.STORAGE_KEY_RECORDS,
     C.STORAGE_KEY_RECORDS_LEGACY, C.STORAGE_KEY_RECORDS_OLD,
     C.STORAGE_KEY_UNLOCKS, C.STORAGE_KEY_UNLOCKS_LEGACY,

@@ -4,12 +4,17 @@
 import { Store } from '$lib/game/core/Store';
 import * as Storage from '$lib/game/core/Storage';
 import { setLanguage, t } from '$lib/game/i18n';
-import { MAPS, MAX_MANA } from '$lib/game/constants';
+import { MAPS, MAX_MANA, STAR_THRESHOLDS, TOOL_ORDER } from '$lib/game/constants';
 import { BattleRenderer } from '$lib/game/battle/BattleRenderer';
 import { getCurrentTarget, pickMonsterAt } from '$lib/game/battle/TargetingSystem';
 import { clone } from '$lib/game/utils/helpers';
 import { calculateSpellStats } from '$lib/game/designer/StatsCalculator';
 import { createComponentFromGridCoord, canPlaceComponent } from '$lib/game/designer/Components';
+import {
+  requiredMapForTool,
+  isToolUnlocked,
+  getLockedToolNamesFromComponents,
+} from '$lib/game/utils/progression';
 import type { GameState } from '$lib/game/types';
 import { showToast } from '$lib/game/ui/Toast';
 import { updateHUD } from '$lib/game/ui/HUD';
@@ -75,8 +80,18 @@ export class GameManager {
   startLoop() { startLoop(this); }
 
   // ── Designer ─────────────────────────────────────────────
-  /** 설계 도구를 변경합니다 (예: 'circle', 'red', 'eraser') */
-  setTool(tool: string) { this.designer.tool = tool; gameRx.syncFull(this); }
+  /** 설계 도구를 변경합니다 (예: 'circle', 'red', 'eraser'). 잠긴 도구는 첫 해금 도구로 폰백됩니다 */
+  setTool(tool: string) {
+    if (!isToolUnlocked(tool, this.store.unlocks, this.store.records)) {
+      const first = TOOL_ORDER.find((t: string) =>
+        t !== 'eraser' && isToolUnlocked(t, this.store.unlocks, this.store.records),
+      ) || 'red';
+      this.designer.tool = first;
+    } else {
+      this.designer.tool = tool;
+    }
+    gameRx.syncFull(this);
+  }
   /** 회전 가능한 도구(oval, mixed2)의 방향을 토글합니다 */
   rotateTool() { this.designer.rotation = this.designer.rotation === 0 ? 1 : 0; gameRx.syncFull(this); }
   /** 설계판 크기를 변경하고 설계판 밖 부품을 제거합니다 */
@@ -339,6 +354,88 @@ export class GameManager {
     this.state = 'design';
     gameRx.syncFull(this);
     showToast('데이터가 초기화되었습니다.', 'good');
+  }
+
+  // ── Phase 3.5: v1.5 State & Logic Migration ──────────────
+
+  /** 마나 보너스 ON/OFF를 토글합니다 (별 5개 이상 필요) */
+  toggleManaBonus() {
+    if (this.store.totalStars < 5) {
+      showToast('별 5개 이상부터 마나 보너스를 사용할 수 있습니다.', 'bad');
+      return;
+    }
+    this.store.manaBonusEnabled = !this.store.manaBonusEnabled;
+    Storage.saveManaBonusEnabled(this.store.manaBonusEnabled);
+    showToast(`마나 보너스 ${this.store.manaBonusEnabled ? 'ON' : 'OFF'}`, this.store.manaBonusEnabled ? 'good' : 'bad');
+    gameRx.syncFull(this);
+  }
+
+  /** 설계 미리보기 좌표를 설정합니다 (placement ghost 용) */
+  setDesignerPreview(x: number, y: number) {
+    this.designer.previewX = x;
+    this.designer.previewY = y;
+  }
+
+  /** 설계 미리보기 좌표를 초기화합니다 */
+  clearDesignerPreview() {
+    this.designer.previewX = null;
+    this.designer.previewY = null;
+  }
+
+  /** 테스트용 치트 코드: 1111 입력 시 모든 맵과 별 9개 해금 */
+  tryUnlockAllMaps(code: string): boolean {
+    if (code.trim() !== '1111') {
+      showToast('비밀번호가 틀렸습니다.', 'bad');
+      return false;
+    }
+    this.store.unlocks = { '1': true, '2': true, '3': true };
+    for (const id of [1, 2, 3]) {
+      const thresholds = STAR_THRESHOLDS[id] || [];
+      const threeStarScore = thresholds[2] || 0;
+      const rec = Storage.getMapRecord(this.store.records, id, 'assist');
+      Storage.setMapRecord(this.store.records, id, 'assist', {
+        score: Math.max(rec.score || 0, threeStarScore),
+        time: Math.max(rec.time || 0, 1),
+      });
+    }
+    Storage.saveUnlocks(this.store.unlocks);
+    Storage.saveRecords(this.store.records);
+    gameRx.syncFull(this);
+    showToast('테스트 모드: 모든 맵과 별 9개 해금', 'good');
+    return true;
+  }
+
+  /** 현재 5개 슬롯을 지정한 덱 인덱스에 저장합니다 */
+  saveDeck(index: number) {
+    if (index < 0 || index >= 10) return;
+    this.store.decks[index] = clone(this.store.slots);
+    Storage.saveDecks(this.store.decks);
+    const name = this.store.deckNames[index] || `덱 ${index + 1}`;
+    showToast(`현재 5개 슬롯을 ${name}에 저장했습니다.`, 'good');
+  }
+
+  /** 지정한 덱 인덱스의 술식을 현재 슬롯으로 불러옵니다 */
+  loadDeck(index: number) {
+    if (index < 0 || index >= 10) return;
+    const deck = this.store.decks[index] || [null, null, null, null, null];
+    if (!deck.some(Boolean)) {
+      showToast('이 덱은 비어 있습니다.', 'bad');
+      return;
+    }
+    this.store.slots = deck.map(spell => spell ? Storage.normalizeSpell(spell) : null);
+    Storage.saveSlots(this.store.slots);
+    gameRx.syncFull(this);
+    const name = this.store.deckNames[index] || `덱 ${index + 1}`;
+    showToast(`${name}을(를) 불러왔습니다.`, 'good');
+  }
+
+  /** 덱 이름을 변경합니다 (최대 18자) */
+  renameDeck(index: number, name: string) {
+    if (index < 0 || index >= 10) return;
+    const trimmed = (name || '').trim().slice(0, 18) || `덱 ${index + 1}`;
+    this.store.deckNames[index] = trimmed;
+    Storage.saveDeckNames(this.store.deckNames);
+    showToast('덱 이름을 저장했습니다.', 'good');
   }
 }
 

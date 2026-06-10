@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { game } from '$lib/stores/game';
   import * as Storage from '$lib/game/core/Storage';
+  import { updateMobileLayout } from '$lib/game/utils/mobile';
   import '$lib/game/style.css';
 
   let canvas: HTMLCanvasElement;
@@ -14,6 +15,7 @@
 
   onMount(() => {
     game.initClient();
+    updateMobileLayout();
     game.initCanvas(canvas);
     game.refreshAll();
 

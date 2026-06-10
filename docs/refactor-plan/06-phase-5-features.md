@@ -1,27 +1,30 @@
 # Phase 5: Features
 
-> **목표**: 원작 HTML v1.3에 있으나 `jesulkr-svelte`에 누락된 기능 구현  
+> **목표**: 원작 HTML v1.5에 있으나 `jesulkr-svelte`에 누락된 기능 구현  
 > **기간**: 4~5일  
 > **브랜치**: `refactor/phase-5-features` (base: `refactor/phase-4-ui`)
+
+> **참고**: Phase 3.5에서 v1.5의 **상태/저장/핵심 로직**은 이미 통합됨. Phase 5는 **UI와 상호작용**만 구현.
 
 ---
 
 ## 5-0. 누락 기능 목록
 
-| # | 기능 | 원작 구현 | 복잡도 | 우선순위 |
-|---|------|----------|--------|---------|
-| 1 | 맵 선택 모달 | `mapModal`, `renderMapCards` | 중간 | P1 |
-| 2 | 덱 관리 UI | `deckControls`, 10개 덱 | 중간 | P1 |
-| 3 | 키 설정 모달 | `keySettingsModal`, 키 캡처 | 높음 | P1 |
-| 4 | 자동 마나 보존 | `autoReserveInput` | 낮음 | P2 |
-| 5 | 설계 배치 미리보기 | `placementGhost` | 중간 | P2 |
-| 6 | SVG 도구 아이콘 | `toolIconSvg` | 낮음 | P3 |
-| 7 | 설계판 휠 회전 | `onDesignWheel` | 낮음 | P3 |
-| 8 | 드래그 연속 배치 | `placingDrag` | 중간 | P2 |
-| 9 | 도구 해금 UI 표시 | `locked` 클래스, 배지 | 낮음 | P2 |
-| 10 | 술식 필요 맵 체크 | `getSpellRequiredMap` | 낮음 | P2 |
-| 11 | 모바일 터치 지원 | `touchstart/move/end` | 중간 | P2 |
-| 12 | 모바일 레이아웃 | `mobile-layout` 클래스 | 중간 | P2 |
+| # | 기능 | 원작(v1.5) 구현 | 복잡도 | 우선순위 | 상태 기반(Phase 3.5) |
+|---|------|----------------|--------|---------|-------------------|
+| 1 | 맵 선택 모달 | `mapModal`, `renderMapCards` | 중간 | P1 | ✅ `tryUnlockAllMaps` |
+| 2 | 덱 관리 UI | `deckControls`, 10개 덱 | 중간 | P1 | ✅ `saveDeck/loadDeck/renameDeck` |
+| 3 | 키 설정 모달 | `keySettingsModal`, 키 캡처 | 높음 | P1 | ✅ 저장/불러오기 기존 존재 |
+| 4 | 마나 복원 복원 ON/OFF | `.manaBonusToggle` | 낮음 | P1 | ✅ `toggleManaBonus` |
+| 5 | 튜토리얼 모달 | `openTutorial`, `renderTutorial` | 중간 | P1 | ✅ `tutorialSeen` |
+| 6 | 자동 마나 보존 | `autoReserveInput` | 낮음 | P2 | ✅ `autoManaReserve` 기존 존재 |
+| 7 | 설계 배치 미리보기 | `placementGhost` | 중간 | P2 | ✅ `setDesignerPreview` |
+| 8 | 도구 해금 UI 표시 | `locked` 클래스, 배지 | 낮음 | P2 | ✅ `isToolUnlocked` |
+| 9 | 모바일 터치 지원 | `touchstart/move/end` | 중간 | P2 | ✅ `isMobileLayout` |
+| 10 | 모바일 레이아웃 | `mobile-layout` 클래스 | 중간 | P2 | ✅ `isMobileLayout` |
+| 11 | 설계판 휠 회전 | `onDesignWheel` | 낮음 | P3 | — |
+| 12 | 드래그 연속 배치 | `placingDrag` | 중간 | P2 | — |
+| 13 | SVG 도구 아이콘 | `toolIconSvg` | 낮음 | P3 | — |
 
 ---
 

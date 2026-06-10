@@ -109,6 +109,47 @@
 - [x] Phase 1~2 테스트 전부 통과
 - [⏳→P4] Svelte 5 반응형 룬 ($state/$derived/$effect) — Phase 4 Svelte 컴포넌트에서 도입
 
+### 다음 계획 (변경: Phase 3.5 추가)
+- ~~Phase 4: UI Components~~ → **Phase 3.5: v1.5 상태·게임로직 마이그레이션** 먼저 진행
+- main 브랜치의 `Jesulkr_v1.5.html`을 참고하여 1.5 버전 상태/저장/핵심 로직 통합
+- Phase 3.5 완료 후 Phase 4: UI Components 진행
+
+---
+
+## Phase 3.5: v1.5 상태·게임로직 마이그레이션 (계획)
+
+> **목표**: main 브랜치 `Jesulkr_v1.5.html`의 상태 필드, localStorage, 핵심 계산/검증 로직을 Svelte Store/GameManager로 통합  
+> **원칙**: UI는 Phase 4/5에서 구현. Phase 3.5는 상태·로직·저장만 다룬다.
+
+### 3.5-1. 마나 복원 복원 ON/OFF 토글
+- `Storage.ts` — `loadManaBonusEnabled` / `saveManaBonusEnabled` 동작 확인
+- `game.ts` — `toggleManaBonus()` 메서드 추가
+- `game.svelte.ts` — `syncFull`에 마나 복원 복원 상태 표시
+
+### 3.5-2. 도구 해금 로직
+- `progression.ts` — `requiredMapForTool(tool)`, `isToolUnlocked()`, `getLockedToolNamesFromComponents()` 추가
+- `game.ts` — `setTool()`에서 잠긴 도구 폰백, `saveSpell()`에서 잠긴 도구 차단
+
+### 3.5-3. 런 모드 저장/불러오기 검증
+- `Storage.ts` — `saveSelectedRunMode` / `loadSelectedRunMode` 확인
+
+### 3.5-4. 튜토리얼 상태 저장/불러오기
+- `Storage.ts` — `TUTORIAL_SEEN_KEY = "jesulkr_tutorial_seen_v2"` 추가
+- `Store.ts` — `tutorialSeen` 필드 추가
+
+### 3.5-5. 모바일 감지 유틸
+- `mobile.ts` — `isMobileLayout()` / `shouldUseMobileLayout()` 신규
+- `+page.svelte` — `body.mobile-layout` 클래스 토글
+
+### 3.5-6. 설계 미리보기 좌표
+- `game.ts` — `setDesignerPreview(x, y)` / `clearDesignerPreview()` 추가
+
+### 3.5-7. 맵 잠금 해제 코드
+- `game.ts` — `tryUnlockAllMaps(code)` 추가
+
+### 3.5-8. 덱 관리 기반 메서드
+- `game.ts` — `saveDeck(index)` / `loadDeck(index)` / `renameDeck(index, name)` 추가
+
 ### 다음 계획
 - Phase 4: UI Components — 페이지 monolith → Svelte 컴포넌트 분리
   → 이때 $state/$effect로 진정한 반응형 전환
@@ -119,3 +160,43 @@
 - `DesignerRenderer.ts` (70줄) — `renderDesigner()`, `eraseComponent()`
 - `SpellManager.ts` (59줄) — `saveSpell()`, `loadSpell()`, `clearDesign()`
 - GameManager는 얇은 파사드로 유지, 모든 public API는 `+page.svelte`와 호환
+
+---
+
+## Phase 3.5: v1.5 상태·게임로직 마이그레이션 (완료 ✅)
+
+> **브랜치**: `refactor/phase-3.5-v1.5`
+> **날짜**: 2026-06-10
+
+### 완료한 것 (8개 작업 모두 구현)
+
+| # | 작업 | 상태 |
+|---|------|------|
+| 1 | 마나 보너스 토글 | ✅ `toggleManaBonus()` |
+| 2 | 도구 해금 로직 | ✅ `requiredMapForTool`, `isToolUnlocked`, `getLockedToolNamesFromComponents` |
+| 3 | 런 모드 저장/불러오기 | ✅ 검증 완료 (기존 구현 정상) |
+| 4 | 튜토리얼 저장 | ✅ `STORAGE_KEY_TUTORIAL_SEEN`, `loadTutorialSeen/saveTutorialSeen`, Store.tutorialSeen |
+| 5 | 모바일 감지 유틸 | ✅ `mobile.ts` 신규, `+page.svelte` 연동 |
+| 6 | 설계 미리보기 좌표 | ✅ `setDesignerPreview/clearDesignerPreview` |
+| 7 | 맵 잠금 해제 코드 | ✅ `tryUnlockAllMaps(1111)` |
+| 8 | 덱 관리 메서드 | ✅ `saveDeck/loadDeck/renameDeck` |
+
+### 변경된 파일
+| 파일 | 변경 |
+|------|------|
+| `src/lib/game/constants.ts` | `STORAGE_KEY_TUTORIAL_SEEN` 추가 |
+| `src/lib/game/core/Storage.ts` | `loadTutorialSeen/saveTutorialSeen` re-export, clearAllStorage 확장 |
+| `src/lib/game/core/StorageMisc.ts` | `loadTutorialSeen/saveTutorialSeen` 함수 추가 |
+| `src/lib/game/core/Store.ts` | `tutorialSeen` 필드 + loadFromStorage 통합 |
+| `src/lib/game/utils/progression.ts` | `requiredMapForTool`, `isToolUnlocked`, `getLockedToolNamesFromComponents` 추가 |
+| `src/lib/game/utils/mobile.ts` | **신규** — 모바일 감지 유틸 |
+| `src/lib/stores/game.ts` | `toggleManaBonus`, `setDesignerPreview`, `clearDesignerPreview`, `tryUnlockAllMaps`, `saveDeck`, `loadDeck`, `renameDeck` 추가 + `setTool` 잠금 체크 |
+| `src/routes/+page.svelte` | `updateMobileLayout()` 호출 추가 |
+
+### 검증
+- ✅ `npm run check` — 0 errors
+- ✅ `npm run test` — 56 tests 통과
+- ✅ `npm run build` — 빌드 성공
+
+### 다음 계획
+- Phase 4: UI Components — $state/$effect로 진정한 반응형 전환

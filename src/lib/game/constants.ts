@@ -13,6 +13,7 @@ export const STORAGE_KEY_CONTROL_BINDINGS = 'magic_design_game_control_bindings_
 export const STORAGE_KEY_SLOT_AUTO = 'magic_design_game_slot_auto_modes_v1';
 export const STORAGE_KEY_AUTO_MANA_RESERVE = 'magic_design_game_auto_mana_reserve_v1';
 export const STORAGE_KEY_MANA_BONUS = 'magic_design_game_mana_bonus_enabled_v1';
+export const STORAGE_KEY_TUTORIAL_SEEN = 'jesulkr_tutorial_seen_v2';
 export const STORAGE_KEY_LANGUAGE = 'jesulkr_language_v1';
 export const STORAGE_KEY_RUN_MODE = 'magic_design_game_selected_run_mode_v1';
 export const STORAGE_KEY_RECORDS = 'magic_design_game_map_records_v3';

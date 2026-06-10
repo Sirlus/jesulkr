@@ -51,6 +51,15 @@ export function saveLanguage(lang: string): void {
   localStorage.setItem(C.STORAGE_KEY_LANGUAGE, lang);
 }
 
+export function loadTutorialSeen(): boolean {
+  return localStorage.getItem(C.STORAGE_KEY_TUTORIAL_SEEN) === 'seen';
+}
+
+export function saveTutorialSeen(seen: boolean): void {
+  if (seen) localStorage.setItem(C.STORAGE_KEY_TUTORIAL_SEEN, 'seen');
+  else localStorage.removeItem(C.STORAGE_KEY_TUTORIAL_SEEN);
+}
+
 export function loadSelectedRunMode(): string {
   const raw = localStorage.getItem(C.STORAGE_KEY_RUN_MODE);
   return raw === 'pure' ? 'pure' : 'assist';

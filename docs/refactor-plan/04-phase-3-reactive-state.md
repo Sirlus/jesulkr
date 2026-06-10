@@ -334,3 +334,9 @@ GameLoop.ts                  → gameRx.syncPartial(gm) ← 매 프레임 (HUD+c
 | EventBus 제거 | ✅ | 파일 삭제 + Store.emit() 제거 |
 | Phase 1~2 테스트 모두 통과 | ✅ | 56 tests |
 | $state/$derived/$effect 도입 | ⏳→P4 | vitest와 공존 불가, Phase 4 Svelte 컴포넌트에서 도입 |
+
+---
+
+## 다음 단계
+
+- [Phase 3.5: v1.5 상태·게임로직 마이그레이션](./04-phase-3.5-v1.5-state-migration.md) — main 브랜치 `Jesulkr_v1.5.html`의 상태/저장/핵심 로직을 Svelte 구조로 통합

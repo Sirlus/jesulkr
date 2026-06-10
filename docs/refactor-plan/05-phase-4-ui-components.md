@@ -2,7 +2,8 @@
 
 > **목표**: `+page.svelte`의 176줄 monolith를 Svelte 컴포넌트로 분리하고, 명령형 DOM 조작을 선언적 템플릿으로 전환  
 > **기간**: 5~7일  
-> **브랜치**: `refactor/phase-4-ui` (base: `refactor/phase-3-reactive`)
+> **브랜치**: `refactor/phase-4-ui` (base: `refactor/phase-3.5-v1.5`)  
+> **선행 조건**: Phase 3.5 완료 (v1.5 상태/로직 통합)
 
 ---
 
@@ -25,6 +26,22 @@
 │ Toast.svelte                        │  ← 토스트 알림
 └─────────────────────────────────────┘
 ```
+
+---
+
+## 4-0. Phase 3.5에서 마련된 기반
+
+Phase 3.5를 통해 다음 상태/메서드가 GameManager/Store에 통합되어 있어, Phase 4 컴포넌트에서 직접 사용 가능:
+
+| 기반 | 위치 | Phase 4 사용처 |
+|------|------|---------------|
+| `game.toggleManaBonus()` | `game.ts` | `SlotPanel.svelte` 마나 복원 복원 토글 |
+| `game.isToolUnlocked(tool)` | `game.ts` | `DesignerPanel.svelte` 도구 버튼 잠금 |
+| `game.setDesignerPreview(x,y)` | `game.ts` | `DesignerPanel.svelte` 배치 고스트 |
+| `game.tutorialSeen` | `Store.ts` | `LanguageModal.svelte` 튜토리얼 자동 표시 |
+| `isMobileLayout()` | `mobile.ts` | 모든 컴포넌트 반응형 레이아웃 |
+| `game.saveDeck/loadDeck/renameDeck` | `game.ts` | `DeckControls.svelte` (Phase 5) |
+| `game.tryUnlockAllMaps(code)` | `game.ts` | `MapSelectModal.svelte` (Phase 5) |
 
 ---
 
