@@ -1,8 +1,8 @@
 // ============================================================
 // Jesulkr — Game manager singleton (SvelteKit compatible)
 // ============================================================
-import { Store } from '$lib/game/core/Store';
 import * as Storage from '$lib/game/core/Storage';
+import { gameState } from './gameState.svelte';
 import { setLanguage, t } from '$lib/game/i18n';
 import { MAPS, MAX_MANA, STAR_THRESHOLDS, TOOL_ORDER, UNLOCK_ALL_MAPS_CODE, SPAWN_TIMER_BATTLE_START, MAX_SPELL_NAME_LENGTH } from '$lib/game/constants';
 import { BattleRenderer } from '$lib/game/battle/BattleRenderer';
@@ -26,7 +26,7 @@ import { gameRx } from './game.svelte';
 
 /** 게임의 중앙 제어 싱글톤. 모든 상태 변경과 상호작용의 진입점 */
 export class GameManager {
-  store = new Store();
+  store = gameState;
   canvas: HTMLCanvasElement | null = null;
   renderer: BattleRenderer | null = null;
   lastTime = 0;
@@ -302,9 +302,6 @@ export class GameManager {
     setLanguage(lang);
     document.documentElement.lang = lang;
     Storage.saveLanguage(lang);
-    // Hide the modal immediately so the user sees the game UI
-    const modal = document.getElementById('languageModal');
-    if (modal) modal.classList.add('hidden');
     gameRx.syncFull(this);
   }
 
@@ -339,8 +336,16 @@ export class GameManager {
     return b.label || b.key || String(index + 1);
   }
 
+  /** 지정한 조작 액션의 키 라벨을 반환합니다 */
+  getControlKeyLabel(action: string): string {
+    const b = this.controlBindings[action] || Storage.defaultControlBindings()[action];
+    return b?.label || b?.key || '';
+  }
+
   /** 해당 맵이 해금되었는지 확인합니다 */
   isMapUnlocked(id: number): boolean { return this.store.isMapUnlocked(id); }
+  /** 해당 도구가 해금되었는지 확인합니다 */
+  isToolUnlocked(tool: string): boolean { return isToolUnlocked(tool, this.unlocks, this.records); }
   /** 해당 맵의 획득 별 개수를 반환합니다 */
   getMapStars(id: number): number { return this.store.getMapStars(id); }
 

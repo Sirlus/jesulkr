@@ -113,6 +113,9 @@ const en: Record<string, string> = {
   'invalid.spell': 'Invalid spell.',
   'slot.saved': 'Saved to slot {0}.',
   'slot.loaded': 'Loaded slot {0}.',
+  'slot.number': 'Slot {0}',
+  'select.tool': 'Select a tool and click the design board.',
+  'seconds': 's',
   'target.hp': 'Target: HP {0}',
 };
 

@@ -42,10 +42,7 @@ export function loadSpell(gm: GameManager, slotIndex: number) {
   gm.designer.height = spell.height;
   gm.designer.components = clone(spell.components);
   gm.designer.nextId = 1 + gm.designer.components.reduce((m, c) => Math.max(m, Number(c.id) || 0), 0);
-  const nameInput = document.getElementById('spellName') as HTMLInputElement;
-  if (nameInput) nameInput.value = spell.name;
-  const slotSelect = document.getElementById('slotSelect') as HTMLSelectElement;
-  if (slotSelect) slotSelect.value = String(slotIndex);
+  gm.designer.spellName = spell.name;
   if (gm.state !== 'design') gm.store.returnStateAfterDesign = gm.state;
   gm.state = 'design';
   // gameRx.sync will render designer (called from onStateChange)
@@ -56,7 +53,6 @@ export function loadSpell(gm: GameManager, slotIndex: number) {
 export function clearDesign(gm: GameManager) {
   gm.designer.components = [];
   gm.designer.nextId = 1;
-  const nameInput = document.getElementById('spellName') as HTMLInputElement;
-  if (nameInput) nameInput.value = '';
+  gm.designer.spellName = '';
   gameRx.syncFull(gm);
 }

@@ -113,6 +113,9 @@ const ko: Record<string, string> = {
   'invalid.spell': '유효한 술식이 아닙니다.',
   'slot.saved': '{0}번 슬롯에 저장했습니다.',
   'slot.loaded': '{0}번 슬롯을 불러왔습니다.',
+  'slot.number': '{0}번 슬롯',
+  'select.tool': '도구를 선택하고 설계판을 클릭하세요.',
+  'seconds': '초',
   'target.hp': '대상: HP {0}',
 };
 
