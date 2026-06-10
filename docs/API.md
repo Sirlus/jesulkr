@@ -4,6 +4,8 @@
 
 원작 HTML v1.3을 SvelteKit으로 포팅한 버전의 API를 다룹니다.
 
+> ⚠️ **2026-06-10 기준 주의**: 아래 메서드 중 `❌ 미구현`으로 표기된 것들은 `src/lib/stores/game.ts`에 아직 정의되어 있지 않습니다. `npm run check` 실행 시 타입 오류를 발생시키며, 실제로 호출하면 런타임 예외가 발생합니다. 상세 내용은 [`CONSISTENCY_REPORT.md`](./CONSISTENCY_REPORT.md) §2.2, §7을 참조하세요.
+
 ---
 
 ## GameManager (`src/lib/stores/game.ts`)
@@ -23,8 +25,10 @@ import { game } from '$lib/stores/game';
 if (typeof window !== 'undefined') game.initClient();
 ```
 
-#### `initCanvas(canvas: HTMLCanvasElement)`
+#### `initCanvas(canvas: HTMLCanvasElement)` ❌ 미구현
 전투 캔버스를 초기화하고 렌더링 루프를 시작합니다.
+
+> 낶부에서 `startLoop()`를 호출하려 하지만, `startLoop` 메서드도 현재 미구현 상태입니다.
 
 ```ts
 const canvas = document.getElementById('battleCanvas') as HTMLCanvasElement;
@@ -56,7 +60,7 @@ game.initCanvas(canvas);
 
 ### 설계 (Designer)
 
-#### `setTool(tool: string)`
+#### `setTool(tool: string)` ✅
 현재 선택 도구를 변경합니다.
 
 ```ts
@@ -64,17 +68,19 @@ game.setTool('circle');   // 1칸 회로 선택
 game.setTool('eraser');   // 지우개 선택
 ```
 
-#### `rotateTool()`
+#### `rotateTool()` ✅
 회전 가능한 도구(`oval`, `mixed2`)의 방향을 토글합니다.
 
-#### `setFrame(w: number, h: number)`
+#### `setFrame(w: number, h: number)` ⚠️ 부분 동작
 설계판 크기를 변경합니다. 범위는 1×1 ~ 11×11.
+
+> `trimComponents()`가 미구현이라 프레임 밖 부품 제거는 동작하지 않습니다.
 
 ```ts
 game.setFrame(3, 3);  // 3×3 설계판
 ```
 
-#### `placeComponent(e: MouseEvent): boolean`
+#### `placeComponent(e: MouseEvent): boolean` ✅
 마우스 이벤트 위치에 현재 선택한 도구를 배치합니다. 배치 성공 여부를 반환합니다.
 
 ```ts
@@ -83,88 +89,118 @@ board.addEventListener('mousedown', (e) => {
 });
 ```
 
-#### `eraseComponent(e: MouseEvent): void`
+#### `eraseComponent(e: MouseEvent): void` ❌ 미구현
 마우스 위치의 부품을 제거합니다.
 
-#### `clearDesign(): void`
+> `+page.svelte` 우클릭 핸들러에서 호출하고 있어 `npm run check` 오류를 유발합니다.
+
+#### `clearDesign(): void` ❌ 미구현
 설계판의 모든 부품을 제거합니다.
 
-#### `saveSpell(name: string, slotIndex: number): void`
+> "설계 초기화" 버튼의 `onclick`에 연결되어 있습니다.
+
+#### `saveSpell(name: string, slotIndex: number): void` ❌ 미구현
 현재 설계를 지정한 슬롯에 저장합니다. 유효하지 않은 설계는 저장되지 않습니다.
 
 ```ts
 game.saveSpell('화염구', 0);  // 0번 슬롯에 저장
 ```
 
-#### `loadSpell(slotIndex: number): void`
+#### `loadSpell(slotIndex: number): void` ❌ 미구현
 지정한 슬롯의 술식을 설계판으로 불러옵니다.
 
-#### `spellStats(): SpellStats`
+> 전투가 아닐 때 슬롯 클릭 시 호출됩니다.
+
+#### `spellStats(): SpellStats` ❌ 미구현
 현재 설계의 통계를 계산하여 반환합니다.
+
+> `updateStatsDisplay()`와 `routes/test/+page.svelte`에서 호출하고 있습니다.
 
 ```ts
 const stats = game.spellStats();
 console.log(stats.damage, stats.manaCost, stats.valid);
 ```
 
+#### `renderDesigner(): void` ❌ 미구현
+설계판 DOM을 그립니다.
+
+> `placeComponent`, `setTool`, `rotateTool`, `clearDesign`, `loadSpell`, `setFrame` 등에서 호출됩니다.
+
+#### `trimComponents(): void` ❌ 미구현
+프레임 크기를 벗어난 부품을 제거합니다.
+
+> `setFrame()` 낶에서 호출됩니다.
+
 ---
 
 ### 전투 (Battle)
 
-#### `startBattle()`
+#### `startBattle()` ✅
 전투를 시작합니다. 저장된 술식이 없으면 토스트 메시지를 출력합니다.
 
-#### `restartBattle()`
+> ⚠️ `recordRun()`이 미구현이어서, 이미 진행 중인 런이 있을 때 이전 기록 저장 단계에서 런타임 오류가 발생할 수 있습니다.
+
+#### `restartBattle()` ✅
 현재 맵으로 전투를 즉시 재시작합니다.
 
-#### `togglePause()`
+#### `togglePause()` ✅
 전투 중이면 일시정지, 일시정지 중이면 재개합니다.
 
-#### `toggleDesigner()`
+#### `toggleDesigner()` ✅
 설계 화면과 전투 화면을 전환합니다.
 
-#### `castSlot(index: number)`
+#### `castSlot(index: number)` ✅
 지정한 슬롯의 술식을 수동 발사합니다.
+
+> ⚠️ `state !== 'battle'`인 상황에서 원작과 다른 `"마나 부족"` 메시지를 출력합니다.
 
 ```ts
 game.castSlot(0);  // 0번 슬롯 발사
 ```
 
-#### `setBattleSpeed(speed: number)`
+#### `setBattleSpeed(speed: number)` ✅
 전투 속도를 설정합니다. 허용 값: `1, 2, 4, 8`.
 
 ```ts
 game.setBattleSpeed(4);  // 4배속
 ```
 
-#### `onCanvasClick(e: MouseEvent)`
+#### `onCanvasClick(e: MouseEvent)` ✅
 캔버스 클릭 시 호출합니다. 클릭한 위치의 몬스터를 수동 타겟팅합니다.
+
+#### `recordRun(): void` ❌ 미구현
+전투 종료/재시작 시 기록을 저장합니다.
+
+> `startBattle()`과 `checkUnlocks()`에서 호출합니다.
+
+#### `startLoop(): void` ❌ 미구현
+`initCanvas()`가 호출하는 Canvas 렌더링/업데이트 루프입니다.
 
 ---
 
 ### 설정 (Settings)
 
-#### `setLanguage(lang: 'ko' | 'en')`
+#### `setLanguage(lang: 'ko' | 'en')` ✅
 게임 언어를 변경하고 `localStorage`에 저장합니다.
 
 ```ts
 game.setLanguage('en');
 ```
 
-#### `getSlotKeyLabel(index: number): string`
+#### `getSlotKeyLabel(index: number): string` ✅
 지정한 슬롯에 할당된 키의 표시 이름을 반환합니다.
 
-#### `isMapUnlocked(id: number): boolean`
+#### `isMapUnlocked(id: number): boolean` ✅
 맵이 해금되었는지 확인합니다.
 
-#### `getMapStars(id: number): number`
+#### `getMapStars(id: number): number` ✅
 특정 맵의 현재 획득 별 개수를 반환합니다.
 
 ---
 
 ## 통계 계산 (`src/lib/game/designer/StatsCalculator.ts`)
 
-### `calculateSpellStats(model: SpellModel): SpellStats`
+### `calculateSpellStats(model: SpellModel): SpellStats` ✅
 
 설계된 술식의 모든 통계를 계산합니다.
 
@@ -199,9 +235,11 @@ console.log(stats);
 
 ## 전투 업데이트 (`src/lib/game/battle/BattleEngine.ts`)
 
-### `updateBattleTick(...): TickResult`
+### `updateBattleTick(...): TickResult` ✅
 
 고정 시간 간격(tick) 단위로 전투 상태를 업데이트합니다. 직접 호출하기보다는 `GameManager`의 루프 낶에서 사용됩니다.
+
+> ⚠️ `spawnOneMonster`의 일반 몬스터 속도에 `survival * 0.45` 증가분이 누락되어 있어 원작 밸런스와 다릅니다.
 
 **핵심 파라미터**:
 - `regen`: 초당 마나 재생량
@@ -218,11 +256,11 @@ console.log(stats);
 
 ## 도선 네트워크 (`src/lib/game/designer/WireNetwork.ts`)
 
-### `buildConnectionGraph(components: Component[]): ConnectionGraph`
+### `buildConnectionGraph(components: Component[]): ConnectionGraph` ✅
 
 모든 도선(`wire`)을 BFS로 그룹화하고, 각 그룹과 인접한 비-wire 부품을 연결합니다.
 
-### `getConnectedComponents(component, components, graph, predicate): Component[]`
+### `getConnectedComponents(component, components, graph, predicate): Component[]` ✅
 
 특정 부품에 **직접 인접**하거나 **도선 네트워크로 연결**된 부품 중 `predicate`를 만족하는 부품을 모두 반환합니다.
 
@@ -239,7 +277,7 @@ const redSources = getConnectedComponents(
 console.log(redSources.length);  // 연결된 빨간 마나 개수
 ```
 
-### `getDirectNeighborComponents(component, components): Component[]`
+### `getDirectNeighborComponents(component, components): Component[]` ✅
 
 직접 인접(4방향)한 부품만 반환합니다. 도선 네트워크는 고려하지 않습니다.
 
@@ -247,9 +285,11 @@ console.log(redSources.length);  // 연결된 빨간 마나 개수
 
 ## 국제화 (`src/lib/game/i18n/index.ts`)
 
-### `t(key: string, ...args: (string | number)[]): string`
+### `t(key: string, ...args: (string | number)[]): string` ✅
 
 번역 키를 현재 설정된 언어로 변환합니다. `{0}`, `{1}` 등의 플레이스홀더를 지원합니다.
+
+> ⚠️ `ko.ts`와 `en.ts`에 중복 키가 존재하여 `svelte-check` 오류를 유발합니다.
 
 ```ts
 import { t } from '$lib/game/i18n';
@@ -258,7 +298,7 @@ t('not.enough.mana');  // "마나 부족" (또는 "Not enough mana")
 t('score');            // "점수" (또는 "Score")
 ```
 
-### `setLanguage(lang: Language): void`
+### `setLanguage(lang: Language): void` ✅
 
 현재 언어를 변경합니다.
 
@@ -299,6 +339,8 @@ import { loadUnlocks, saveUnlocks, isMapUnlocked } from '$lib/game/core/Storage'
 const unlocks = loadUnlocks();
 const ok = isMapUnlocked(2, unlocks, records);  // true/false
 ```
+
+> ⚠️ `clearAllStorage`는 원작에 있었으나 `Storage.ts`에서 re-export되지 않고 있습니다.
 
 ---
 
