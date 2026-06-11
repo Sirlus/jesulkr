@@ -511,16 +511,19 @@ export class GameManager {
   lastDragPlaceKey: string | null = null;
 
 /** 설계판 마우스 다운: 배치/삭제 및 드래그 상태 시작 */
-  onDesignBoardMouseDown(e: MouseEvent) {
-    if (this.state !== 'design') return;
-    if (e.button === 2) {
-      this.erasingDrag = true;
-      this.eraseComponent(e);
-    } else if (e.button === 0 && this.designer.tool !== 'eraser') {
-      this.placingDrag = true;
-      this.placeComponent(e);
-    }
+onDesignBoardMouseDown(e: MouseEvent) {
+  if (this.state !== 'design') return;
+  if (e.button === 2) {
+    this.erasingDrag = true;
+    this.eraseComponent(e);
+  } else if (e.button === 0 && this.designer.tool !== 'eraser') {
+    this.placingDrag = true;
+    this.placeComponent(e);
+  } else if (e.button === 0 && this.designer.tool === 'eraser') {
+    this.erasingDrag = true;
+    this.eraseComponent(e);
   }
+}
 
   /** 설계판 마우스 이동: 드래그 연속 배치/삭제 */
   onDesignBoardMouseMove(e: MouseEvent) {

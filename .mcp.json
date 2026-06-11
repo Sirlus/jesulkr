@@ -1,15 +1,1 @@
-{
-	"mcpServers": {
-		"svelte": {
-			"type": "stdio",
-			"command": "npx",
-			"env": {
-				
-			},
-			"args": [
-				"-y",
-				"@sveltejs/mcp"
-			]
-		}
-	}
-}
+{"mcpServers":{"svelte":{"type":"stdio","command":"npx","env":{},"args":["-y","@sveltejs/mcp"],"alwaysAllow":["svelte-autofixer"]}}}
