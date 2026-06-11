@@ -3,7 +3,7 @@
 // ============================================================
 import type { KeyBinding } from '../types';
 import { clone } from '../utils/helpers';
-import { loadJSON, saveJSON } from './StorageBase';
+import { saveJSON } from './StorageBase';
 import * as C from '../constants';
 
 export function formatKeyLabel(code: string, key: string): string {

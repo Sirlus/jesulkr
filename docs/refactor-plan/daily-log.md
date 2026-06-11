@@ -432,3 +432,64 @@ Phase 5 잔여 항목 (Phase 6으로 이관):
 - ✅ `CONSISTENCY_REPORT.md` — v1.5 기준, 0 errors 갱신
 - ✅ `daily-log.md` — gameState.svelte.ts/toast.svelte.ts 생성 기록, 라인 수 정정, dead code 삭제 기록
 - ✅ `08-checklist.md` — 완료 상태 갱신
+
+---
+
+## 2026-06-11 — Phase 6: Quality 완료
+
+> **브랜치**: `refactor/phase-6-quality`
+> **목표**: 테스트, 접근성, 성능, 문서화, 도구를 통한 프로덕션 품질 달성
+
+### 완료한 것
+
+| 항목 | 내용 | 커밋/파일 |
+|------|------|----------|
+| 테스트 | `GameManager.test.ts` `vi.stubGlobal` → `Object.defineProperty(globalThis, ...)` 수정 (vitest 4.x 호환) | `GameManager.test.ts` |
+| 테스트 | 89 tests (8 files) 전체 통과 | — |
+| CI/CD | GitHub Actions deploy 워크플로우에 `check`, `lint`, `test` 단계 추가 | `.github/workflows/deploy.yml` |
+| 문서화 | `BattleTickState`, `TickResult`, `BattleContext` JSDoc 추가 | `BattleEngine.ts` |
+| 문서화 | `README.md` 테스트 현황/린트 스크립트/bun toolchain 갱신 | `README.md` |
+| 안정성 | `saveSpell` slotIndex `Number()` 정규화 + 범위 검증 강화 | `SpellManager.ts` |
+| 안정성 | `DesignerPanel` select `onchange`에서 숫자 변환 처리 | `DesignerPanel.svelte` |
+
+### 검증 결과 (Phase 6 최종)
+
+| 명령어 | 결과 |
+|--------|------|
+| `bun run build` | ✅ 성공 |
+| `bun run check` | ✅ 0 errors, 0 warnings |
+| `bun run test` | ✅ 89 passed (8 files) |
+| `bun run lint` | ✅ 0 errors, 0 warnings |
+
+### Phase 6 체크리스트 달성 현황
+
+- [x] BattleEngine.ts 테스트 커버리지 ≥ 80% (생존, 마나, 쿨타임, 스폰, 게임오버)
+- [x] StorageSlots/StorageRecords 테스트 커버리지 ≥ 80%
+- [x] GameManager 통합 테스트 29개 시나리오
+- [x] Toast `role="status"`, `aria-live="polite"`, `aria-atomic="true"`
+- [x] LanguageModal `role="dialog"`, `aria-modal="true"`, focus trap
+- [x] DesignerPanel tool buttons `aria-label`
+- [x] Canvas offscreen 캐싱 (정적 레이어)
+- [x] `structuredClone` 사용 (JSON fallback)
+- [x] localStorage debounce (50ms)
+- [x] `updateBattleTick` 파라미터 객체화 (`BattleTickState`)
+- [x] JSDoc: `calculateSpellStats`, `buildConnectionGraph`, `updateBattleTick`, `GameManager` public API
+- [x] `CHANGELOG.md` v1.3.0 작성
+- [x] `README.md` 업데이트
+- [x] ESLint 설정 (`eslint.config.js`) — 오류 0, 경고 0
+- [x] CI workflow에 `check`, `test`, `lint` 단계 추가
+- [x] `sass-embedded` 제거
+- [x] `package-lock.json` 제거 (bun.lock 유지)
+- [x] `innerHTML` 보안 위험 제거
+
+### 미완료/이관 항목
+
+- [ ] GameManager 책임 분리 (BattleController, DesignerController 등) — **규모가 크고 안정성 리스크가 있어 Phase 6에서 제외, 향후 별도 브랜치로 진행 권장**
+- [ ] WCAG AA 색상 대비 수동 검증 — 코드 변경 없이 수동 체크만 남음
+- [ ] `devicePixelRatio` 대응 — 현재 Canvas 렌더링 품질로 충분
+
+### 다음 단계
+
+- `refactor/phase-6-quality` → `main` PR 생성
+- squash merge
+- Git tag `v1.3.0` 생성

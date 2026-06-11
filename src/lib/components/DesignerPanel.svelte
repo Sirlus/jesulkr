@@ -120,6 +120,7 @@
             data-tool={tool}
             disabled={!unlocked}
             title={unlocked ? info.name : `${info.name} - ${t('locked.tool')}`}
+            aria-label={info.name}
             onclick={() => { game.setTool(tool); }}
           >
             <span class="toolIconSvg"><span class="toolIcon {tool}"></span></span>
@@ -204,7 +205,7 @@
       </div>
       <label>
         {t('save.slot')}
-        <select bind:value={selectedSlot}>
+        <select bind:value={selectedSlot} onchange={(e) => selectedSlot = Number(e.currentTarget.value)}>
           {#each [0, 1, 2, 3, 4] as i}
             <option value={i}>{t('slot.number', i + 1)}</option>
           {/each}
@@ -214,7 +215,7 @@
         id="saveBtn"
         class="good"
         disabled={!stats.valid}
-        onclick={() => game.saveSpell(gameState.designer.spellName || '', selectedSlot)}
+        onclick={() => game.saveSpell(gameState.designer.spellName || '', Number(selectedSlot))}
       >
         {t('save.to.slot')}
       </button>

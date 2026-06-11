@@ -1,9 +1,9 @@
 // ============================================================
 // Storage — Map unlocks
 // ============================================================
-import { loadJSON, saveJSON, removeKey } from './StorageBase';
+import { saveJSON, removeKey } from './StorageBase';
 import { defaultUnlocks } from '../utils/helpers';
-import { getMapProgressScore, getMapStars } from './StorageRecords';
+import { getMapStars } from './StorageRecords';
 import type { Records } from '../types';
 import * as C from '../constants';
 

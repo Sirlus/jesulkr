@@ -60,7 +60,6 @@ export function eraseComponent(gm: GameManager, e: MouseEvent) {
   const step = CELL + GAP;
   const cx = Math.max(0, Math.min(gm.designer.width - 1, Math.round((localX - CELL / 2) / step)));
   const cy = Math.max(0, Math.min(gm.designer.height - 1, Math.round((localY - CELL / 2) / step)));
-  const before = gm.designer.components.length;
   gm.designer.components = gm.designer.components.filter(
     c => !(cx >= c.x && cx < c.x + c.w && cy >= c.y && cy < c.y + c.h),
   );

@@ -24,7 +24,7 @@ export function updateMobileLayout(): void {
 export function applyMobileDesignerScale(
   board: HTMLElement,
   width: number,
-  height: number,
+  _height: number,
 ): void {
   if (!shouldUseMobileLayout() || !board.parentElement) {
     board.style.transform = '';

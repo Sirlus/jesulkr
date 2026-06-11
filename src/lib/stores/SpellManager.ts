@@ -11,7 +11,11 @@ import { showToast } from '$lib/game/ui/Toast';
 
 /** 현재 설계를 지정한 슬롯에 저장합니다 */
 export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
-  if (slotIndex < 0 || slotIndex > 4) { showToast(t('invalid.slot'), 'bad'); return; }
+  const normalizedSlotIndex = Number(slotIndex);
+  if (!Number.isInteger(normalizedSlotIndex) || normalizedSlotIndex < 0 || normalizedSlotIndex > 4) {
+    showToast(t('invalid.slot'), 'bad');
+    return;
+  }
   const stats = gm.spellStats();
   if (!stats.valid) { showToast(t('invalid.spell'), 'bad'); return; }
   const n = (name || '').trim() || (t('unnamed.spell') || '이름 없는 술식');
@@ -27,9 +31,10 @@ export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
     aoeDamage: stats.aoeDamage,
     breakdown: stats.breakdown,
   };
-  gm.store.slots[slotIndex] = spell;
+  gm.store.slots[normalizedSlotIndex] = spell;
+  gm.store.slots = [...gm.store.slots];
   Storage.saveSlots(gm.slots);
-  showToast(t('slot.saved', slotIndex + 1), 'good');
+  showToast(t('slot.saved', normalizedSlotIndex + 1), 'good');
 }
 
 /** 지정한 슬롯의 술식을 설계판으로 불러옵니다 */

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { gameState } from '$lib/stores/gameState.svelte';
-  import { game } from '$lib/stores/game';
   import { createComponentFromGridCoord, canPlaceComponent } from '$lib/game/designer/Components';
 
   const preview = $derived(

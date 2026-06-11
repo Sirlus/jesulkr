@@ -4,7 +4,7 @@
 import type { Records, BattleState, GameState, Component } from '../types';
 import { getMapProgressScore, getMapStars } from '../core/StorageRecords';
 import { isMapUnlocked } from '../core/StorageUnlocks';
-import { MANA_BONUS_STAR_COUNT, STAR_MANA_REGEN, BASE_MANA_REGEN } from '../constants';
+import { MANA_BONUS_STAR_COUNT } from '../constants';
 
 export function getTotalStars(
   records: Records,

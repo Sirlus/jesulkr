@@ -17,6 +17,15 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Type Check
+        run: bun run check
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Test
+        run: bun run test
+
       - name: Build
         env:
           # Project pages are served from /<repo-name>; remove this if the repo

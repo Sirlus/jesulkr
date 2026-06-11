@@ -280,56 +280,56 @@
 
 ---
 
-## Phase 6: Quality
+## Phase 6: Quality ✅ (2026-06-11 완료)
 
 ### 6-1. 테스트
-- [ ] `BattleEngine.test.ts` (생존, 마나, 쿨타임, 스폰, 보스, 게임오버)
-- [ ] `StorageSlots.test.ts` (normalizeSpell, load/save)
-- [ ] `StorageRecords.test.ts` (마이그레이션, 별 계산)
-- [ ] `gameActions.test.ts` (save/load, clear, trim, cast)
-- [ ] 테스트 커버리지 ≥ 80% (BattleEngine, Storage)
+- [x] `BattleEngine.test.ts` (생존, 마나, 쿨타임, 스폰, 보스, 게임오버)
+- [x] `StorageSlots.test.ts` (normalizeSpell, load/save)
+- [x] `StorageRecords.test.ts` (마이그레이션, 별 계산)
+- [x] `gameActions.test.ts` → `GameManager.test.ts` (save/load, clear, trim, cast, toggleManaBonus, setBattleSpeed, setTool)
+- [x] 테스트 커버리지 ≥ 80% (BattleEngine, Storage)
 
 ### 6-2. 접근성
-- [ ] 토스트 `role="status"`, `aria-live="polite"`
-- [ ] 언어 모달 초점 트랩
-- [ ] 이모지 버튼 `aria-label`
-- [ ] 색상 대비 WCAG AA 검증
-- [ ] 키보드 네비게이션 (Tab, Escape)
+- [x] 토스트 `role="status"`, `aria-live="polite"`, `aria-atomic="true"`
+- [x] 언어 모달 초점 트랩
+- [x] 이모지 버튼 `aria-label`
+- [ ] 색상 대비 WCAG AA 검증 — 수동 검증 미실시 (코드 적용 완료)
+- [x] 키보드 네비게이션 (Tab, Escape)
 
 ### 6-3. 성능
-- [ ] Canvas offscreen 캐싱 (정적 레이어)
-- [ ] `structuredClone` 사용 (fallback JSON)
-- [ ] localStorage debounce (50ms)
-- [ ] `devicePixelRatio` 대응
+- [x] Canvas offscreen 캐싱 (정적 레이어)
+- [x] `structuredClone` 사용 (fallback JSON)
+- [x] localStorage debounce (50ms)
+- [ ] `devicePixelRatio` 대응 — 계획상 존재, 현재 Canvas 품질로 충분
 
 ### 6-4. 문서화
-- [ ] JSDoc: `calculateSpellStats`, `updateBattleTick`, `GameActions`
-- [ ] `CHANGELOG.md` 작성 (v1.3.0)
-- [ ] `README.md` 업데이트 (컴포넌트 구조, 스크립트)
+- [x] JSDoc: `calculateSpellStats`, `buildConnectionGraph`, `updateBattleTick`, `GameManager` public API
+- [x] `CHANGELOG.md` 작성 (v1.3.0)
+- [x] `README.md` 업데이트 (컴포넌트 구조, 스크립트, 테스트 현황)
 
 ### 6-5. 도구
-- [ ] ESLint 설정 (`eslint.config.js`)
-- [ ] `npm run lint` 통과 (오류 0, 경고 ≤ 10)
-- [ ] CI workflow에 `check`, `test`, `lint` 추가
+- [x] ESLint 설정 (`eslint.config.js`)
+- [x] `npm run lint` 통과 (오류 0, 경고 0)
+- [x] CI workflow에 `check`, `test`, `lint` 추가
 
 ### 6-7. 아키텍처 개선
-- [ ] GameManager 책임 분리 (BattleController, DesignerController, SpellManager, InputController)
-- [ ] `updateBattleTick` 파라미터 → `BattleTickState` 객체화
-- [ ] `vitest.config.ts` → `globals: true` 제거
-- [ ] `package-lock.json` 제거 (bun.lock 만 유지)
+- [ ] GameManager 책임 분리 (BattleController, DesignerController, SpellManager, InputController) — 규모 큼, 별도 브랜치 권장
+- [x] `updateBattleTick` 파라미터 → `BattleTickState` 객체화
+- [x] `vitest.config.ts` → `globals: true` 제거
+- [x] `package-lock.json` 제거 (bun.lock 만 유지)
 
 ### 6-8. 보안
-- [ ] `innerHTML` 사용처 `escapeHtml` 적용 검증
-- [ ] localStorage XSS 방어 확인
+- [x] `innerHTML` 사용처 `escapeHtml` 적용 검증 → Svelte 템플릿으로 대체 완료
+- [x] localStorage XSS 방어 확인
 
 ### 6-6. 최종 검증
-- [ ] `npm run build` 성공
-- [ ] `npm run check` 오류 0
-- [ ] `npm run test` 전체 통과
-- [ ] `npm run lint` 오류 0
-- [ ] axe-core a11y 오류 0
-- [ ] 브라우저에서 전체 플레이 가능
-- [ ] 모바일에서 설계/전투 동작
+- [x] `npm run build` 성공
+- [x] `npm run check` 오류 0
+- [x] `npm run test` 전체 통과 (89 tests, 8 files)
+- [x] `npm run lint` 오류 0
+- [ ] axe-core a11y 오류 0 — CLI 미설치, 수동 검증으로 대체
+- [x] 브라우저에서 전체 플레이 가능
+- [x] 모바일에서 설계/전투 동작
 
 ---
 

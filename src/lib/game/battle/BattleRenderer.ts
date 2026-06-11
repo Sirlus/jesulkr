@@ -3,33 +3,28 @@
 // ============================================================
 import type { Monster, CastProjectile, VisualEffect, GameState } from '../types';
 import { LANES } from '../constants';
-import { t } from '../i18n';
 
 export class BattleRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
+  private staticCanvas: HTMLCanvasElement;
+  private staticCtx: CanvasRenderingContext2D;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
+    this.staticCanvas = document.createElement('canvas');
+    this.staticCanvas.width = canvas.width;
+    this.staticCanvas.height = canvas.height;
+    this.staticCtx = this.staticCanvas.getContext('2d')!;
+    this.renderStaticLayer();
   }
 
-  render(
-    monsters: Monster[],
-    casts: CastProjectile[],
-    effects: VisualEffect[],
-    state: GameState,
-    selectedTargetId: number | null,
-    stateLabel: string,
-    pauseMsg: string,
-  ): void {
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-    const ctx = this.ctx;
+  private renderStaticLayer(): void {
+    const w = this.staticCanvas.width;
+    const h = this.staticCanvas.height;
+    const ctx = this.staticCtx;
     const laneW = w / LANES;
-
-    ctx.clearRect(0, 0, w, h);
-    ctx.save();
 
     // Background
     ctx.fillStyle = '#07101e';
@@ -57,6 +52,27 @@ export class BattleRenderer {
     ctx.moveTo(0, h - 38);
     ctx.lineTo(w, h - 38);
     ctx.stroke();
+  }
+
+  render(
+    monsters: Monster[],
+    casts: CastProjectile[],
+    effects: VisualEffect[],
+    state: GameState,
+    selectedTargetId: number | null,
+    stateLabel: string,
+    pauseMsg: string,
+  ): void {
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    const ctx = this.ctx;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw pre-rendered static layer (background, lanes, base zone)
+    ctx.drawImage(this.staticCanvas, 0, 0);
+
+    ctx.save();
 
     // Projectiles
     for (const cast of casts) {

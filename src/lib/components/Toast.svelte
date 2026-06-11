@@ -9,6 +9,7 @@
   class:bad={toastState.type === 'bad'}
   role="status"
   aria-live="polite"
+  aria-atomic="true"
 >
   {toastState.message}
 </div>

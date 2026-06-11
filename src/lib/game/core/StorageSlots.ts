@@ -6,7 +6,7 @@ import type { SpellData, Component } from '../types';
 import { clampInt } from '../utils/helpers';
 import { calculateSpellStats } from '../designer/StatsCalculator';
 import { canPlaceComponent, dimensionsFor } from '../designer/Components';
-import { loadJSON, saveJSON } from './StorageBase';
+import { saveJSON } from './StorageBase';
 
 const VALID_TYPES = new Set(['red', 'blueGen', 'wire', 'circle', 'oval', 'kernel', 'mixed2', 'mixedCore']);
 

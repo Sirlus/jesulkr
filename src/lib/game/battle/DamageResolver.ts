@@ -1,7 +1,7 @@
 // ============================================================
 // Battle — Damage resolution (resolveCast)
 // ============================================================
-import type { Monster, CastProjectile, VisualEffect, SpellData } from '../types';
+import type { Monster, CastProjectile, VisualEffect } from '../types';
 import { CORE_AOE_TARGET_LIMIT } from '../constants';
 import { getAutoTarget } from './TargetingSystem';
 
