@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { game } from '$lib/stores/game';
-  import * as Storage from '$lib/game/core/Storage';
+  import { gameState } from '$lib/stores/gameState.svelte';
   import { updateMobileLayout } from '$lib/game/utils/mobile';
   import '$lib/game/style.css';
 
@@ -17,6 +17,12 @@
     game.initClient();
     updateMobileLayout();
     game.state = game.hasSavedSpell ? 'ready' : 'design';
+  });
+
+  $effect(() => {
+    const isDesign = gameState.state === 'design';
+    document.body.classList.toggle('mode-design', isDesign);
+    document.body.classList.toggle('mode-play', !isDesign);
   });
 
   function onKeyDown(e: KeyboardEvent) {

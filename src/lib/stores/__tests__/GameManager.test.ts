@@ -262,4 +262,104 @@ describe('GameManager', () => {
       expect(stars).toBeGreaterThanOrEqual(0);
     });
   });
+
+  // ── Phase 4: setBattleSpeed (DOM-free verification) ──
+  describe('setBattleSpeed (Phase 4)', () => {
+    it('sets valid speed values', () => {
+      game.setBattleSpeed(4);
+      expect(game.battle.battleSpeed).toBe(4);
+      game.setBattleSpeed(2);
+      expect(game.battle.battleSpeed).toBe(2);
+      game.setBattleSpeed(8);
+      expect(game.battle.battleSpeed).toBe(8);
+      game.setBattleSpeed(1);
+      expect(game.battle.battleSpeed).toBe(1);
+    });
+
+    it('falls back to 1 for invalid speeds', () => {
+      game.setBattleSpeed(3);
+      expect(game.battle.battleSpeed).toBe(1);
+      game.setBattleSpeed(0);
+      expect(game.battle.battleSpeed).toBe(1);
+      game.setBattleSpeed(999);
+      expect(game.battle.battleSpeed).toBe(1);
+    });
+  });
+
+  // ── Phase 4: stateLabel ──
+  describe('stateLabel', () => {
+    it('returns correct label for each state', () => {
+      game.state = 'ready';
+      expect(game.stateLabel()).toBeTruthy();
+      game.state = 'design';
+      expect(game.stateLabel()).toBeTruthy();
+      game.state = 'battle';
+      expect(game.stateLabel()).toBeTruthy();
+      game.state = 'paused';
+      expect(game.stateLabel()).toBeTruthy();
+      game.state = 'gameover';
+      expect(game.stateLabel()).toBeTruthy();
+    });
+  });
+
+  // ── Phase 4: toggleManaBonus ──
+  describe('toggleManaBonus', () => {
+    it('toggles mana bonus when stars >= 5', () => {
+      // Simulate 5+ stars (need at least 100000 score on map 1 for 3 stars,
+      // map 2 for 2 stars = 5 stars total)
+      game.records.assist['1'] = { score: 100000, time: 200 };
+      game.records.assist['2'] = { score: 70000, time: 150 };
+      const before = game.manaBonusEnabled;
+      game.toggleManaBonus();
+      expect(game.manaBonusEnabled).toBe(!before);
+      // Toggle back
+      game.toggleManaBonus();
+      expect(game.manaBonusEnabled).toBe(before);
+    });
+
+    it('does not toggle when stars < 5', () => {
+      // Clear records — 0 stars
+      game.records.assist['1'] = { score: 0, time: 0 };
+      game.records.assist['2'] = { score: 0, time: 0 };
+      game.records.assist['3'] = { score: 0, time: 0 };
+      const before = game.manaBonusEnabled;
+      game.toggleManaBonus();
+      expect(game.manaBonusEnabled).toBe(before); // unchanged
+    });
+  });
+
+  // ── Phase 4: spellStats ──
+  describe('spellStats', () => {
+    it('returns invalid for empty design', () => {
+      game.designer.components = [];
+      const stats = game.spellStats();
+      expect(stats.valid).toBe(false);
+    });
+
+    it('returns valid for red + circle', () => {
+      game.designer.components = [
+        { id: 1, type: 'red', x: 0, y: 0, w: 1, h: 1, rotation: 0 },
+        { id: 2, type: 'circle', x: 1, y: 0, w: 1, h: 1, rotation: 0 },
+      ];
+      const stats = game.spellStats();
+      expect(stats.valid).toBe(true);
+      expect(stats.damage).toBeGreaterThan(0);
+    });
+  });
+
+  // ── Phase 4: setTool fallback ──
+  describe('setTool (Phase 4)', () => {
+    it('sets unlocked tool', () => {
+      game.setTool('circle');
+      expect(game.designer.tool).toBe('circle');
+    });
+
+    it('falls back to first unlocked tool when locked tool selected', () => {
+      // 'kernel' may be locked depending on records
+      game.setTool('kernel');
+      // Should fall back to a valid tool (red or another unlocked tool)
+      expect(game.designer.tool).toBeTruthy();
+      expect(game.designer.tool).not.toBe('eraser');
+    });
+  });
 });

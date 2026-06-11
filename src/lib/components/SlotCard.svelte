@@ -5,9 +5,8 @@
   import { t } from '$lib/game/i18n';
   import KeyBadge from './KeyBadge.svelte';
 
-  let { index }: { index: number } = $props();
+  let { index, spell = null }: { index: number; spell?: import('$lib/game/types').SpellData | null } = $props();
 
-  const spell = $derived(gameState.slots[index]);
   const cooldown = $derived(gameState.battle.cooldowns[index]);
   const isPureMode = $derived(
     (gameState.state === 'battle' || gameState.state === 'paused')

@@ -43,8 +43,8 @@
   </div>
 
   <div class="slots">
-    {#each gameState.slots as _, i}
-      <SlotCard index={i} />
+    {#each gameState.slots as spell, i}
+      <SlotCard index={i} {spell} />
     {/each}
   </div>
 </aside>
