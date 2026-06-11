@@ -7,6 +7,8 @@ import { showToast } from '$lib/game/ui/Toast';
 import type { GameManager } from '$lib/stores/game';
 import { eraseComponent, getBoardGridCoordFromPointer, placeComponent } from './DesignerController';
 
+const SLOT_COUNT = 5;
+
 export function eventToBinding(e: KeyboardEvent): KeyBinding | null {
   if (!e.code) return null;
   let label = e.key;
@@ -24,7 +26,7 @@ export function eventToBinding(e: KeyboardEvent): KeyBinding | null {
 
 export function findBindingConflict(gm: GameManager, target: KeyTarget, binding: KeyBinding): string | null {
   if (target.type === 'slot') {
-    for (let index = 0; index < 5; index++) {
+    for (let index = 0; index < SLOT_COUNT; index++) {
       if (index === target.index) continue;
       const candidate = gm.keyBindings[index];
       if (candidate && candidate.code === binding.code) return gm.getSlotKeyLabel(index);
@@ -38,7 +40,7 @@ export function findBindingConflict(gm: GameManager, target: KeyTarget, binding:
     }
   }
   if (target.type === 'control') {
-    for (let index = 0; index < 5; index++) {
+    for (let index = 0; index < SLOT_COUNT; index++) {
       const candidate = gm.keyBindings[index];
       if (candidate && candidate.code === binding.code) return gm.getSlotKeyLabel(index);
     }
