@@ -313,7 +313,7 @@
 - [x] CI workflow에 `check`, `test`, `lint` 추가
 
 ### 6-7. 아키텍처 개선
-- [ ] GameManager 책임 분리 (BattleController, DesignerController, SpellManager, InputController) — 규모 큼, 별도 브랜치 권장
+- [x] GameManager 책임 분리 (BattleController, DesignerController, SpellManager, InputController) — GameManager 파사드 유지, 컨트롤러 위임 완료
 - [x] `updateBattleTick` 파라미터 → `BattleTickState` 객체화
 - [x] `vitest.config.ts` → `globals: true` 제거
 - [x] `package-lock.json` 제거 (bun.lock 만 유지)
