@@ -200,3 +200,82 @@
 
 ### 다음 계획
 - Phase 4: UI Components — $state/$effect로 진정한 반응형 전환
+
+---
+
+## 2026-06-11 — Phase 4 최종 정리
+
+> **브랜치**: `refactor/phase-4-prep`
+> **목표**: Phase 4 잔여 부채 청산, dead code 제거, no-op 브릿지 제거, 테스트 보강
+
+### 1차 작업: Dead DOM 모듈 제거
+
+| 파일 | 작업 | 설명 |
+|------|------|------|
+| `src/lib/game/ui/HUD.ts` | **삭제** | `updateHUD()` — Svelte `HUD.svelte`가 대체 |
+| `src/lib/game/ui/SlotPanel.ts` | **삭제** | `renderSlots()` / `updateCooldownBars()` — Svelte `SlotPanel.svelte`가 대체 |
+| `src/lib/stores/game.ts` | **정리** | 메서드 6개 제거: `updateStatsDisplay()`, `refreshHUD()`, `refreshCooldowns()`, `refreshAll()`, `refreshSlots()`, `updateStartBtn()` |
+| `src/lib/stores/game.ts` | **정리** | `setBattleSpeed()` 내 `document.querySelectorAll('.speedBtn')` DOM 조작 제거 |
+| `src/lib/stores/DesignerRenderer.ts` | **수정** | `gm.updateStatsDisplay()` 호출 제거 |
+
+### 2차 작업: P0 버그 수정 + 테스트 보강 + $state 정리
+
+| 파일 | 작업 | 설명 |
+|------|------|------|
+| `+page.svelte` | **P0 fix** | `$effect`로 `mode-design` / `mode-play` body 클래스 전환 추가 (CSS 숨김/표시 복원) |
+| `SlotCard.svelte` | **개선** | `$derived(gameState.slots[index])` → `spell` prop 직접 수신 |
+| `SlotPanel.svelte` | **개선** | `{#each gameState.slots as _, i}` → 명시적 `spell` prop 전달 |
+| `test/+page.svelte` | **수정** | `log`, `pass`, `fail`, `running` → `$state()` (4 warnings → 0) |
+| `GameManager.test.ts` | **보강** | +9 tests: `setBattleSpeed` (valid/invalid), `stateLabel`, `toggleManaBonus` (toggle + block), `spellStats`, `setTool` fallback |
+
+### 3차 작업: gameRx no-op 브릿지 완전 제거
+
+| 파일 | 작업 | 설명 |
+|------|------|------|
+| `game.svelte.ts` | **삭제** | 완전한 no-op 브릿지, Svelte `$state`가 이미 반응형 처리 |
+| `game.ts` | **정리** | `gameRx.syncFull(this)` 10곳 제거, `gameRx` import 제거 |
+| `GameLoop.ts` | **정리** | `gameRx.syncPartial(gm)` 제거, import 제거 |
+| `SpellManager.ts` | **정리** | `gameRx.syncFull(gm)` 2곳 제거, import + 주석 제거 |
+| `DesignerRenderer.ts` | **정리** | `gameRx.syncFull(gm)` 2곳 제거, import 제거 |
+| `game.ts` | **정리** | 미사용 import: `requiredMapForTool`, `getLockedToolNamesFromComponents` 제거 |
+
+### 검증 결과
+
+| 항목 | 결과 |
+|------|------|
+| `svelte-check` | 0 errors, 0 warnings |
+| `npm run build` | ✅ 성공 |
+| `npx vitest run` | 65/65 passed (5 files) |
+| `gameRx` references | 0 (완전 제거) |
+| 남은 DOM 조작 (`src/`) | `DesignerRenderer.ts` (테스트 전용), `game.ts` `placeComponent` (getBoundingClientRect), `mobile.ts` (classList.toggle) |
+
+### Phase 4 최종 성적
+
+| 지표 | 시작 | 종료 |
+|------|------|------|
+| `+page.svelte` | ~195줄 | 59줄 |
+| `game.ts` | 449줄 | ~375줄 |
+| Svelte 컴포넌트 | 0개 | 11개 |
+| `ui/` 모듈 | 3개 | 1개 (`Toast.ts`) |
+| `gameRx` 호출 | 15곳 | 0곳 |
+| `game.svelte.ts` | 존재 | 삭제 |
+| `innerHTML` (src/) | 10+ | 1곳 (테스트 전용) |
+| svelte-check | - | 0 errors, 0 warnings |
+| tests | 56 | 65 (+9) |
+
+### Phase 5 진입 준비
+
+Phase 4 잔여 항목 (Phase 5~6으로 이관):
+- `DesignerRenderer.ts` → `renderDesigner()` 제거 (테스트를 선언적 렌더링으로 전환 필요)
+- `game.ts` `placeComponent()` → `document.getElementById('designBoard')` 제거 (Svelte ref 활용)
+- `mobile.ts` → `classList.toggle` → `$effect`로 이동
+- GameManager God Object 분리 (BattleController / DesignerController)
+- Phase 5 features: MapSelectModal, KeySettingsModal, DeckControls
+
+### 커밋
+
+| 커밋 | 내용 |
+|------|------|
+| `6a0f78b` | Phase 4 cleanup: dead code 제거 |
+| `c070f9a` | Phase 4 final: P0 fix + test 보강 + $state cleanup |
+| `8cd296c` | Phase 4: gameRx no-op bridge 제거 |
