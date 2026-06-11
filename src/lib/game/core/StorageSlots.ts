@@ -6,9 +6,10 @@ import type { SpellData, Component } from '../types';
 import { clampInt } from '../utils/helpers';
 import { calculateSpellStats } from '../designer/StatsCalculator';
 import { canPlaceComponent, dimensionsFor } from '../designer/Components';
+import { STORABLE_TYPES } from '../designer/components/registry';
 import { saveJSON } from './StorageBase';
 
-const VALID_TYPES = new Set(['red', 'blueGen', 'wire', 'circle', 'oval', 'kernel', 'mixed2', 'mixedCore']);
+const VALID_TYPES = STORABLE_TYPES;
 
 function normalizeType(type: string): string {
   return type === 'mana' ? 'red' : type;

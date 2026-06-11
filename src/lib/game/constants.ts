@@ -2,6 +2,7 @@
 // Jesulkr v1.3 — Constants & Configuration
 // ============================================================
 import type { MapDef, ControlAction, ToolDescriptor, ComponentType } from './types';
+import { ALL_DEFS, ORDERED_TYPES, getDef } from './designer/components/registry';
 
 // ── Storage Keys ──────────────────────────────────────────────
 export const STORAGE_KEY_SLOTS = 'magic_design_game_slots_v2';
@@ -82,57 +83,12 @@ export const MAPS: (MapDef | null)[] = [
 ];
 
 // ── Tools ─────────────────────────────────────────────────────
-export const TOOL_DESCRIPTIONS: Record<string, ToolDescriptor> = {
-  red: {
-    name: '빨간 점 마나',
-    text: '기본 마나 소스입니다. 배치 1개당 마나 비용 +1. 기존 빨간 회로와 혼합 회로가 읽을 수 있습니다.',
-    formula: '비용 +1',
-  },
-  blueGen: {
-    name: '파란 마나 생성기',
-    text: '빨간 마나와 직접 인접하거나 도선으로 연결되어야 작동합니다. 작동하면 추가 마나 2를 쓰고 파란 마나 1개를 제공합니다.',
-    formula: '연결 빨간 마나 ≥ 1 → 파란 마나 1개, 비용 +2',
-  },
-  wire: {
-    name: '도선',
-    text: '맵 2에서 해금됩니다. 마나를 먼 회로에 연결합니다. 같은 도선망에 연결된 마나는 회로에 인접한 마나처럼 계산됩니다. 자체 비용과 일반 데미지는 없습니다.',
-    formula: '연결 전달',
-  },
-  circle: {
-    name: '1칸 회로',
-    text: '연결된 빨간 마나를 일반 데미지로 바꿉니다. 일반 데미지가 1 이상 나오는 작동 중 상태일 때만 9칸 혼합 핵의 조건 부품으로 인정됩니다.',
-    formula: '연결 빨간 마나 수 × 1',
-  },
-  oval: {
-    name: '2칸 타원',
-    text: '기존 빨간 2칸 회로입니다. 연결된 빨간 마나 2개 묶음마다 일반 데미지 5를 냅니다.',
-    formula: 'floor(빨간 마나 / 2) × 5',
-  },
-  kernel: {
-    name: '2x2 핵',
-    text: '기존 빨간 2x2 핵입니다. 연결된 빨간 마나 3개 묶음마다 일반 데미지 12를 냅니다.',
-    formula: 'floor(빨간 마나 / 3) × 12',
-  },
-  mixed2: {
-    name: '2칸 혼합 회로',
-    text: '빨간 마나와 파란 마나를 한 쌍으로 묶어 고효율 일반 데미지를 냅니다.',
-    formula: 'min(빨간 마나, 파란 마나) × 8',
-  },
-  mixedCore: {
-    name: '9칸 혼합 핵',
-    text: '3x3 고위 회로입니다. 빨간 마나 1개, 파란 마나 2개, 작동 중인 1칸 회로 1개가 한 묶음입니다. 묶음마다 일반 데미지 60과 특수 데미지 분산 3을 줍니다. 분산은 기지에 가까운 적 최대 3개에게 각각 피해를 주는 방식입니다.',
-    formula: 'min(빨강 마나, floor(파란 마나 / 2), 인접 활성 1칸 회로 수) × (일반 60 + 분산 3)',
-  },
-  eraser: {
-    name: '지우개',
-    text: '클릭하거나 드래그한 칸의 부품을 제거합니다. 지우개가 아니어도 설계판에서 우클릭하면 즉시 삭제됩니다.',
-    formula: '제거',
-  },
-};
+// 부품 정의는 designer/components/ 의 레지스트리에서 파생됩니다.
+export const TOOL_DESCRIPTIONS: Record<string, ToolDescriptor> = Object.fromEntries(
+  ALL_DEFS.map(d => [d.type, { name: d.name, text: d.text, formula: d.formula }]),
+);
 
-export const TOOL_ORDER: ComponentType[] = [
-  'red', 'blueGen', 'wire', 'circle', 'oval', 'kernel', 'mixed2', 'mixedCore', 'eraser',
-];
+export const TOOL_ORDER: ComponentType[] = ORDERED_TYPES as ComponentType[];
 
 // ── Control Actions ───────────────────────────────────────────
 export const CONTROL_ACTIONS: ControlAction[] = [
@@ -148,7 +104,5 @@ export const CONTROL_ACTIONS: ControlAction[] = [
 
 // ── Tool unlock map requirements ──────────────────────────────
 export function requiredMapForTool(tool: string): number {
-  if (tool === 'blueGen' || tool === 'wire' || tool === 'mixed2') return 2;
-  if (tool === 'mixedCore') return 3;
-  return 1;
+  return getDef(tool)?.requiredMap ?? 1;
 }

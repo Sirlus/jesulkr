@@ -2,15 +2,19 @@
 // Designer — Component placement, collision, dimensions
 // ============================================================
 import type { Component, ComponentType } from '../types';
+import { getDef } from './components/registry';
 
 export function dimensionsFor(type: string, rotation: number): { w: number; h: number; rotation: number } {
-  if (type === 'oval' || type === 'mixed2') {
+  const size = getDef(type)?.size;
+  if (!size) return { w: 1, h: 1, rotation: 0 };
+  if (size.rotatable) {
     const r = rotation === 1 ? 1 : 0;
-    return r ? { w: 1, h: 2, rotation: 1 } : { w: 2, h: 1, rotation: 0 };
+    // 회전 시 가로/세로를 교환합니다
+    return r
+      ? { w: Math.min(size.w, size.h), h: Math.max(size.w, size.h), rotation: 1 }
+      : { w: Math.max(size.w, size.h), h: Math.min(size.w, size.h), rotation: 0 };
   }
-  if (type === 'kernel') return { w: 2, h: 2, rotation: 0 };
-  if (type === 'mixedCore') return { w: 3, h: 3, rotation: 0 };
-  return { w: 1, h: 1, rotation: 0 };
+  return { w: size.w, h: size.h, rotation: 0 };
 }
 
 export function componentsOverlap(a: Component, b: Component): boolean {

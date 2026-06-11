@@ -5,6 +5,7 @@ import type { Records, BattleState, GameState, Component } from '../types';
 import { getMapProgressScore, getMapStars } from '../core/StorageRecords';
 import { isMapUnlocked } from '../core/StorageUnlocks';
 import { MANA_BONUS_STAR_COUNT } from '../constants';
+import { getDef } from '../designer/components/registry';
 
 export function getTotalStars(
   records: Records,
@@ -39,9 +40,7 @@ export function canUseManaBonus(
  * - 맵 3: mixedCore
  */
 export function requiredMapForTool(tool: string): number {
-  if (tool === 'blueGen' || tool === 'wire' || tool === 'mixed2') return 2;
-  if (tool === 'mixedCore') return 3;
-  return 1;
+  return getDef(tool)?.requiredMap ?? 1;
 }
 
 /** 현재 해금 상태를 기준으로 도구가 사용 가능한지 확인합니다 */

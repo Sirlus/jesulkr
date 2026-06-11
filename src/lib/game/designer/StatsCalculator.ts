@@ -4,6 +4,7 @@
 import type { Component, SpellStats } from '../types';
 import { buildConnectionGraph, getConnectedComponents, getDirectNeighborComponents } from './WireNetwork';
 import { CORE_AOE_TARGET_LIMIT } from '../constants';
+import { getDef, CIRCUIT_TYPES } from './components/registry';
 
 export interface SpellModel {
   width: number;
@@ -42,9 +43,7 @@ export function calculateSpellStats(model: SpellModel): SpellStats {
   let damage = 0;
   let aoeDamage = 0;
 
-  const circuits = components.filter(c =>
-    ['circle', 'oval', 'kernel', 'mixed2', 'mixedCore'].includes(c.type),
-  );
+  const circuits = components.filter(c => CIRCUIT_TYPES.has(c.type));
 
   for (const c of circuits) {
     const red = getConnectedComponents(c, components, graph, x => x.type === 'red').length;
@@ -52,44 +51,22 @@ export function calculateSpellStats(model: SpellModel): SpellStats {
       x.type === 'blueGen' && activeBlueIds.has(x.id),
     ).length;
 
-    let d = 0;
-    let label = '';
-    let detail = '';
+    const def = getDef(c.type);
+    const result = def?.calc?.({
+      red,
+      blue,
+      component: c,
+      components,
+      neighbors: getDirectNeighborComponents(c, components),
+      connectedTo: (target, predicate) =>
+        getConnectedComponents(target, components, graph, predicate).length,
+      isActiveBlue: id => activeBlueIds.has(id),
+    });
 
-    if (c.type === 'circle') {
-      d = red;
-      label = '1칸 회로';
-      detail = `빨간 ${red}개 × 1`;
-    } else if (c.type === 'oval') {
-      const groups = Math.floor(red / 2);
-      d = groups * 5;
-      label = '2칸 타원';
-      detail = `floor(빨간 ${red} / 2) = ${groups}묶음 × 5`;
-    } else if (c.type === 'kernel') {
-      const groups = Math.floor(red / 3);
-      d = groups * 12;
-      label = '2x2 핵';
-      detail = `floor(빨간 ${red} / 3) = ${groups}묶음 × 12`;
-    } else if (c.type === 'mixed2') {
-      const pairs = Math.min(red, blue);
-      d = pairs * 8;
-      label = '2칸 혼합 회로';
-      detail = `min(빨간 ${red}, 파란 ${blue}) = ${pairs}쌍 × 8`;
-    } else if (c.type === 'mixedCore') {
-      const neighborCircles = getDirectNeighborComponents(c, components).filter(x => x.type === 'circle');
-      const activeCircleCount = neighborCircles.filter(x =>
-        getConnectedComponents(x, components, graph, y => y.type === 'red').length >= 1,
-      ).length;
-      const inactiveCircleCount = neighborCircles.length - activeCircleCount;
-      const bluePairs = Math.floor(blue / 2);
-      const groups = Math.min(red, bluePairs, activeCircleCount);
-      d = groups * 60;
-      if (groups > 0) aoeDamage += groups * 3;
-      label = '9칸 혼합 핵';
-      detail = `min(빨강 ${red}, floor(파란 ${blue} / 2) = ${bluePairs}, 인접 활성 1칸 회로 ${activeCircleCount}) = ${groups}묶음 × (일반 60 + 분산 3)`;
-      if (groups > 0) detail += ` / 일반 ${d}, 특수 분산 ${groups * 3}`;
-      if (inactiveCircleCount > 0) detail += ` / 비활성 1칸 회로 ${inactiveCircleCount}개 제외`;
-    }
+    const d = result?.damage ?? 0;
+    const label = def?.name ?? c.type;
+    const detail = result?.detail ?? '';
+    if (result?.aoe) aoeDamage += result.aoe;
 
     damage += d;
     breakdown.push(`${label} ${c.id}: ${detail} → ${d}`);
