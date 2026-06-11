@@ -484,7 +484,7 @@ Phase 5 잔여 항목 (Phase 6으로 이관):
 
 ### 미완료/이관 항목
 
-- [ ] GameManager 책임 분리 (BattleController, DesignerController 등) — **규모가 크고 안정성 리스크가 있어 Phase 6에서 제외, 향후 별도 브랜치로 진행 권장**
+- [x] GameManager 책임 분리 (BattleController, DesignerController, InputController, StorageController) — `game.ts`는 파사드만 유지하고 책임을 컨트롤러로 위임
 - [ ] WCAG AA 색상 대비 수동 검증 — 코드 변경 없이 수동 체크만 남음
 - [ ] `devicePixelRatio` 대응 — 현재 Canvas 렌더링 품질로 충분
 
