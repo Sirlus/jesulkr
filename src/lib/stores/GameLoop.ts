@@ -2,7 +2,6 @@
 // GameLoop — requestAnimationFrame 기반 게임 루프
 // ============================================================
 import type { GameManager } from './game';
-import { gameRx } from './game.svelte';
 import { updateBattleTick, type BattleContext } from '$lib/game/battle/BattleEngine';
 import { TICK_SEC } from '$lib/game/constants';
 import { t } from '$lib/game/i18n';
@@ -70,7 +69,6 @@ export function startLoop(gm: GameManager) {
         t('pause'),
       );
     }
-    gameRx.syncPartial(gm);
     gm.animId = requestAnimationFrame(loop);
   };
   gm.animId = requestAnimationFrame(loop);

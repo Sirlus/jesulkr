@@ -8,7 +8,6 @@ import { MAX_SPELL_NAME_LENGTH } from '$lib/game/constants';
 import { t } from '$lib/game/i18n';
 import { clone } from '$lib/game/utils/helpers';
 import { showToast } from '$lib/game/ui/Toast';
-import { gameRx } from './game.svelte';
 
 /** 현재 설계를 지정한 슬롯에 저장합니다 */
 export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
@@ -30,7 +29,6 @@ export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
   };
   gm.store.slots[slotIndex] = spell;
   Storage.saveSlots(gm.slots);
-  gameRx.syncFull(gm);
   showToast(t('slot.saved', slotIndex + 1), 'good');
 }
 
@@ -45,7 +43,6 @@ export function loadSpell(gm: GameManager, slotIndex: number) {
   gm.designer.spellName = spell.name;
   if (gm.state !== 'design') gm.store.returnStateAfterDesign = gm.state;
   gm.state = 'design';
-  // gameRx.sync will render designer (called from onStateChange)
   showToast(t('slot.loaded', slotIndex + 1), 'good');
 }
 
@@ -54,5 +51,4 @@ export function clearDesign(gm: GameManager) {
   gm.designer.components = [];
   gm.designer.nextId = 1;
   gm.designer.spellName = '';
-  gameRx.syncFull(gm);
 }

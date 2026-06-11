@@ -10,18 +10,12 @@ import { getCurrentTarget, pickMonsterAt } from '$lib/game/battle/TargetingSyste
 import { clone } from '$lib/game/utils/helpers';
 import { calculateSpellStats } from '$lib/game/designer/StatsCalculator';
 import { createComponentFromGridCoord, canPlaceComponent } from '$lib/game/designer/Components';
-import {
-  requiredMapForTool,
-  isToolUnlocked,
-  getLockedToolNamesFromComponents,
-} from '$lib/game/utils/progression';
+import { isToolUnlocked } from '$lib/game/utils/progression';
 import type { GameState } from '$lib/game/types';
 import { showToast } from '$lib/game/ui/Toast';
 import { renderDesigner, eraseComponent } from './DesignerRenderer';
 import { saveSpell, loadSpell, clearDesign } from './SpellManager';
 import { startLoop } from './GameLoop';
-import { gameRx } from './game.svelte';
-
 /** 게임의 중앙 제어 싱글톤. 모든 상태 변경과 상호작용의 진입점 */
 export class GameManager {
   store = gameState;
@@ -83,12 +77,11 @@ export class GameManager {
     } else {
       this.designer.tool = tool;
     }
-    gameRx.syncFull(this);
   }
   /** 회전 가능한 도구(oval, mixed2)의 방향을 토글합니다 */
-  rotateTool() { this.designer.rotation = this.designer.rotation === 0 ? 1 : 0; gameRx.syncFull(this); }
+  rotateTool() { this.designer.rotation = this.designer.rotation === 0 ? 1 : 0;; }
   /** 설계판 크기를 변경하고 설계판 밖 부품을 제거합니다 */
-  setFrame(w: number, h: number) { this.designer.width = w; this.designer.height = h; this.trimComponents(); gameRx.syncFull(this); }
+  setFrame(w: number, h: number) { this.designer.width = w; this.designer.height = h; this.trimComponents();; }
 
   /** 마우스 위치에 현재 선택한 도구를 배치합니다. 성공 여부를 반환합니다 */
   placeComponent(e: MouseEvent): boolean {
@@ -103,7 +96,6 @@ export class GameManager {
     if (canPlaceComponent(comp, this.designer.components, this.designer.width, this.designer.height)) {
       this.designer.components.push(comp);
       this.designer.nextId++;
-      gameRx.syncFull(this);
       return true;
     }
     return false;
@@ -247,7 +239,6 @@ export class GameManager {
     setLanguage(lang);
     document.documentElement.lang = lang;
     Storage.saveLanguage(lang);
-    gameRx.syncFull(this);
   }
 
   /** 전투를 일시정지하거나 재개합니다 */
@@ -300,7 +291,6 @@ export class GameManager {
     Storage.clearAllStorage();
     this.store.loadFromStorage();
     this.state = 'design';
-    gameRx.syncFull(this);
     showToast(t('data.cleared'), 'good');
   }
 
@@ -315,7 +305,6 @@ export class GameManager {
     this.store.manaBonusEnabled = !this.store.manaBonusEnabled;
     Storage.saveManaBonusEnabled(this.store.manaBonusEnabled);
     showToast(t('mana.bonus.toggled', this.store.manaBonusEnabled ? 'ON' : 'OFF'), this.store.manaBonusEnabled ? 'good' : 'bad');
-    gameRx.syncFull(this);
   }
 
   /** 설계 미리보기 좌표를 설정합니다 (placement ghost 용) */
@@ -348,7 +337,6 @@ export class GameManager {
     }
     Storage.saveUnlocks(this.store.unlocks);
     Storage.saveRecords(this.store.records);
-    gameRx.syncFull(this);
     showToast(t('test.mode.unlocked'), 'good');
     return true;
   }
@@ -372,7 +360,6 @@ export class GameManager {
     }
     this.store.slots = deck.map(spell => spell ? Storage.normalizeSpell(spell) : null);
     Storage.saveSlots(this.store.slots);
-    gameRx.syncFull(this);
     const name = this.store.deckNames[index] || `덱 ${index + 1}`;
     showToast(t('deck.loaded', name), 'good');
   }
