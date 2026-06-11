@@ -23,7 +23,8 @@
   onMount(() => {
     game.initClient();
     updateMobileLayout();
-    game.state = game.hasSavedSpell ? 'ready' : 'design';
+    const hasSavedSpell = game.hasSavedSpell;
+    game.state = hasSavedSpell ? 'ready' : 'design';
   });
 
   $effect(() => {

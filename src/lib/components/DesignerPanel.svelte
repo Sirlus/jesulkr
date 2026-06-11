@@ -3,14 +3,23 @@
   import { game } from '$lib/stores/game';
   import { t } from '$lib/game/i18n';
   import { TOOL_ORDER, TOOL_DESCRIPTIONS, CELL, GAP } from '$lib/game/constants';
+  import { applyMobileDesignerScale } from '$lib/game/utils/mobile';
   import StatCard from './StatCard.svelte';
   import PlacementGhost from './PlacementGhost.svelte';
 
   let selectedSlot = $state(0);
+  let boardEl = $state<HTMLElement | null>(null);
 
   const stats = $derived(game.spellStats());
   const boardWidth = $derived(gameState.designer.width * (CELL + GAP) - GAP);
   const boardHeight = $derived(gameState.designer.height * (CELL + GAP) - GAP);
+
+  $effect(() => {
+    if (!boardEl) return;
+    boardWidth;
+    boardHeight;
+    applyMobileDesignerScale(boardEl, gameState.designer.width, gameState.designer.height);
+  });
 
   function onBoardMouseDown(e: MouseEvent) {
     game.onDesignBoardMouseDown(e);
@@ -30,6 +39,7 @@
   }
 
   function onBoardMouseLeave() {
+    game.endDrag();
     game.clearDesignerPreview();
   }
 
@@ -48,6 +58,7 @@
   function onBoardTouchMove(e: TouchEvent) {
     if (e.touches.length !== 1) return;
     const t = e.touches[0];
+    e.preventDefault();
     onBoardMouseMove({ clientX: t.clientX, clientY: t.clientY } as MouseEvent);
   }
 
@@ -128,6 +139,7 @@
       <div class="boardWrap">
         <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
         <div
+          bind:this={boardEl}
           id="designBoard"
           class="designBoard"
           role="application"

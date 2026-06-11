@@ -369,3 +369,34 @@ Phase 5 잔여 항목 (Phase 6으로 이관):
 | 커밋 | 내용 |
 |------|------|
 | `5216113` | Phase 5: Features — 13 files, +888줄 |
+
+---
+
+## 2026-06-11 — Phase 5 Final Cleanup (pre-Phase 6)
+
+### 오늘 목표
+- [x] Phase 5 잔여 안정성 이슈 정리 후 Phase 6 진입 가능 상태 확정
+
+### 완료한 것
+- `DesignerPanel.svelte`
+  - 모바일 보드 스케일링 연동: `applyMobileDesignerScale()` 호출 `$effect` 추가
+  - `designBoard`에 `bind:this={boardEl}` 연결
+  - 마우스가 보드를 벗어날 때 `game.endDrag()` 호출하도록 수정
+  - `touchmove`에서 `e.preventDefault()` 추가 (모바일 스크롤 간섭 방지)
+- `+page.svelte`
+  - 초기 상태 결정 로직 명확화: `hasSavedSpell` 값을 지역 상수로 분리 후 `game.state` 설정
+
+### 검증
+
+| 항목 | 결과 |
+|------|------|
+| `bun run check` | 0 errors, 0 warnings |
+| `bun run test` | 65/65 passed |
+| `bun run build` | ✅ 성공 |
+
+### 참고
+- 브라우저 자동 스모크 테스트는 Playwright Chromium 바이너리 미설치로 실행 불가.
+  - 설치 명령: `npx playwright install`
+
+### 커밋(예정)
+- `fix: finalize phase-5 interaction hardening before phase 6`
