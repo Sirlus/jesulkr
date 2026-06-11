@@ -41,10 +41,11 @@ export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
 export function loadSpell(gm: GameManager, slotIndex: number) {
   const spell = gm.slots[slotIndex];
   if (!spell) { showToast(t('no.spell'), 'bad'); return; }
+  const nextComponents = clone(spell.components);
   gm.designer.width = spell.width;
   gm.designer.height = spell.height;
-  gm.designer.components = clone(spell.components);
-  gm.designer.nextId = 1 + gm.designer.components.reduce((m, c) => Math.max(m, Number(c.id) || 0), 0);
+  gm.designer.components = nextComponents;
+  gm.designer.nextId = 1 + nextComponents.reduce((m, c) => Math.max(m, Number(c.id) || 0), 0);
   gm.designer.spellName = spell.name;
   if (gm.state !== 'design') gm.store.returnStateAfterDesign = gm.state;
   gm.state = 'design';

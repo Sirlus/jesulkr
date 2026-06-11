@@ -21,7 +21,7 @@
     applyMobileDesignerScale(boardEl, gameState.designer.width, gameState.designer.height);
   });
 
-  function onBoardMouseDown(e: MouseEvent) {
+function onBoardMouseDown(e: MouseEvent) {
     game.onDesignBoardMouseDown(e);
   }
 
