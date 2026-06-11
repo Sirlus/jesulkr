@@ -2,7 +2,7 @@
 // Storage — Decks
 // ============================================================
 import type { SpellData } from '../types';
-import { loadJSON, saveJSON } from './StorageBase';
+import { saveJSON } from './StorageBase';
 import { normalizeSpell } from './StorageSlots';
 import * as C from '../constants';
 

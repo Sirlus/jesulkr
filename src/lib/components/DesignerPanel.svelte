@@ -120,6 +120,7 @@
             data-tool={tool}
             disabled={!unlocked}
             title={unlocked ? info.name : `${info.name} - ${t('locked.tool')}`}
+            aria-label={info.name}
             onclick={() => { game.setTool(tool); }}
           >
             <span class="toolIconSvg"><span class="toolIcon {tool}"></span></span>

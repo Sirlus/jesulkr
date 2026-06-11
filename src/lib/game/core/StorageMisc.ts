@@ -1,7 +1,7 @@
 // ============================================================
 // Storage — Misc settings (auto modes, language, etc.)
 // ============================================================
-import { loadJSON, saveJSON } from './StorageBase';
+import { saveJSON } from './StorageBase';
 import * as C from '../constants';
 
 export function defaultSlotAutoModes(): boolean[] {

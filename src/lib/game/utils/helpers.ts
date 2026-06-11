@@ -2,8 +2,11 @@
 // Utility helpers
 // ============================================================
 
-/** Deep clone via JSON */
+/** Deep clone via structuredClone with JSON fallback */
 export function clone<T>(obj: T): T {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(obj);
+  }
   return JSON.parse(JSON.stringify(obj));
 }
 

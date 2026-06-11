@@ -3,7 +3,7 @@
 // ============================================================
 import type { Records, MapRecord } from '../types';
 import { clone } from '../utils/helpers';
-import { loadJSON, saveJSON } from './StorageBase';
+import { saveJSON } from './StorageBase';
 import * as C from '../constants';
 
 function emptyRecord(): MapRecord {

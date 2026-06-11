@@ -2,7 +2,7 @@
 // Battle — Casting system (cast, cooldown, auto-cast)
 // ============================================================
 import type { SpellData, CastProjectile, Monster, GameState } from '../types';
-import { HIT_DELAY_TICKS, MAX_MANA } from '../constants';
+import { HIT_DELAY_TICKS } from '../constants';
 import { clone } from '../utils/helpers';
 import { getCurrentTarget } from './TargetingSystem';
 import { isMapUnlocked } from '../core/StorageUnlocks';
@@ -37,7 +37,7 @@ export function tryCastSlot(
   records: import('../types').Records,
   autoManaReserve: number,
   auto: boolean,
-  silent: boolean,
+  _silent: boolean,
 ): { result: CastResult; newMana?: number; projectile?: CastProjectile } {
   if (!spell) {
     return { result: { success: false, message: '이 슬롯에는 술식이 없습니다.' } };

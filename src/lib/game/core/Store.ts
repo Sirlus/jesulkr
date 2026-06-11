@@ -2,12 +2,12 @@
 // Central Store — state container with change notifications
 // ============================================================
 import type {
-  GameState, RunMode, Language, Monster, CastProjectile, VisualEffect,
+  GameState, Language, Monster, CastProjectile, VisualEffect,
   SpellData, KeyBinding, Records, MapDef, Component, KeyTarget,
 } from '../types';
 import { MAPS, MAX_MANA, BASE_MANA_REGEN, STAR_MANA_REGEN, MANA_BONUS_STAR_COUNT, SPAWN_TIMER_DEFAULT } from '../constants';
 import * as Storage from './Storage';
-import { getMapProgressScore, getMapStars, getMapRecord, setMapRecord } from './StorageRecords';
+import { getMapProgressScore, getMapStars } from './StorageRecords';
 import { isMapUnlocked, getFirstUnlockedMap } from './StorageUnlocks';
 import { getTotalStars } from '../utils/progression';
 import { defaultUnlocks, defaultSlotAutoModes } from '../utils/helpers';

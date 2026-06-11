@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { gameState } from '$lib/stores/gameState.svelte';
   import { game } from '$lib/stores/game';
   import { t } from '$lib/game/i18n';
   import { CONTROL_ACTIONS } from '$lib/game/constants';

@@ -1,10 +1,8 @@
 // ============================================================
 // Battle — Game engine (tick update, spawn)
 // ============================================================
-import type { Monster, CastProjectile, VisualEffect, GameState, MapDef, SpellData, Records } from '../types';
+import type { Monster, CastProjectile, VisualEffect, MapDef, SpellData, Records } from '../types';
 import { TICK_SEC, LANES, MAX_MANA } from '../constants';
-import { tryCastSlot } from './CastingSystem';
-import { resolveCast } from './DamageResolver';
 import { getAutoTarget } from './TargetingSystem';
 
 export interface BattleContext {
@@ -63,7 +61,7 @@ export function updateBattleTick(
 ): TickResult {
   let m = [...state.monsters];
   let e = [...state.effects];
-  let cds = [...state.cooldowns];
+  const cds = [...state.cooldowns];
   let sid = state.selectedTargetId;
   let mId = state.nextMonsterId;
   let cId = state.nextCastId;
@@ -76,7 +74,7 @@ export function updateBattleTick(
   let nextSurvival = state.survival;
   let killedAny = false;
   let bossSpawned = false;
-  let casts2 = [...state.casts];
+  const casts2 = [...state.casts];
 
   // 1. Mana regen
   nextMana = Math.min(MAX_MANA, nextMana + regen * TICK_SEC);

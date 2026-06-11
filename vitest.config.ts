@@ -14,7 +14,6 @@ export default mergeConfig(
 			include: ['src/**/*.{test,spec}.{js,ts}'],
 			exclude: ['src/**/*.svelte.test.{js,ts}', 'node_modules/**'],
 			environment: 'node',
-			globals: true,
 		},
 	})
 );

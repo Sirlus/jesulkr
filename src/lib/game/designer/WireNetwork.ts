@@ -2,7 +2,7 @@
 // Designer — Wire connection network (buildConnectionGraph)
 // ============================================================
 import type { Component, ConnectionGraph, WireGroup } from '../types';
-import { componentAt, componentsOverlap } from './Components';
+import { componentAt } from './Components';
 
 /** Get neighboring cell coordinates (4-dir) */
 export function neighborCells(x: number, y: number): [number, number][] {
