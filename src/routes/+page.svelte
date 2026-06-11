@@ -12,6 +12,13 @@
   import SlotPanel from '$lib/components/SlotPanel.svelte';
   import DesignerPanel from '$lib/components/DesignerPanel.svelte';
   import Toast from '$lib/components/Toast.svelte';
+  import MapSelectModal from '$lib/components/MapSelectModal.svelte';
+  import DeckControls from '$lib/components/DeckControls.svelte';
+  import KeySettingsModal from '$lib/components/KeySettingsModal.svelte';
+
+  let mapModal: { open: () => void; close: () => void };
+  let keyModal: { open: () => void; close: () => void };
+  let showDeck = $state(false);
 
   onMount(() => {
     game.initClient();
@@ -43,10 +50,18 @@
   <title>Jesulkr</title>
 </svelte:head>
 
-<svelte:window onkeydown={onKeyDown} />
+<svelte:window
+  onkeydown={onKeyDown}
+  onresize={() => updateMobileLayout()}
+  onorientationchange={() => updateMobileLayout()}
+/>
 
 <LanguageModal />
-<MainMenu />
+<MainMenu
+  onOpenKeySettings={() => keyModal?.open()}
+  onOpenMapSelect={() => mapModal?.open()}
+  onToggleDeck={() => showDeck = !showDeck}
+/>
 <HUD />
 
 <div class="layout">
@@ -55,4 +70,9 @@
 </div>
 
 <DesignerPanel />
+<MapSelectModal bind:this={mapModal} />
+{#if showDeck}
+  <DeckControls />
+{/if}
+<KeySettingsModal bind:this={keyModal} />
 <Toast />

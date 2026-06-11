@@ -4,6 +4,7 @@
   import { t } from '$lib/game/i18n';
   import { TOOL_ORDER, TOOL_DESCRIPTIONS, CELL, GAP } from '$lib/game/constants';
   import StatCard from './StatCard.svelte';
+  import PlacementGhost from './PlacementGhost.svelte';
 
   let selectedSlot = $state(0);
 
@@ -12,17 +13,46 @@
   const boardHeight = $derived(gameState.designer.height * (CELL + GAP) - GAP);
 
   function onBoardMouseDown(e: MouseEvent) {
-    if (e.button === 2) {
-      e.preventDefault();
-      game.eraseComponent(e);
-    } else if (e.button === 0) {
-      game.placeComponent(e);
+    game.onDesignBoardMouseDown(e);
+  }
+
+  function onBoardMouseMove(e: MouseEvent) {
+    game.onDesignBoardMouseMove(e);
+    const coord = game.getBoardGridCoordFromPointer(e);
+    if (coord) {
+      game.setDesignerPreview(Math.floor(coord.gx), Math.floor(coord.gy));
     }
+  }
+
+  function onBoardMouseUp() {
+    game.endDrag();
+    game.clearDesignerPreview();
+  }
+
+  function onBoardMouseLeave() {
+    game.clearDesignerPreview();
   }
 
   function onBoardWheel(e: WheelEvent) {
     e.preventDefault();
     game.rotateTool();
+  }
+
+  function onBoardTouchStart(e: TouchEvent) {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    e.preventDefault();
+    game.onDesignBoardMouseDown({ clientX: t.clientX, clientY: t.clientY, button: 0, preventDefault: () => {} } as MouseEvent);
+  }
+
+  function onBoardTouchMove(e: TouchEvent) {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    onBoardMouseMove({ clientX: t.clientX, clientY: t.clientY } as MouseEvent);
+  }
+
+  function onBoardTouchEnd() {
+    onBoardMouseUp();
   }
 </script>
 
@@ -105,6 +135,12 @@
           style:width="{boardWidth}px"
           style:height="{boardHeight}px"
           onmousedown={onBoardMouseDown}
+          onmousemove={onBoardMouseMove}
+          onmouseup={onBoardMouseUp}
+          onmouseleave={onBoardMouseLeave}
+          ontouchstart={onBoardTouchStart}
+          ontouchmove={onBoardTouchMove}
+          ontouchend={onBoardTouchEnd}
           onwheel={onBoardWheel}
           oncontextmenu={(e) => e.preventDefault()}
         >
@@ -130,6 +166,8 @@
               style:height="{c.h * CELL + (c.h - 1) * GAP}px"
             ></div>
           {/each}
+
+          <PlacementGhost />
         </div>
       </div>
     </div>

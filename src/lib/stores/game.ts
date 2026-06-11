@@ -4,14 +4,14 @@
 import * as Storage from '$lib/game/core/Storage';
 import { gameState } from './gameState.svelte';
 import { setLanguage, t } from '$lib/game/i18n';
-import { MAPS, MAX_MANA, STAR_THRESHOLDS, TOOL_ORDER, UNLOCK_ALL_MAPS_CODE, SPAWN_TIMER_BATTLE_START, MAX_SPELL_NAME_LENGTH } from '$lib/game/constants';
+import { MAPS, MAX_MANA, STAR_THRESHOLDS, TOOL_ORDER, UNLOCK_ALL_MAPS_CODE, SPAWN_TIMER_BATTLE_START, MAX_SPELL_NAME_LENGTH, CONTROL_ACTIONS } from '$lib/game/constants';
 import { BattleRenderer } from '$lib/game/battle/BattleRenderer';
 import { getCurrentTarget, pickMonsterAt } from '$lib/game/battle/TargetingSystem';
 import { clone } from '$lib/game/utils/helpers';
 import { calculateSpellStats } from '$lib/game/designer/StatsCalculator';
 import { createComponentFromGridCoord, canPlaceComponent } from '$lib/game/designer/Components';
 import { isToolUnlocked } from '$lib/game/utils/progression';
-import type { GameState } from '$lib/game/types';
+import type { GameState, RunMode, KeyTarget, KeyBinding } from '$lib/game/types';
 import { showToast } from '$lib/game/ui/Toast';
 import { renderDesigner, eraseComponent } from './DesignerRenderer';
 import { saveSpell, loadSpell, clearDesign } from './SpellManager';
@@ -371,6 +371,170 @@ export class GameManager {
     this.store.deckNames[index] = trimmed;
     Storage.saveDeckNames(this.store.deckNames);
     showToast(t('deck.name.saved'), 'good');
+  }
+
+  // ── Phase 5: Feature helpers ─────────────────────────────
+
+  /** 현재 맵을 변경합니다 */
+  setCurrentMap(mapId: number) {
+    const map = MAPS[mapId];
+    if (map) this.store.currentMap = map;
+  }
+
+  /** 런 모드를 변경하고 저장합니다 */
+  setRunMode(mode: RunMode) {
+    this.store.selectedRunMode = mode;
+    Storage.saveSelectedRunMode(mode);
+  }
+
+  /** 현재 5개 슬롯을 지정한 덱 인덱스에 저장합니다 (saveDeck alias) */
+  saveCurrentSlotsToDeck(index: number) { this.saveDeck(index); }
+
+  /** 지정한 덱 인덱스의 술식을 현재 슬롯으로 불러옵니다 (loadDeck alias) */
+  loadDeckToSlots(index: number) { this.loadDeck(index); }
+
+  /** 덱 이름을 저장합니다 (renameDeck alias) */
+  saveDeckName(index: number, name: string) { this.renameDeck(index, name); }
+
+  /** 맵 정보를 반환합니다 */
+  getMap(mapId: number) { return MAPS[mapId]; }
+
+  /** 맵 잠금 해금 조건 텍스트 키를 반환합니다 */
+  getUnlockText(mapId: number): string {
+    return `unlock.map${mapId}`;
+  }
+
+  /** 별 개수만큼 ★ 문자열을 반환합니다 */
+  renderStars(count: number): string {
+    return '★'.repeat(count) + '☆'.repeat(Math.max(0, 3 - count));
+  }
+
+  /** KeyboardEvent를 KeyBinding으로 변환합니다 */
+  eventToBinding(e: KeyboardEvent): KeyBinding | null {
+    if (!e.code) return null;
+    let label = e.key;
+    if (e.code.startsWith('Key')) label = e.code.slice(3);
+    else if (e.code.startsWith('Digit')) label = e.code.slice(5);
+    else if (e.code === 'Space') label = 'SPC';
+    else if (e.code === 'Enter') label = '↵';
+    else if (e.code === 'Escape') label = 'ESC';
+    else if (e.code === 'ArrowUp') label = '↑';
+    else if (e.code === 'ArrowDown') label = '↓';
+    else if (e.code === 'ArrowLeft') label = '←';
+    else if (e.code === 'ArrowRight') label = '→';
+    return { code: e.code, key: e.key, label: label.toUpperCase() };
+  }
+
+  /** 지정한 바인딩이 다른 타겟과 중복되는지 검사합니다 */
+  findBindingConflict(target: KeyTarget, binding: KeyBinding): string | null {
+    if (target.type === 'slot') {
+      for (let i = 0; i < 5; i++) {
+        if (i === target.index) continue;
+        const b = this.keyBindings[i];
+        if (b && b.code === binding.code) return this.getSlotKeyLabel(i);
+      }
+    }
+    for (const [id, b] of Object.entries(this.controlBindings)) {
+      if (target.type === 'control' && target.id === id) continue;
+      if (b && b.code === binding.code) {
+        const action = CONTROL_ACTIONS.find(a => a.id === id);
+        return action?.name || id;
+      }
+    }
+    if (target.type === 'control') {
+      for (let i = 0; i < 5; i++) {
+        const b = this.keyBindings[i];
+        if (b && b.code === binding.code) return this.getSlotKeyLabel(i);
+      }
+    }
+    return null;
+  }
+
+  /** 키 바인딩을 설정하고 저장합니다 */
+  setBinding(target: KeyTarget, binding: KeyBinding) {
+    if (target.type === 'slot') {
+      this.store.keyBindings[target.index] = binding;
+      Storage.saveKeyBindings(this.store.keyBindings);
+    } else {
+      this.store.controlBindings[target.id] = binding;
+      Storage.saveControlBindings(this.store.controlBindings);
+    }
+  }
+
+  /** 바인딩 대상의 이름을 반환합니다 */
+  bindingNameForTarget(target: KeyTarget): string {
+    if (target.type === 'slot') return t('slot.number', target.index + 1);
+    const action = CONTROL_ACTIONS.find(a => a.id === target.id);
+    return action?.name || target.id;
+  }
+
+  /** 모든 키 바인딩을 기본값으로 초기화하고 저장합니다 */
+  resetKeyBindings() {
+    this.store.keyBindings = Storage.defaultKeyBindings();
+    this.store.controlBindings = Storage.defaultControlBindings();
+    Storage.saveKeyBindings(this.store.keyBindings);
+    Storage.saveControlBindings(this.store.controlBindings);
+    showToast(t('reset.all.keys'), 'good');
+  }
+
+  /** 자동 마나 보존 값을 저장합니다 */
+  saveAutoManaReserve() {
+    Storage.saveAutoManaReserve(this.store.autoManaReserve);
+  }
+
+  /** 마우스 포인터 위치를 설계판 그리드 좌표로 변환합니다 */
+  getBoardGridCoordFromPointer(e: { clientX: number; clientY: number }): { gx: number; gy: number } | null {
+    const board = document.getElementById('designBoard');
+    if (!board) return null;
+    const rect = board.getBoundingClientRect();
+    const bw = this.designer.width * 58 + (this.designer.width - 1) * 4;
+    const bh = this.designer.height * 58 + (this.designer.height - 1) * 4;
+    const gx = (e.clientX - rect.left) / bw * this.designer.width;
+    const gy = (e.clientY - rect.top) / bh * this.designer.height;
+    return { gx, gy };
+  }
+
+  // ── Drag placement state ─────────────────────────────────
+  placingDrag = false;
+  erasingDrag = false;
+  lastDragPlaceKey: string | null = null;
+
+  /** 설계판 마우스 다운: 배치/삭제 및 드래그 상태 시작 */
+  onDesignBoardMouseDown(e: MouseEvent) {
+    if (this.state !== 'design') return;
+    if (e.button === 2) {
+      this.erasingDrag = true;
+      this.eraseComponent(e);
+    } else if (e.button === 0 && this.designer.tool !== 'eraser') {
+      this.placingDrag = true;
+      this.placeComponent(e);
+    }
+  }
+
+  /** 설계판 마우스 이동: 드래그 연속 배치/삭제 */
+  onDesignBoardMouseMove(e: MouseEvent) {
+    if (this.state !== 'design') return;
+    if (this.erasingDrag && this.designer.tool === 'eraser') {
+      this.eraseComponent(e);
+    } else if (this.placingDrag && this.designer.tool !== 'eraser') {
+      const coord = this.getBoardGridCoordFromPointer(e);
+      if (!coord) return;
+      const comp = createComponentFromGridCoord(this.designer.tool, coord.gx, coord.gy, this.designer.nextId, this.designer.rotation);
+      const key = `${comp.type}:${comp.x},${comp.y}:${comp.w}x${comp.h}:${comp.rotation}`;
+      if (this.lastDragPlaceKey === key) return;
+      this.lastDragPlaceKey = key;
+      if (canPlaceComponent(comp, this.designer.components, this.designer.width, this.designer.height)) {
+        this.designer.components.push(comp);
+        this.designer.nextId++;
+      }
+    }
+  }
+
+  /** 드래그를 종료합니다 */
+  endDrag() {
+    this.placingDrag = false;
+    this.erasingDrag = false;
+    this.lastDragPlaceKey = null;
   }
 }
 

@@ -19,3 +19,21 @@ export function updateMobileLayout(): void {
   const useMobile = shouldUseMobileLayout();
   document.body.classList.toggle('mobile-layout', useMobile);
 }
+
+/** 모바일에서 디자이너 보드를 화면 너비에 맞게 스케일링합니다 */
+export function applyMobileDesignerScale(
+  board: HTMLElement,
+  width: number,
+  height: number,
+): void {
+  if (!shouldUseMobileLayout() || !board.parentElement) {
+    board.style.transform = '';
+    return;
+  }
+  const wrap = board.parentElement;
+  const fullW = width * 62 - 4;
+  const available = Math.max(220, wrap.clientWidth - 12);
+  const scale = Math.min(1, available / Math.max(1, fullW));
+  board.style.transform = `scale(${scale.toFixed(4)})`;
+  board.style.transformOrigin = 'top center';
+}

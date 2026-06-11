@@ -35,6 +35,7 @@
       step="1"
       value={gameState.autoManaReserve}
       oninput={(e) => game.autoManaReserve = Number(e.currentTarget.value)}
+      onchange={() => game.saveAutoManaReserve()}
     />
   </label>
 
