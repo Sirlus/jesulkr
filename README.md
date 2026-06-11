@@ -1,7 +1,7 @@
-# Jesulkr (제술커) v1.3
+# Jesulkr (제술커) v1.5
 
 > Svelte 5 + SvelteKit으로 제작된 타워 디펜스형 술식 설계 게임  
-> 원작 HTML v1.3을 SvelteKit으로 포팅한 버전
+> 원작 HTML v1.5를 SvelteKit으로 포팅한 버전
 
 ## 개요
 
@@ -17,13 +17,13 @@
 
 | 구분 | 기술 |
 |------|------|
-| 프레임워크 | Svelte 5, SvelteKit 2 |
+| 프레임워크 | Svelte 5 (runes mode), SvelteKit 2 |
 | 언어 | TypeScript 6 |
 | 번들러 | Vite 8 |
-| 스타일 | CSS (Sass Embedded) |
+| 스타일 | CSS |
 | 테스트 | Vitest 4 |
 | 포맷터 | Prettier 3 + prettier-plugin-svelte |
-| 패키지 매니저 | bun |
+| 패키지 매니저 | npm |
 | 배포 | 정적 사이트 (`@sveltejs/adapter-static`) |
 
 ---
@@ -33,22 +33,44 @@
 ```
 src/
 ├── routes/
-│   ├── +page.svelte          # 메인 게임 화면 (HUD, 설계 패널, 전투 캔버스)
-│   ├── +layout.svelte        # 루트 레이아웃
-│   └── test/+page.svelte     # 테스트 페이지
+│   ├── +page.svelte              # 메인 진입점 (79줄, Svelte 컴포넌트 조합)
+│   ├── +layout.svelte            # 루트 레이아웃
+│   └── test/+page.svelte         # 테스트 페이지
 ├── lib/
-│   ├── stores/game.ts        # GameManager 싱글톤 (게임 로직 총괄)
-│   ├── index.ts              # $lib 엔트리
+│   ├── components/               # 15개 Svelte 5 컴포넌트
+│   │   ├── Toast.svelte
+│   │   ├── KeyBadge.svelte
+│   │   ├── SpeedButton.svelte
+│   │   ├── StatCard.svelte
+│   │   ├── SlotCard.svelte
+│   │   ├── SlotPanel.svelte
+│   │   ├── HUD.svelte
+│   │   ├── BattleSection.svelte
+│   │   ├── DesignerPanel.svelte
+│   │   ├── LanguageModal.svelte
+│   │   ├── MainMenu.svelte
+│   │   ├── MapSelectModal.svelte
+│   │   ├── DeckControls.svelte
+│   │   ├── KeySettingsModal.svelte
+│   │   └── PlacementGhost.svelte
+│   ├── stores/
+│   │   ├── game.ts               # GameManager (542줄)
+│   │   ├── gameState.svelte.ts   # 반응형 상태 ($state)
+│   │   ├── toast.svelte.ts       # 토스트 상태
+│   │   ├── GameLoop.ts           # RAF 게임 루프
+│   │   ├── DesignerRenderer.ts   # 설계판 렌더링
+│   │   ├── SpellManager.ts       # 술식 저장/불러오기
+│   │   └── __tests__/
 │   └── game/
-│       ├── types.ts          # 전체 타입 정의
-│       ├── constants.ts      # 게임 상수, 맵 정의, 도구 설명
-│       ├── style.css         # 게임 전용 스타일
-│       ├── i18n/             # 다국어 (ko, en)
-│       ├── core/             # 저장, 상태, 이벤트 버스
-│       ├── designer/         # 술식 설계, 통계 계산, 도선 네트워크
-│       ├── battle/           # 전투 엔진, 렌더러, 타겟팅, 데미지 계산
-│       ├── ui/               # HUD, 슬롯 패널, 토스트
-│       └── utils/            # 유틸리티, 진행도 계산
+│       ├── types.ts
+│       ├── constants.ts
+│       ├── style.css
+│       ├── i18n/                 # ko, en
+│       ├── core/                 # Store, Storage* (7개 모듈)
+│       ├── designer/             # Components, StatsCalculator, WireNetwork
+│       ├── battle/               # BattleEngine, BattleRenderer, Targeting 등
+│       ├── ui/                   # Toast.ts
+│       └── utils/                # helpers, progression, mobile, dom
 ```
 
 ---
@@ -60,10 +82,11 @@ src/
 | v1.0 | 기본 술식 설계 + 3개 맵 |
 | v1.1 | 별 시스템, 맵 해금 |
 | v1.2 | 도선 네트워크, 혼합 회로 |
-| **v1.3** | **덱 시스템, 키 설정, 배속 조절, 설계 미리보기, 모바일 대응** |
+| v1.3 | 덱 시스템, 키 설정, 배속 조절, 설계 미리보기, 모바일 대응 |
+| **v1.5** | **마나 보너스 토글, 도구 해금, 튜토리얼, Svelte 컴포넌트 15개 분리** |
 
-본 프로젝트는 원작 HTML v1.3을 SvelteKit으로 재구현한 것입니다.  
-핵심 게임 로직(전투 엔진, 설계 통계, 저장 시스템 등)은 v1.3과 동일하며, 일부 UI(덱 관리, 키 설정 모달, 설계 미리보기)는 스타일 시트와 로직은 준비되어 있으나 마크업 연결이 아직 완료되지 않았습니다.
+본 프로젝트는 원작 HTML v1.5를 SvelteKit + Svelte 5 runes 모드로 재구현한 것입니다.  
+Phase 0~5 리팩터링을 통해 핵심 게임 로직, 저장 시스템, UI 컴포넌트가 모두 구현 완료되었습니다.
 
 ---
 

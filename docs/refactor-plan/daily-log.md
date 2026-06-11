@@ -249,16 +249,22 @@
 | `gameRx` references | 0 (완전 제거) |
 | 남은 DOM 조작 (`src/`) | `DesignerRenderer.ts` (테스트 전용), `game.ts` `placeComponent` (getBoundingClientRect), `mobile.ts` (classList.toggle) |
 
+### 추가: gameState.svelte.ts / toast.svelte.ts 신규 생성
+
+- `game.svelte.ts` 삭제 후, 게임 상태와 토스트 상태를 분리된 반응형 모듈로 재구성
+- `gameState.svelte.ts` — `$state` 기반 게임 상태 (전역 반응형 상태)
+- `toast.svelte.ts` — `$state` 기반 토스트 상태 (전역 반응형 상태)
+
 ### Phase 4 최종 성적
 
 | 지표 | 시작 | 종료 |
 |------|------|------|
-| `+page.svelte` | ~195줄 | 59줄 |
-| `game.ts` | 449줄 | ~375줄 |
-| Svelte 컴포넌트 | 0개 | 11개 |
+| `+page.svelte` | ~195줄 | 79줄 |
+| `game.ts` | 449줄 | 542줄 (Phase 5 +168줄 포함) |
+| Svelte 컴포넌트 | 0개 | 15개 |
 | `ui/` 모듈 | 3개 | 1개 (`Toast.ts`) |
 | `gameRx` 호출 | 15곳 | 0곳 |
-| `game.svelte.ts` | 존재 | 삭제 |
+| `game.svelte.ts` | 존재 | 삭제 (→ `gameState.svelte.ts` + `toast.svelte.ts`로 대체) |
 | `innerHTML` (src/) | 10+ | 1곳 (테스트 전용) |
 | svelte-check | - | 0 errors, 0 warnings |
 | tests | 56 | 65 (+9) |
@@ -400,3 +406,29 @@ Phase 5 잔여 항목 (Phase 6으로 이관):
 
 ### 커밋(예정)
 - `fix: finalize phase-5 interaction hardening before phase 6`
+
+---
+
+## 2026-06-11 — 문서 정합성 전수조사 및 수정
+
+### 발견된 이슈 (15건)
+- Dead code 파일 3건: `EventBus.ts`, `HUD.ts`, `SlotPanel.ts` (삭제 기록되었으나 실제 파일 존재)
+- `game.svelte.ts` → `gameState.svelte.ts` + `toast.svelte.ts` 변경 미기록
+- README.md 구버전 구조/버전/미완료 표기
+- API.md 전 메서드 `❌ 미구현` 표기 (실제는 전부 구현됨)
+- ARCHITECTURE.md 29 errors 경고 + EventBus 참조 + 미구현 진입점 표기
+- GAME_DESIGN.md 몬스터 속도 누락 경고
+- CONSISTENCY_REPORT.md 전면 outdated (29 errors 기준)
+- 문서 버전 통일 필요 (v1.3 → v1.5)
+- `+page.svelte`, `game.ts` 라인 수 불일치
+- 패키지 매니저 혼란 (bun vs npm)
+
+### 수정 완료
+- ✅ `EventBus.ts`, `HUD.ts`, `SlotPanel.ts` 파일 삭제
+- ✅ `README.md` — v1.5 버전, 프로젝트 구조, 기술 스택, 컴포넌트 15개, 완료 상태 갱신
+- ✅ `API.md` — v1.5, 모든 `❌ 미구현` → `✅ 구현됨`, 경고 문구 제거
+- ✅ `ARCHITECTURE.md` — v1.5, 빌드 상태 0 errors, EventBus → gameState, v1.5 기능 구현 완료
+- ✅ `GAME_DESIGN.md` — v1.5, 몬스터 속도 누락 경고 제거, 기능 구현 완료
+- ✅ `CONSISTENCY_REPORT.md` — v1.5 기준, 0 errors 갱신
+- ✅ `daily-log.md` — gameState.svelte.ts/toast.svelte.ts 생성 기록, 라인 수 정정, dead code 삭제 기록
+- ✅ `08-checklist.md` — 완료 상태 갱신

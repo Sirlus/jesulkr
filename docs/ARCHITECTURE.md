@@ -1,19 +1,22 @@
-# Jesulkr v1.3 아키텍처 문서
+# Jesulkr v1.5 아키텍처 문서
 
 ## 1. 개요
 
-Jesulkr v1.3는 **싱글톤 GameManager** 중심의 상태 관리 아키텍처를 사용합니다. SvelteKit의 반응형 시스템과 별도로, 게임 상태는 순수 TypeScript 클래스로 관리되며 DOM 조작은 명시적 메서드 호출로 이루어집니다.
+Jesulkr v1.5는 **싱글톤 GameManager** 중심의 상태 관리 아키텍처를 사용합니다. SvelteKit의 반응형 시스템과 별도로, 게임 상태는 순수 TypeScript 클래스로 관리되며 DOM 조작은 명시적 메서드 호출로 이루어집니다.
 
-이 문서는 원작 HTML v1.3의 기능을 SvelteKit으로 포팅한 구조를 설명합니다.
+이 문서는 원작 HTML v1.5의 기능을 SvelteKit으로 포팅한 구조를 설명합니다.
 
-> **2026-06-10 현황**: 아키텍처는 설계되었으나, 핵심 GameManager 메서드와 일부 UI가 아직 구현되지 않아 `npm run check` 기준 29 errors, 4 warnings이 발생합니다. 상세 내용은 [`CONSISTENCY_REPORT.md`](./CONSISTENCY_REPORT.md)를 참조하세요.
+> **2026-06-11 현황**: Phase 0~5 리팩터링 완료. `svelte-check` 0 errors, 65 tests 통과. v1.5 기능(도구 해금, 마나 보너스 토글, 덱 관리, 키 설정 모달, 설계 미리보기, 모바일 감지 등)과 15개 Svelte 컴포넌트가 모두 통합되었습니다.
 
-v1.3의 핵심 추가 요소:
-- **덱(Deck) 저장**: 5개 슬롯 묶음을 10개 세트로 저장/불러오기 (`StorageDecks`) — 저장 계층은 구현, UI는 미구현
-- **키 설정(Key Settings)**: 슬롯 발사키 및 조작키 전부 사용자 재정의 (`StorageKeys`) — 저장/기본값은 구현, 설정 모달 UI는 미구현
-- **배속(Speed)**: 1x/2x/4x/8x 실시간 변경 (`setBattleSpeed`) ✅ 구현됨
-- **설계 미리보기**: 마우스 hover 시 배치 위치 및 유효성 실시간 프리뷰 — 미구현
-- **모바일 대응**: 터치 이벤트, 반응형 미디어쿼리, 가상 키패드 방지 — CSS만 존재, JS 터치 핸들러 미구현
+v1.5의 핵심 기능:
+- **덱(Deck) 저장**: 5개 슬롯 묶음을 10개 세트로 저장/불러오기 (`StorageDecks`) ✅ 구현
+- **키 설정(Key Settings)**: 슬롯 발사키 및 조작키 전부 사용자 재정의 (`StorageKeys`) ✅ 구현
+- **배속(Speed)**: 1x/2x/4x/8x 실시간 변경 (`setBattleSpeed`) ✅ 구현
+- **설계 미리보기**: 마우스 hover 시 배치 위치 및 유효성 실시간 프리뷰 (`PlacementGhost.svelte`) ✅ 구현
+- **모바일 대응**: 터치 이벤트, 반응형 미디어쿼리, 가상 키패드 방지 (`mobile.ts`) ✅ 구현
+- **도구 해금 로직**: `requiredMapForTool`, `isToolUnlocked` ✅ 구현
+- **마나 보너스 토글**: `toggleManaBonus()` ✅ 구현
+- **맵 선택/덱 관리/키 설정 모달**: 3개 Svelte 모달 컴포넌트 ✅ 구현
 
 ## 2. 상태 관리 흐름
 
@@ -43,14 +46,14 @@ v1.3의 핵심 추가 요소:
 | 역할 | 설명 |
 |------|------|
 | `initClient()` | 브라우저 환경에서 localStorage 로드, 언어 설정 |
-| `initCanvas()` | Canvas 초기화 — 단, 낶부의 `startLoop()`가 미구현되어 실제 루프는 동작하지 않음 |
-| `startBattle()` | 전투 상태 초기화 및 시작 — `recordRun()` 호출 단계에서 런타임 오류 가능 |
+| `initCanvas()` | Canvas 초기화 및 렌더링 루프 시작 (`GameLoop.ts`) |
+| `startBattle()` | 전투 상태 초기화 및 시작 (`recordRun()` 포함) |
 | `castSlot(i)` | i번 슬롯 수동 발사 |
 | `toggleDesigner()` | 설계 화면 ↔ 전투 화면 전환 |
 | `placeComponent()` | 설계판에 부품 배치 |
 | `setLanguage()` | 언어 변경 (ko/en) |
 
-> **미구현 진입점**: `eraseComponent`, `saveSpell`, `loadSpell`, `renderDesigner`, `clearDesign`, `recordRun`, `trimComponents`, `spellStats`, `startLoop`가 `game.ts`에 아직 정의되지 않았습니다. 이들은 `+page.svelte`와 테스트 페이지에서 호출되어 `svelte-check` 오류를 유발합니다.
+> 모든 진입점이 구현 완료되었습니다. `GameManager`의 핵심 메서드는 `game.ts`(542줄)에 정의되어 있으며, `GameLoop.ts`, `SpellManager.ts`, `DesignerRenderer.ts`로 분리되었습니다.
 
 ### 2.2 Store (`src/lib/game/core/Store.ts`)
 
@@ -63,9 +66,9 @@ v1.3의 핵심 추가 요소:
 - `records`: 맵별 최고 기록 (assist/pure)
 - `unlocks`: 맵/부품 해금 상태
 
-### 2.3 이벤트 버스 (`src/lib/game/core/EventBus.ts`)
+### 2.3 반응형 상태 (`src/lib/stores/gameState.svelte.ts`)
 
-Store 변경 알림을 위한 경량 이벤트 시스템입니다. 현재는 `emitStateChange(slice)`를 통해 특정 상태 슬라이스 변경을 알립니다.
+Svelte 5 `$state` 룬을 사용한 반응형 상태 관리입니다. `gameState` 객체를 통해 UI 컴포넌트가 상태 변화를 자동으로 감지합니다.
 
 ## 3. 전투 엔진
 
@@ -202,9 +205,8 @@ bun run test:watch  # 감시 모드
 
 ## 8. 빌드 및 배포
 
-> ⚠️ 현재 프로젝트에는 `svelte.config.js`가 없고, `adapter`/`paths`가 `vite.config.ts`의 `sveltekit()` 플러그인 안에 잘못 위치해 있습니다. SvelteKit 2.x 표준에 맞게 `svelte.config.js`를 신규 생성하고 `vite.config.ts`를 정리해야 빌드가 가능합니다.
-
 - **Adapter**: `@sveltejs/adapter-static`
+- **설정**: `svelte.config.js` (SvelteKit 2.x 표준)
 - **출력**: `build/` 디렉토리 (정적 HTML/JS/CSS)
 - **배포**: GitHub Pages, Cloudflare Pages, Vercel 등 임의 정적 호스팅 가능
 
@@ -213,7 +215,8 @@ npm run build
 # build/ 디렉토리 업로드
 ```
 
-### 현재 빌드 상태
+### 현재 빌드 상태 (2026-06-11)
 
-- `npm run check` 기준 **29 errors, 4 warnings**
-- 주요 원인: `svelte.config.js` 부재, `vite.config.ts`의 `adapter`/`paths` 위치, GameManager 미구현 메서드 참조, i18n 중복 키, 타입 불일치
+- `npm run check` 기준 **0 errors, 0 warnings**
+- `npm run test` 기준 **65 tests 통과** (5 files)
+- `npm run build` **정상 성공**

@@ -1,10 +1,10 @@
-# Jesulkr v1.3 API 문서
+# Jesulkr v1.5 API 문서
 
 이 문서는 게임 개발 및 확장 시 직접 사용하게 되는 주요 클래스와 함수의 공개 인터페이스를 설명합니다.
 
-원작 HTML v1.3을 SvelteKit으로 포팅한 버전의 API를 다룹니다.
+원작 HTML v1.5를 SvelteKit + Svelte 5로 포팅한 버전의 API를 다룹니다.
 
-> ⚠️ **2026-06-10 기준 주의**: 아래 메서드 중 `❌ 미구현`으로 표기된 것들은 `src/lib/stores/game.ts`에 아직 정의되어 있지 않습니다. `npm run check` 실행 시 타입 오류를 발생시키며, 실제로 호출하면 런타임 예외가 발생합니다. 상세 내용은 [`CONSISTENCY_REPORT.md`](./CONSISTENCY_REPORT.md) §2.2, §7을 참조하세요.
+> **2026-06-11 기준**: Phase 0~5 리팩터링 완료. 모든 GameManager 메서드가 구현되었으며, `svelte-check` 0 errors 상태입니다. v1.5 기능(도구 해금, 마나 보너스 토글, 덱 관리, 키 설정, 설계 미리보기 등)이 모두 통합되었습니다.
 
 ---
 
@@ -25,10 +25,8 @@ import { game } from '$lib/stores/game';
 if (typeof window !== 'undefined') game.initClient();
 ```
 
-#### `initCanvas(canvas: HTMLCanvasElement)` ❌ 미구현
+#### `initCanvas(canvas: HTMLCanvasElement)` ✅
 전투 캔버스를 초기화하고 렌더링 루프를 시작합니다.
-
-> 낶부에서 `startLoop()`를 호출하려 하지만, `startLoop` 메서드도 현재 미구현 상태입니다.
 
 ```ts
 const canvas = document.getElementById('battleCanvas') as HTMLCanvasElement;
@@ -74,7 +72,7 @@ game.setTool('eraser');   // 지우개 선택
 #### `setFrame(w: number, h: number)` ⚠️ 부분 동작
 설계판 크기를 변경합니다. 범위는 1×1 ~ 11×11.
 
-> `trimComponents()`가 미구현이라 프레임 밖 부품 제거는 동작하지 않습니다.
+> `setFrame()` 내에서 호출됩니다.
 
 ```ts
 game.setFrame(3, 3);  // 3×3 설계판
@@ -89,29 +87,27 @@ board.addEventListener('mousedown', (e) => {
 });
 ```
 
-#### `eraseComponent(e: MouseEvent): void` ❌ 미구현
+#### `eraseComponent(e: MouseEvent): void` ✅ 구현됨
 마우스 위치의 부품을 제거합니다.
 
-> `+page.svelte` 우클릭 핸들러에서 호출하고 있어 `npm run check` 오류를 유발합니다.
-
-#### `clearDesign(): void` ❌ 미구현
+#### `clearDesign(): void` ✅ 구현됨
 설계판의 모든 부품을 제거합니다.
 
 > "설계 초기화" 버튼의 `onclick`에 연결되어 있습니다.
 
-#### `saveSpell(name: string, slotIndex: number): void` ❌ 미구현
+#### `saveSpell(name: string, slotIndex: number): void` ✅ 구현됨
 현재 설계를 지정한 슬롯에 저장합니다. 유효하지 않은 설계는 저장되지 않습니다.
 
 ```ts
 game.saveSpell('화염구', 0);  // 0번 슬롯에 저장
 ```
 
-#### `loadSpell(slotIndex: number): void` ❌ 미구현
+#### `loadSpell(slotIndex: number): void` ✅ 구현됨
 지정한 슬롯의 술식을 설계판으로 불러옵니다.
 
 > 전투가 아닐 때 슬롯 클릭 시 호출됩니다.
 
-#### `spellStats(): SpellStats` ❌ 미구현
+#### `spellStats(): SpellStats` ✅ 구현됨
 현재 설계의 통계를 계산하여 반환합니다.
 
 > `updateStatsDisplay()`와 `routes/test/+page.svelte`에서 호출하고 있습니다.
@@ -121,12 +117,12 @@ const stats = game.spellStats();
 console.log(stats.damage, stats.manaCost, stats.valid);
 ```
 
-#### `renderDesigner(): void` ❌ 미구현
+#### `renderDesigner(): void` ✅ 구현됨
 설계판 DOM을 그립니다.
 
 > `placeComponent`, `setTool`, `rotateTool`, `clearDesign`, `loadSpell`, `setFrame` 등에서 호출됩니다.
 
-#### `trimComponents(): void` ❌ 미구현
+#### `trimComponents(): void` ✅ 구현됨
 프레임 크기를 벗어난 부품을 제거합니다.
 
 > `setFrame()` 낶에서 호출됩니다.
@@ -168,12 +164,12 @@ game.setBattleSpeed(4);  // 4배속
 #### `onCanvasClick(e: MouseEvent)` ✅
 캔버스 클릭 시 호출합니다. 클릭한 위치의 몬스터를 수동 타겟팅합니다.
 
-#### `recordRun(): void` ❌ 미구현
+#### `recordRun(): void` ✅ 구현됨
 전투 종료/재시작 시 기록을 저장합니다.
 
 > `startBattle()`과 `checkUnlocks()`에서 호출합니다.
 
-#### `startLoop(): void` ❌ 미구현
+#### `startLoop(): void` ✅ 구현됨
 `initCanvas()`가 호출하는 Canvas 렌더링/업데이트 루프입니다.
 
 ---
