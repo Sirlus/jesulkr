@@ -13,6 +13,7 @@ export const STORAGE_KEY_CONTROL_BINDINGS = 'magic_design_game_control_bindings_
 export const STORAGE_KEY_SLOT_AUTO = 'magic_design_game_slot_auto_modes_v1';
 export const STORAGE_KEY_AUTO_MANA_RESERVE = 'magic_design_game_auto_mana_reserve_v1';
 export const STORAGE_KEY_MANA_BONUS = 'magic_design_game_mana_bonus_enabled_v1';
+export const STORAGE_KEY_TUTORIAL_SEEN = 'jesulkr_tutorial_seen_v2';
 export const STORAGE_KEY_LANGUAGE = 'jesulkr_language_v1';
 export const STORAGE_KEY_RUN_MODE = 'magic_design_game_selected_run_mode_v1';
 export const STORAGE_KEY_RECORDS = 'magic_design_game_map_records_v3';
@@ -33,6 +34,11 @@ export const CELL = 58;
 export const GAP = 4;
 export const MAX_FRAME = 11;
 export const MANA_BONUS_STAR_COUNT = 5;
+export const MAX_SPELL_NAME_LENGTH = 18;
+export const TOAST_DURATION_MS = 1400;
+export const UNLOCK_ALL_MAPS_CODE = '1111';
+export const SPAWN_TIMER_BATTLE_START = 10;
+export const SPAWN_TIMER_DEFAULT = 12;
 
 // ── Star Thresholds ───────────────────────────────────────────
 export const STAR_THRESHOLDS: Record<number, number[]> = {
@@ -56,7 +62,7 @@ export const MAPS: (MapDef | null)[] = [
     id: 2,
     shortName: '맵 2',
     name: '맵 2: 강화 침공',
-    desc: '몬스터 HP가 1~50 사이로 등장합니다. 별 조건: 55,000 / 60,000 / 65,000점. 파란 마나 생성기, 도선, 2칸 혼합 회로가 해금됩니다.',
+    desc: '몬스터 HP가 1~50 사이로 등장합니다. 별 조건: 55,000 / 65,000 / 75,000점. 파란 마나 생성기, 도선, 2칸 혼합 회로가 해금됩니다.',
     minHp: 1,
     maxHp: 50,
   },

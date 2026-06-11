@@ -2,10 +2,10 @@
   import { onMount } from 'svelte';
   import { game } from '$lib/stores/game';
 
-  let log = '';
-  let pass = 0;
-  let fail = 0;
-  let running = true;
+  let log = $state('');
+  let pass = $state(0);
+  let fail = $state(0);
+  let running = $state(true);
 
   function assert(label: string, ok: boolean, detail = '') {
     if (ok) pass++; else fail++;

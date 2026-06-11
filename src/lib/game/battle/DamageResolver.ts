@@ -23,7 +23,7 @@ export function resolveCast(
   canvasWidth: number,
   canvasHeight: number,
 ): ResolveResult {
-  let target = monsters.find(m => m.id === cast.targetId && m.hp > 0);
+  let target = monsters.find(m => m.id === cast.targetId && m.hp > 0) ?? null;
   if (!target) target = getAutoTarget(monsters);
   if (!target) {
     return { monsters, effects: [], scoreDelta: 0, killedAny: false, aoeEffects: [] };

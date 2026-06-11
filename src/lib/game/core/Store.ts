@@ -3,10 +3,9 @@
 // ============================================================
 import type {
   GameState, RunMode, Language, Monster, CastProjectile, VisualEffect,
-  BattleState, SpellData, KeyBinding, Records, MapDef,
+  SpellData, KeyBinding, Records, MapDef, Component, KeyTarget,
 } from '../types';
-import { eventBus } from './EventBus';
-import { MAPS, MAX_MANA, BASE_MANA_REGEN, STAR_MANA_REGEN, MANA_BONUS_STAR_COUNT } from '../constants';
+import { MAPS, MAX_MANA, BASE_MANA_REGEN, STAR_MANA_REGEN, MANA_BONUS_STAR_COUNT, SPAWN_TIMER_DEFAULT } from '../constants';
 import * as Storage from './Storage';
 import { getMapProgressScore, getMapStars, getMapRecord, setMapRecord } from './StorageRecords';
 import { isMapUnlocked, getFirstUnlockedMap } from './StorageUnlocks';
@@ -17,7 +16,7 @@ import { defaultUnlocks, defaultSlotAutoModes } from '../utils/helpers';
 export interface DesignerState {
   width: number;
   height: number;
-  components: import('../types').Component[];
+  components: Component[];
   tool: string;
   rotation: number;
   nextId: number;
@@ -70,7 +69,7 @@ function createBattleState(): BattleState {
     monsters: [], casts: [], effects: [],
     cooldowns: [0, 0, 0, 0, 0],
     selectedTargetId: null,
-    spawnTimer: 12, nextMonsterId: 1, nextCastId: 1,
+    spawnTimer: SPAWN_TIMER_DEFAULT, nextMonsterId: 1, nextCastId: 1,
     accumulator: 0, lastTime: 0,
     battleStarted: false, battleSpeed: 1,
     activeRunMapId: null, activeRunMode: null,
@@ -98,9 +97,10 @@ export class Store {
 
   keyBindings: KeyBinding[] = Storage.defaultKeyBindings();
   controlBindings: Record<string, KeyBinding> = Storage.defaultControlBindings();
-  keyCaptureTarget: import('../types').KeyTarget | null = null;
+  keyCaptureTarget: KeyTarget | null = null;
 
   language: Language = 'ko';
+  tutorialSeen: boolean = false;
 
   designer = createDesignerState();
   battle = createBattleState();
@@ -122,6 +122,7 @@ export class Store {
     this.autoManaReserve = Storage.loadAutoManaReserve();
     this.manaBonusEnabled = Storage.loadManaBonusEnabled();
     this.language = (Storage.loadLanguage() as Language) || 'ko';
+    this.tutorialSeen = Storage.loadTutorialSeen();
     this.selectedRunMode = Storage.loadSelectedRunMode();
     this.unlocks = Storage.loadUnlocks();
     this.records = Storage.loadRecords();
@@ -158,8 +159,4 @@ export class Store {
     return getMapProgressScore(this.records, id);
   }
 
-  // ── Emit change ──────────────────────────────────────────
-  emit(slice: string): void {
-    eventBus.emitStateChange(slice);
-  }
 }

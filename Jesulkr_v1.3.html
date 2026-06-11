@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jesulkr</title>
+<style>
+:root{
+  --bg:#07101d; --panel:#101b2e; --panel2:#0b1424; --line:#284a78;
+  --blue:#51a8ff; --blue2:#1f6fde; --red:#ff465c; --red2:#ff99a5;
+  --text:#eef6ff; --muted:#9fb2cf; --gold:#ffd76d; --good:#70ffc0; --bad:#ff7380;
+  --cell:58px; --gap:4px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#14233b 0%,var(--bg) 58%,#02060c 100%);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{padding:12px;min-height:100vh}
+button,select,input{font:inherit;border:1px solid #2e5284;background:#0b1424;color:var(--text);border-radius:10px;padding:8px 10px;outline:none}
+button{cursor:pointer;transition:.14s transform,.14s background,.14s border-color,.14s box-shadow}
+button:hover:not(:disabled){transform:translateY(-1px);background:#122743;border-color:var(--blue);box-shadow:0 0 14px rgba(81,168,255,.16)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input{width:100%}.small{font-size:12px;color:var(--muted)}
+.hud{display:none;grid-template-columns:1.4fr repeat(6,auto);gap:10px;align-items:center;padding:12px;border:1px solid #28456f;border-radius:18px;background:linear-gradient(180deg,rgba(18,34,57,.96),rgba(6,13,25,.96));box-shadow:0 12px 30px rgba(0,0,0,.26);margin-bottom:12px}
+.title{font-weight:900;font-size:24px;letter-spacing:-.5px}.title span{color:var(--blue)}
+.hudItem{padding:8px 10px;border:1px solid #213b60;border-radius:12px;background:rgba(3,8,17,.55);white-space:nowrap}.hudItem b{color:var(--gold)}
+.layout{display:grid;grid-template-columns:minmax(640px,960px) minmax(360px,520px);gap:12px;align-items:start;justify-content:center;max-width:1510px;margin:0 auto}.panel{border:1px solid #28456f;background:linear-gradient(180deg,rgba(15,29,50,.96),rgba(6,13,25,.96));border-radius:18px;padding:12px;box-shadow:0 12px 30px rgba(0,0,0,.26)}
+.panelTitle{display:flex;align-items:center;justify-content:space-between;gap:10px;font-weight:850;margin-bottom:10px}.panelTitle em{font-style:normal;color:var(--muted);font-size:12px;font-weight:500}
+.battleTopHud{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}.battleTopHud div{border:1px solid #2a4c7a;border-radius:12px;background:rgba(3,8,17,.72);padding:8px 10px;color:var(--muted);font-size:13px}.battleTopHud b{display:block;color:var(--gold);font-size:22px;line-height:1.15;margin-top:2px}
+#battleCanvas{width:100%;height:auto;display:block;background:linear-gradient(180deg,rgba(9,21,39,.94),rgba(3,8,16,.96));border:1px solid #31507c;border-radius:16px}.battleButtons{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.slots{display:grid;gap:8px}.slot{position:relative;overflow:hidden;border:1px solid #2b4f7d;border-radius:14px;padding:10px 12px;min-height:78px;background:linear-gradient(135deg,rgba(17,35,60,.9),rgba(6,13,25,.9))}.slot.empty{opacity:.75;background:linear-gradient(135deg,rgba(11,17,29,.9),rgba(4,7,13,.9));border-style:dashed}.slotHead{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}.keyBadge{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:#102947;border:1px solid var(--blue);color:#c7e3ff;font-weight:900;flex:0 0 auto;font-size:12px;text-align:center;line-height:1}.slotName{font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;font-size:20px}.slotStats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;color:var(--muted);margin-bottom:0}.slotStats b{display:block;color:var(--text);font-size:24px;line-height:1.05}.slotStats b.specialValue{font-size:17px;white-space:nowrap}.cooldown{position:absolute;left:0;bottom:0;height:4px;width:0%;background:linear-gradient(90deg,var(--red),var(--blue));transition:width .08s linear}
+.slotModeRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;color:var(--muted);font-size:12px}.autoReserveControl{display:grid;grid-template-columns:auto 132px;gap:10px;align-items:center;border:1px solid #25456f;border-radius:14px;background:rgba(3,8,17,.42);padding:10px 12px;margin:8px 0 10px;color:#c9dcf6;font-size:13px}.autoReserveControl b{color:#fff;font-size:18px;letter-spacing:-.3px}.autoReserveControl input{width:132px;padding:8px 10px;text-align:center;font-size:28px;font-weight:900;line-height:1.05;appearance:textfield;-moz-appearance:textfield}.autoReserveControl input::-webkit-outer-spin-button,.autoReserveControl input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.autoReserveControl span{grid-column:1/3;color:var(--muted);line-height:1.35;font-size:13px}.autoSwitch{position:relative;min-width:74px;border-radius:999px;padding:5px 9px 5px 30px;border-color:#385f91;background:rgba(6,13,25,.75);font-size:12px;font-weight:900;color:#cfe2fb;box-shadow:none}.autoSwitch::before{content:"";position:absolute;left:7px;top:50%;width:15px;height:15px;border-radius:50%;transform:translateY(-50%);background:#6f809d;box-shadow:0 0 8px rgba(111,128,157,.35);transition:.16s left,.16s background,.16s box-shadow}.autoSwitch.on{border-color:#36b77e;background:rgba(112,255,192,.13);color:#d8ffef;padding-left:9px;padding-right:30px}.autoSwitch.on::before{left:calc(100% - 22px);background:var(--good);box-shadow:0 0 10px rgba(112,255,192,.7)}.manualOnlyBadge{border:1px solid #42577c;border-radius:999px;padding:5px 9px;color:#c9dcf6;background:rgba(5,12,24,.62);font-weight:800;white-space:nowrap}.autoSwitch:disabled{opacity:.55;cursor:not-allowed}
+.designerPanel{margin-top:12px}.designerPanel.hidden{display:none}body.mode-design .layout{display:none}body.mode-design .designerPanel{display:block}body.mode-play .designerPanel{display:none}.designerCloseBtn{padding:7px 10px;font-size:13px}.designerLayout{display:grid;grid-template-columns:minmax(360px,1.05fr) minmax(320px,.95fr);gap:14px}.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}.toolBar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}.toolBtn.active{border-color:var(--red);background:rgba(255,70,92,.16);box-shadow:0 0 14px rgba(255,70,92,.16)}
+.toolInfo{border:1px solid #27456e;border-radius:14px;background:rgba(4,9,18,.45);padding:10px;margin-bottom:10px;line-height:1.45;color:#cfe2fb;font-size:13px}.toolInfo b{color:#fff}.toolInfo .formula{color:var(--gold);font-weight:800}.boardWrap{overflow:auto;max-height:760px;padding:10px;border:1px solid #28456f;border-radius:16px;background:rgba(3,8,16,.48)}.designBoard{position:relative;min-width:var(--cell);min-height:var(--cell);margin:auto}.gridCell{position:absolute;border:2px solid rgba(81,168,255,.52);border-radius:9px;background:rgba(81,168,255,.035);cursor:crosshair}.gridCell:hover{background:rgba(81,168,255,.15);box-shadow:inset 0 0 12px rgba(81,168,255,.16)}
+.piece{position:absolute;pointer-events:none;border-radius:10px;display:grid;place-items:center}.piece::before,.piece::after{content:"";display:block;position:absolute}.piece.red::after{width:14px;height:14px;border-radius:50%;background:var(--red);box-shadow:0 0 16px var(--red),0 0 4px #fff inset}.piece.blueGen::after{width:15px;height:15px;border-radius:50%;background:var(--blue);box-shadow:0 0 16px var(--blue),0 0 4px #fff inset}.piece.blueGen::before{width:26px;height:26px;border:2px solid rgba(255,70,92,.7);border-radius:50%;box-shadow:0 0 10px rgba(255,70,92,.22)}.piece.wire::after{left:12%;right:12%;top:43%;height:14%;border-radius:999px;background:var(--blue);box-shadow:0 0 10px var(--blue)}.piece.wire::before{top:12%;bottom:12%;left:43%;width:14%;border-radius:999px;background:var(--blue);box-shadow:0 0 10px var(--blue)}.piece.circle::after{width:34px;height:34px;border:4px solid var(--red);border-radius:50%;box-shadow:0 0 10px rgba(255,70,92,.35),inset 0 0 10px rgba(255,70,92,.16)}.piece.oval::after{width:78%;height:48%;border:4px solid var(--red);border-radius:50%;box-shadow:0 0 12px rgba(255,70,92,.35),inset 0 0 10px rgba(255,70,92,.16)}.piece.oval.vertical::after{width:48%;height:78%}.piece.kernel::after{width:76%;height:76%;border:4px solid var(--red);border-radius:43%;box-shadow:0 0 16px rgba(255,70,92,.45),inset 0 0 16px rgba(255,70,92,.18)}.piece.mixed2::after{width:82%;height:42%;border:5px solid var(--blue);border-radius:999px;box-shadow:0 0 16px rgba(81,168,255,.4),inset 0 0 10px rgba(81,168,255,.14)}.piece.mixed2.vertical::after{width:42%;height:82%}.piece.mixed2::before{width:46%;height:10%;background:var(--red);border-radius:999px;transform:rotate(-25deg);box-shadow:0 0 9px var(--red)}.piece.mixedCore::after{width:78%;height:78%;border:5px solid var(--blue);border-radius:50%;box-shadow:0 0 24px rgba(81,168,255,.35),inset 0 0 20px rgba(255,70,92,.16);background:radial-gradient(circle,rgba(255,70,92,.3) 0 12%,transparent 13% 100%)}.piece.mixedCore::before{width:86%;height:28%;border:4px solid var(--blue);border-radius:50%;transform:rotate(-28deg);box-shadow:0 0 14px rgba(81,168,255,.35)}
+.invalidShake{animation:shake .28s}@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
+.statsBox{display:grid;gap:8px;padding:12px;border:1px solid #28456f;border-radius:16px;background:rgba(3,8,16,.35);margin-bottom:10px}.statGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.statCard{padding:8px;border:1px solid #223b5f;border-radius:12px;background:rgba(8,17,31,.65);min-height:58px}.statCard span{display:block;color:var(--muted);font-size:12px}.statCard b{font-size:20px}.breakdown{max-height:210px;overflow:auto;font-size:12px;line-height:1.55;color:#c9dcf6;border-top:1px solid #223b5f;padding-top:8px;white-space:pre-wrap}.help{margin-top:10px;color:#c9dcf6;line-height:1.55;font-size:13px;border-left:3px solid var(--blue);padding-left:10px}.sideControls{display:grid;gap:8px}.loadButtons{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.loadButtons button{padding:8px 4px;font-size:12px}.danger{border-color:#713240;background:rgba(255,70,92,.08)}.good{border-color:#297555;background:rgba(112,255,192,.08)}.unlockCodeRow{display:grid;grid-template-columns:auto minmax(140px,220px) auto;gap:8px;align-items:center;border:1px solid #223b5f;border-radius:14px;background:rgba(3,8,16,.42);padding:10px;margin:0 0 12px 0;color:#c9dcf6}.unlockCodeRow input{width:100%;padding:7px 10px}
+.runModeRow{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;align-items:center;border:1px solid #223b5f;border-radius:14px;background:rgba(3,8,16,.42);padding:10px;margin:0 0 12px 0;color:#c9dcf6}.runModeRow>span{font-weight:850}.runModeBtn{min-height:42px;font-weight:900}.runModeBtn.active{border-color:var(--gold);background:rgba(255,215,109,.13);color:#ffe59a;box-shadow:0 0 12px rgba(255,215,109,.13)}.modeNote{font-size:12px;color:var(--muted);grid-column:2/4;line-height:1.4}.mapRecordGrid{display:grid;grid-template-columns:1fr;gap:8px}.mapRecord .recordLabel{color:var(--muted);font-size:12px}
+.preview{position:relative;width:max-content;max-width:180px;margin-top:4px}.previewCell{position:absolute;border:1px solid rgba(81,168,255,.28);border-radius:3px;background:rgba(3,8,16,.45)}.previewPiece{position:absolute;pointer-events:none;border-radius:3px}.previewPiece.red::after,.previewPiece.blueGen::after,.previewPiece.circle::after,.previewPiece.oval::after,.previewPiece.kernel::after,.previewPiece.wire::after,.previewPiece.mixed2::after,.previewPiece.mixedCore::after{content:"";position:absolute;display:block}.previewPiece.red::after{left:50%;top:50%;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);background:var(--red);box-shadow:0 0 6px var(--red)}.previewPiece.blueGen::after{left:50%;top:50%;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);background:var(--blue);box-shadow:0 0 6px var(--blue)}.previewPiece.wire::after{left:12%;right:12%;top:43%;height:14%;background:var(--blue);border-radius:999px;box-shadow:0 0 4px var(--blue)}.previewPiece.circle::after{left:18%;right:18%;top:18%;bottom:18%;border:2px solid var(--red);border-radius:50%}.previewPiece.oval::after{left:6%;right:6%;top:28%;bottom:28%;border:2px solid var(--red);border-radius:50%}.previewPiece.oval.vertical::after{left:28%;right:28%;top:6%;bottom:6%}.previewPiece.kernel::after{left:8%;right:8%;top:8%;bottom:8%;border:2px solid var(--red);border-radius:42%}.previewPiece.mixed2::after{left:6%;right:6%;top:28%;bottom:28%;border:2px solid var(--blue);border-radius:999px}.previewPiece.mixed2.vertical::after{left:28%;right:28%;top:6%;bottom:6%}.previewPiece.mixedCore::after{left:8%;right:8%;top:8%;bottom:8%;border:2px solid var(--blue);border-radius:50%;background:radial-gradient(circle,rgba(255,70,92,.35) 0 14%,transparent 15%)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;padding:10px 14px;border:1px solid #345b8d;border-radius:14px;background:rgba(7,14,26,.95);color:var(--text);box-shadow:0 10px 30px rgba(0,0,0,.35);transition:.18s opacity,.18s transform;z-index:90}#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}#toast.bad{border-color:var(--bad);color:#ffd8dd}#toast.good{border-color:var(--good);color:#d8ffef}
+.mapModal.hidden{display:none}.mapModal{position:fixed;inset:0;display:grid;place-items:center;background:rgba(2,6,14,.76);backdrop-filter:blur(5px);z-index:70;padding:18px}.mapBox{width:min(980px,96vw);max-height:90vh;overflow:auto;border:1px solid #345b8d;border-radius:22px;background:linear-gradient(180deg,rgba(17,35,60,.98),rgba(5,10,20,.98));box-shadow:0 24px 70px rgba(0,0,0,.55);padding:18px}.mapCards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.mapCard{border:1px solid #2b4f7d;border-radius:18px;background:linear-gradient(135deg,rgba(13,26,45,.94),rgba(5,10,20,.94));padding:14px;min-height:220px;display:flex;flex-direction:column;gap:10px}.mapCard h3{margin:0;font-size:21px}.mapCard.active{border-color:var(--gold);box-shadow:0 0 18px rgba(255,214,107,.18);background:linear-gradient(135deg,rgba(42,37,19,.72),rgba(5,10,20,.96))}.mapCard.locked{opacity:.58;filter:grayscale(.35);border-style:dashed}.mapUnlock{border:1px solid #223b5f;border-radius:12px;background:rgba(3,8,16,.5);padding:10px;color:#c9dcf6;font-size:13px;line-height:1.45}.mapUnlock b{color:var(--gold);font-size:16px}.mapDesc{color:#c9dcf6;line-height:1.45;font-size:14px;min-height:42px}.mapRecord{border:1px solid #223b5f;border-radius:12px;background:rgba(3,8,16,.5);padding:10px;color:#c9dcf6;font-size:13px;line-height:1.45}.mapRecord b{color:var(--gold);font-size:18px}.mapStarSummary{margin-left:auto;border:1px solid #7b6222;border-radius:14px;background:rgba(255,214,107,.10);padding:8px 12px;color:#ffe59a;font-weight:900;text-align:right;line-height:1.2;white-space:nowrap}.mapStarSummary span{display:block;color:#c9dcf6;font-size:12px;font-weight:500;margin-top:3px}.starLine{font-size:18px;letter-spacing:1px;color:var(--gold)}.starOff{color:#38506f}.mapThreshold{border:1px solid #223b5f;border-radius:12px;background:rgba(3,8,16,.36);padding:8px;color:#c9dcf6;font-size:12px;line-height:1.45}.mapCard button{margin-top:auto;min-height:42px;display:flex;align-items:center;justify-content:center}
+@media(min-width:1100px){body{height:100vh;overflow:hidden}body.mode-design{height:auto;overflow:auto}.layout{height:calc(100vh - 24px)}.layout>.panel{height:100%;overflow:hidden}.layout>.panel:first-child{display:flex;flex-direction:column}.layout>aside.panel{overflow:auto}.panelTitle{margin-bottom:8px}#battleCanvas{flex:0 0 auto;width:100%;height:auto;aspect-ratio:720/520;object-fit:contain}.battleButtons{margin-top:8px}.designerPanel{position:static;left:auto;right:auto;top:auto;bottom:auto;z-index:auto;margin:0 auto;max-width:1720px;min-height:calc(100vh - 24px);overflow:auto}.designerPanel.hidden{display:none}}@media(max-width:1050px){.hud{grid-template-columns:1fr 1fr}.layout,.designerLayout{grid-template-columns:1fr}.unlockCodeRow,.runModeRow{grid-template-columns:1fr}.modeNote{grid-column:auto}}@media(max-width:820px){.mapCards{grid-template-columns:1fr}}
+
+/* [추가 UI] 전투 속도 / 덱 / 그림 도구 버튼 */
+.speedControls{display:flex;align-items:center;gap:6px;margin-left:0;border:1px solid #27456e;border-radius:12px;background:rgba(3,8,17,.45);padding:5px 6px;color:var(--muted);font-size:12px}
+.speedControls span{padding:0 4px;white-space:nowrap}.speedBtn{padding:6px 9px;border-radius:9px;font-weight:850;min-width:34px;text-align:center}.speedBtn.active{border-color:var(--gold);background:rgba(255,215,109,.16);color:var(--gold);box-shadow:0 0 12px rgba(255,215,109,.12)}
+.sideBattleControls{display:flex;align-items:center;gap:8px;margin:0 0 12px 0;padding:8px;border:1px solid #27456e;border-radius:14px;background:rgba(3,8,17,.52);position:sticky;top:0;z-index:3;backdrop-filter:blur(3px)}
+.sideBattleControls>button{font-weight:850;white-space:nowrap}.sideSpeedControls{margin-left:0;flex:1;justify-content:flex-start}.sideSpeedControls .speedBtn{min-width:38px;padding:7px 10px}
+.deckControls{border:1px solid #25456f;border-radius:14px;background:rgba(3,8,17,.42);padding:10px;margin:10px 0;display:grid;gap:8px}.deckHead{display:flex;justify-content:space-between;gap:8px;align-items:center}.deckHead b{font-size:17px}.deckHead span{font-size:12px;color:var(--muted)}.deckRow{display:grid;grid-template-columns:minmax(120px,1fr) 1.2fr 1fr;gap:6px;align-items:center}.deckNameRow{grid-template-columns:minmax(120px,1fr) minmax(140px,1.4fr) auto}.deckControls button,.deckControls select,.deckControls input{padding:7px 8px;font-size:13px}.deckStatus{color:#c9dcf6}
+.toolBtn{width:54px;height:48px;min-width:54px;padding:5px;display:grid;place-items:center;position:relative}.toolBtn.locked{opacity:.48;filter:grayscale(.35)}.toolBtn.locked::after{content:"잠김";position:absolute;right:-4px;top:-7px;font-size:10px;font-weight:900;color:#07101d;background:var(--gold);border-radius:999px;padding:1px 5px;border:1px solid rgba(255,255,255,.35)}
+
+.keybindControls{border:1px solid #27456e;border-radius:14px;background:rgba(3,8,16,.42);padding:10px;display:grid;gap:8px}
+.keybindHead{display:flex;justify-content:space-between;gap:8px;align-items:center;color:#cfe2fb;font-size:13px}.keybindHead b{color:#fff}.keybindHead span{color:var(--muted);font-size:12px}
+.keybindGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.keyBindBtn{padding:8px 4px;font-size:12px;min-height:46px}.keyBindBtn b{display:block;color:var(--gold);font-size:15px;margin-bottom:2px}.keyBindBtn.capturing{border-color:var(--gold);background:rgba(255,215,109,.13);box-shadow:0 0 14px rgba(255,215,109,.18)}
+.keybindReset{font-size:12px;padding:7px 8px}
+.designBoard,.gridCell{user-select:none;-webkit-user-select:none}
+
+/* [설계 편의] 배치 미리보기
+   마우스를 올린 칸에 현재 선택 부품이 어디까지 차지하는지 반투명하게 보여준다.
+   valid/invalid 색만 바꾸고 실제 부품 모양은 .piece 규칙을 그대로 재사용한다. */
+.placementCellHint{position:absolute;pointer-events:none;border-radius:9px;z-index:8;border:2px dashed rgba(112,255,192,.65);background:rgba(112,255,192,.08)}
+.placementCellHint.invalid{border-color:rgba(255,115,128,.75);background:rgba(255,115,128,.10)}
+.piece.placementGhost{z-index:9;opacity:.38;pointer-events:none;filter:saturate(1.15);mix-blend-mode:screen;outline:2px solid rgba(112,255,192,.55);outline-offset:-3px;background:rgba(112,255,192,.045)}
+.piece.placementGhost.invalid{opacity:.34;outline-color:rgba(255,115,128,.8);background:rgba(255,115,128,.06);filter:saturate(.9)}
+
+.keySettingsModal.hidden{display:none}
+.keySettingsModal{position:fixed;inset:0;display:grid;place-items:center;background:rgba(2,6,14,.76);backdrop-filter:blur(5px);z-index:90;padding:18px}
+.keySettingsBox{width:min(760px,96vw);max-height:90vh;overflow:auto;border:1px solid #345b8d;border-radius:22px;background:linear-gradient(180deg,rgba(17,35,60,.98),rgba(5,10,20,.98));box-shadow:0 24px 70px rgba(0,0,0,.55);padding:18px}
+.keySettingsGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.keySettingSection{border:1px solid #27456e;border-radius:16px;background:rgba(3,8,16,.42);padding:12px;display:grid;gap:8px;align-content:start}
+.keySettingSection h3{margin:0;font-size:16px;color:#fff}
+.keySettingRows{display:grid;gap:6px}
+.keySettingRow{display:grid;grid-template-columns:minmax(120px,1fr) 92px;gap:8px;align-items:center;border:1px solid #223b5f;border-radius:12px;background:rgba(5,12,24,.58);padding:8px}
+.keySettingRow span{color:#cfe2fb;font-size:13px}.keySettingRow small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.keySettingRow button{font-weight:900;color:var(--gold);min-height:36px;padding:6px 8px}
+.keySettingRow button.capturing{border-color:var(--gold);background:rgba(255,215,109,.14);box-shadow:0 0 14px rgba(255,215,109,.18)}
+.keySettingsFooter{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+@media(max-width:720px){.keySettingsGrid{grid-template-columns:1fr}}
+
+.toolIconSvg{width:42px;height:42px;display:block;overflow:visible}.toolIconSvg *{vector-effect:none}.toolIcon{position:relative;display:block;width:34px;height:34px}.toolIcon::before,.toolIcon::after{content:"";position:absolute;display:block}.toolIcon.red::after{left:50%;top:50%;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);background:var(--red);box-shadow:0 0 12px var(--red),0 0 4px #fff inset}.toolIcon.blueGen::after{left:50%;top:50%;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);background:var(--blue);box-shadow:0 0 12px var(--blue),0 0 4px #fff inset}.toolIcon.blueGen::before{left:50%;top:50%;width:28px;height:28px;border:2px solid var(--red);border-radius:50%;transform:translate(-50%,-50%);opacity:.75}.toolIcon.wire::after{left:5px;right:5px;top:15px;height:5px;background:var(--blue);border-radius:999px;box-shadow:0 0 8px var(--blue)}.toolIcon.wire::before{top:5px;bottom:5px;left:15px;width:5px;background:var(--blue);border-radius:999px;box-shadow:0 0 8px var(--blue)}.toolIcon.circle::after{left:50%;top:50%;width:24px;height:24px;border:4px solid var(--red);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(255,70,92,.45)}.toolIcon.oval::after{left:2px;right:2px;top:10px;height:13px;border:4px solid var(--red);border-radius:999px;box-shadow:0 0 8px rgba(255,70,92,.45)}.toolIcon.kernel::after{left:4px;right:4px;top:4px;bottom:4px;border:4px solid var(--red);border-radius:42%;box-shadow:0 0 10px rgba(255,70,92,.45)}.toolIcon.mixed2::after{left:1px;right:1px;top:10px;height:13px;border:4px solid var(--blue);border-radius:999px;box-shadow:0 0 8px rgba(81,168,255,.45)}.toolIcon.mixed2::before{left:8px;right:8px;top:16px;height:4px;background:var(--red);border-radius:999px;transform:rotate(-25deg);box-shadow:0 0 6px var(--red)}.toolIcon.mixedCore::after{left:3px;right:3px;top:3px;bottom:3px;border:4px solid var(--blue);border-radius:50%;background:radial-gradient(circle,rgba(255,70,92,.35) 0 18%,transparent 19%);box-shadow:0 0 12px rgba(81,168,255,.4)}.toolIcon.mixedCore::before{left:1px;right:1px;top:13px;height:12px;border:3px solid var(--blue);border-radius:50%;transform:rotate(-28deg)}.toolIcon.eraser::after{left:7px;top:9px;width:22px;height:14px;border-radius:4px;background:linear-gradient(135deg,#ff7380 0 50%,#cfe2fb 51%);transform:rotate(-18deg);box-shadow:0 0 8px rgba(255,115,128,.35)}.srOnly{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);border:0}
+@media(max-width:1050px){.deckRow,.deckNameRow{grid-template-columns:1fr}.speedControls{width:100%;margin-left:0;justify-content:flex-start}}
+
+
+
+/* [언어 선택 첫 화면]
+   첫 진입 시 English / 한국어를 고르게 하는 게이트 화면이다.
+   선택값은 LANGUAGE_STORAGE_KEY에 저장되며, English 선택 시 주요 UI 문구를 클라이언트에서 번역한다. */
+
+.mainMenuWrap{position:fixed;right:18px;top:18px;z-index:65;display:grid;justify-items:end;gap:8px}
+.mainMenuBtn{min-width:96px;font-weight:950;border-color:#4d6fa8;background:linear-gradient(180deg,rgba(18,35,58,.96),rgba(7,14,27,.96));box-shadow:0 8px 28px rgba(0,0,0,.28)}
+.mainMenuPanel.hidden{display:none}
+.mainMenuPanel{width:230px;border:1px solid #345b8d;border-radius:16px;background:linear-gradient(180deg,rgba(17,35,60,.98),rgba(5,10,20,.98));box-shadow:0 18px 46px rgba(0,0,0,.46);padding:12px;display:grid;gap:9px}
+.mainMenuTitle{font-size:13px;color:#a9bad5;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+.mainMenuPanel button{width:100%;min-height:42px;font-weight:850}
+.mainMenuLang{border-top:1px solid #243d62;padding-top:9px;display:grid;gap:7px}
+.mainMenuLangLabel{font-size:13px;color:#cbdcf4;font-weight:800}
+.mainMenuLangButtons{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.mainMenuLangButtons button.activeLang{border-color:var(--gold);color:#ffe59a;background:rgba(255,214,107,.10)}
+/* 메뉴는 항상 viewport 우측 상단에 고정한다. 페이지를 스크롤해도 상대 위치가 변하지 않아야 한다. */
+body.mode-design .mainMenuWrap{top:18px;right:18px}
+/* [UI PATCH] Keep Menu and To Battle the same fixed size.
+   Also translate the locked tool badge, which is CSS-generated content and cannot be translated by text replacement. */
+.mainMenuBtn,.designerCloseBtn{width:132px;min-width:132px;height:44px;padding:7px 10px;display:inline-grid;place-items:center;text-align:center}
+html[lang="en"] .toolBtn.locked::after{content:"Locked"}
+html[lang="ko"] .toolBtn.locked::after{content:"잠김"}
+/* 설계 화면 제목 줄은 고정 메뉴와 겹치지 않도록 우측 여백을 확보한다. */
+body.mode-design .designerPanel>.panelTitle{padding-right:132px}
+@media(max-width:720px){.mainMenuWrap{right:12px;top:12px}.mainMenuBtn{min-width:78px;padding:7px 9px}.mainMenuPanel{width:min(230px,92vw)}}
+
+.languageModal{position:fixed;inset:0;z-index:200;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at top,#172845 0%,rgba(3,7,14,.96) 58%,#01040a 100%);backdrop-filter:blur(6px)}
+.languageModal.hidden{display:none}
+.languageBox{width:min(560px,94vw);border:1px solid #42679e;border-radius:26px;background:linear-gradient(180deg,rgba(18,34,56,.98),rgba(6,13,25,.98));box-shadow:0 28px 80px rgba(0,0,0,.62);padding:30px;text-align:center}
+.languageLogo{font-size:42px;font-weight:950;letter-spacing:-1px;margin-bottom:8px;color:#fff;text-shadow:0 0 22px rgba(125,172,255,.45)}
+.languageSub{color:#b8cbe8;line-height:1.55;margin-bottom:24px}
+.languageButtons{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.languageButtons button{min-height:72px;font-size:24px;font-weight:950;border-radius:18px;border-color:#4b70aa;background:linear-gradient(180deg,rgba(20,39,66,.96),rgba(9,18,33,.96))}
+.languageButtons button:hover{border-color:#7dacff;box-shadow:0 0 22px rgba(125,172,255,.22)}
+.languageFoot{margin-top:18px;color:#879dbf;font-size:13px}
+@media(max-width:620px){.languageButtons{grid-template-columns:1fr}.languageLogo{font-size:34px}}
+
+
+
+/* [UI FIX 2026-06-09]
+   Menu and To Battle must look like one matched top-right control group.
+   The previous To Battle button inherited .designerCloseBtn{font-size:13px} and sat in
+   the panel title flow while Menu was fixed to the viewport, so the two buttons looked
+   crooked and inconsistent. Both are now forced to the same box size, font, radius,
+   and viewport-aligned top coordinate. */
+:root{
+  --topActionRight:18px;
+  --topActionTop:18px;
+  --topActionWidth:132px;
+  --topActionHeight:44px;
+  --topActionGap:14px;
+}
+.mainMenuWrap{
+  position:fixed !important;
+  right:var(--topActionRight) !important;
+  top:var(--topActionTop) !important;
+  z-index:90 !important;
+  display:grid !important;
+  justify-items:end !important;
+  gap:8px !important;
+}
+.mainMenuBtn,
+.designerCloseBtn{
+  box-sizing:border-box !important;
+  width:var(--topActionWidth) !important;
+  min-width:var(--topActionWidth) !important;
+  max-width:var(--topActionWidth) !important;
+  height:var(--topActionHeight) !important;
+  min-height:var(--topActionHeight) !important;
+  max-height:var(--topActionHeight) !important;
+  padding:0 !important;
+  margin:0 !important;
+  border-radius:14px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+  line-height:1 !important;
+  font-size:18px !important;
+  font-weight:950 !important;
+  letter-spacing:-0.01em !important;
+  white-space:nowrap !important;
+  vertical-align:top !important;
+  border-color:#4d6fa8 !important;
+  background:linear-gradient(180deg,rgba(18,35,58,.96),rgba(7,14,27,.96)) !important;
+  box-shadow:0 8px 28px rgba(0,0,0,.28) !important;
+}
+.mainMenuBtn:hover:not(:disabled),
+.designerCloseBtn:hover:not(:disabled){
+  transform:none !important;
+}
+body.mode-design .designerCloseBtn{
+  position:fixed !important;
+  top:var(--topActionTop) !important;
+  right:calc(var(--topActionRight) + var(--topActionWidth) + var(--topActionGap)) !important;
+  z-index:89 !important;
+}
+body.mode-design .designerPanel>.panelTitle{
+  padding-right:calc(var(--topActionWidth) * 2 + var(--topActionGap) + 28px) !important;
+  min-height:var(--topActionHeight) !important;
+}
+@media(max-width:720px){
+  :root{--topActionRight:12px;--topActionTop:12px;--topActionWidth:112px;--topActionHeight:42px;--topActionGap:8px;}
+  .mainMenuBtn,.designerCloseBtn{font-size:15px !important;border-radius:12px !important;}
+  .mainMenuPanel{width:min(230px,92vw) !important;}
+}
+
+
+/* [MOBILE AUTO LAYOUT]
+   Mobile is detected by JS using coarse pointer or narrow viewport.
+   In mobile battle mode, spell slots become a bottom touch casting panel. */
+body.mobile-layout{padding:8px;overflow-x:hidden}
+body.mobile-layout:not(.mode-design){padding-bottom:310px}
+body.mobile-layout:not(.mode-design) .layout{display:block;max-width:100%;height:auto;margin:0}
+body.mobile-layout:not(.mode-design) .combatPanel{height:auto;overflow:visible;padding:8px;border-radius:16px}
+body.mobile-layout:not(.mode-design) .combatPanel .panelTitle{margin-bottom:6px;font-size:15px}
+body.mobile-layout:not(.mode-design) #battleCanvas{width:100%;height:auto;aspect-ratio:720/520;object-fit:contain;border-radius:14px}
+body.mobile-layout:not(.mode-design) .battleButtons{gap:6px;margin-top:7px}
+body.mobile-layout:not(.mode-design) .battleButtons button{font-size:13px;padding:7px 8px;border-radius:9px}
+body.mobile-layout:not(.mode-design) .slotPanel{position:fixed;left:0;right:0;bottom:0;z-index:64;max-height:300px;overflow:auto;border-radius:18px 18px 0 0;padding:8px 8px 10px;background:linear-gradient(180deg,rgba(14,27,48,.98),rgba(5,10,20,.99));box-shadow:0 -12px 38px rgba(0,0,0,.55)}
+body.mobile-layout:not(.mode-design) .battleTopHud{grid-template-columns:repeat(4,minmax(78px,1fr));gap:5px;margin-bottom:6px}
+body.mobile-layout:not(.mode-design) .battleTopHud div{font-size:10px;padding:5px 6px;border-radius:10px}
+body.mobile-layout:not(.mode-design) .battleTopHud b{font-size:15px}
+body.mobile-layout:not(.mode-design) .sideBattleControls{position:static;margin:0 0 6px 0;padding:5px;border-radius:12px}
+body.mobile-layout:not(.mode-design) .autoReserveControl{grid-template-columns:auto 70px;margin:5px 0 6px;padding:6px 8px;border-radius:12px;font-size:11px}
+body.mobile-layout:not(.mode-design) .autoReserveControl b{font-size:13px}
+body.mobile-layout:not(.mode-design) .autoReserveControl input{width:70px;font-size:19px;padding:4px 6px}
+body.mobile-layout:not(.mode-design) .autoReserveControl span{display:none}
+body.mobile-layout:not(.mode-design) .slotPanel .panelTitle{display:none}
+body.mobile-layout:not(.mode-design) .slots{display:grid;grid-template-columns:repeat(5,minmax(112px,1fr));gap:6px;overflow-x:auto;padding-bottom:4px}
+body.mobile-layout:not(.mode-design) .slot{min-width:112px;min-height:108px;padding:8px;border-radius:12px;touch-action:manipulation}
+body.mobile-layout:not(.mode-design) .slotName{font-size:14px;white-space:nowrap}
+body.mobile-layout:not(.mode-design) .keyBadge{width:26px;height:26px;font-size:11px;border-radius:9px}
+body.mobile-layout:not(.mode-design) .slotStats{grid-template-columns:repeat(2,1fr);gap:4px;font-size:10px}
+body.mobile-layout:not(.mode-design) .slotStats b{font-size:16px}
+body.mobile-layout:not(.mode-design) .slotStats b.specialValue{font-size:12px}
+body.mobile-layout:not(.mode-design) .slotModeRow{margin-top:5px;font-size:10px}
+body.mobile-layout:not(.mode-design) .autoSwitch{min-width:58px;font-size:10px;padding:4px 7px 4px 24px}
+body.mobile-layout:not(.mode-design) .autoSwitch.on{padding-left:7px;padding-right:24px}
+body.mobile-layout:not(.mode-design) button,
+body.mobile-layout:not(.mode-design) .slot,
+body.mobile-layout:not(.mode-design) #battleCanvas{touch-action:manipulation}
+body.mobile-layout.mode-design{padding-bottom:8px}
+body.mobile-layout.mode-design .designerLayout{grid-template-columns:1fr}
+body.mobile-layout.mode-design .boardWrap{max-height:70vh}
+body.mobile-layout.mode-design .toolBtn{width:48px;height:44px;min-width:48px}
+body.mobile-layout.mode-design .statGrid{grid-template-columns:repeat(2,1fr)}
+@media(max-width:640px){
+  body.mobile-layout:not(.mode-design){padding-bottom:335px}
+  body.mobile-layout:not(.mode-design) .slotPanel{max-height:330px}
+  body.mobile-layout:not(.mode-design) .battleTopHud{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+
+
+/* [MOBILE STABILITY PATCH]
+   Phone UI gets a dedicated compact layout. This block is intentionally placed at
+   the end of the style sheet so it overrides earlier desktop/mobile rules. */
+@media (max-width: 820px), (pointer: coarse){
+  html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
+  body.mobile-layout{padding:calc(6px + env(safe-area-inset-top)) 6px calc(6px + env(safe-area-inset-bottom));font-size:14px}
+  body.mobile-layout .panel{border-radius:14px;padding:9px}
+  body.mobile-layout .panelTitle{font-size:17px;line-height:1.2;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  body.mobile-layout .panelTitle em{font-size:11px;line-height:1.25;max-width:100%}
+  body.mobile-layout .mainMenuWrap{top:calc(8px + env(safe-area-inset-top)) !important;right:8px !important;z-index:160 !important}
+  body.mobile-layout .mainMenuBtn,
+  body.mobile-layout .designerCloseBtn{width:96px !important;min-width:96px !important;max-width:96px !important;height:40px !important;min-height:40px !important;max-height:40px !important;font-size:14px !important;border-radius:12px !important}
+  body.mobile-layout .mainMenuPanel{width:min(230px,92vw) !important}
+
+  /* Battle view: keep the canvas ratio and make the bottom slot bar compact. */
+  body.mobile-layout:not(.mode-design){padding-bottom:248px !important}
+  body.mobile-layout:not(.mode-design) .layout{display:block !important;max-width:100% !important;height:auto !important;margin:0 !important}
+  body.mobile-layout:not(.mode-design) .combatPanel{padding:7px !important;border-radius:14px !important;overflow:visible !important}
+  body.mobile-layout:not(.mode-design) .combatPanel .panelTitle{display:block;margin-bottom:5px;font-size:15px}
+  body.mobile-layout:not(.mode-design) .combatPanel .panelTitle em{display:block;margin-top:3px;font-size:10px;color:var(--muted)}
+  body.mobile-layout:not(.mode-design) #battleCanvas{width:100% !important;height:auto !important;aspect-ratio:720/520 !important;object-fit:contain !important;border-radius:12px !important}
+  body.mobile-layout:not(.mode-design) .battleButtons{display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-top:6px}
+  body.mobile-layout:not(.mode-design) .battleButtons button{min-width:0;font-size:10.5px;line-height:1.1;padding:7px 3px;border-radius:9px;white-space:normal}
+
+  body.mobile-layout:not(.mode-design) .slotPanel{position:fixed !important;left:0 !important;right:0 !important;bottom:0 !important;z-index:120 !important;max-height:238px !important;overflow:hidden !important;border-radius:16px 16px 0 0 !important;padding:7px 7px calc(8px + env(safe-area-inset-bottom)) !important;background:linear-gradient(180deg,rgba(14,27,48,.985),rgba(5,10,20,.995)) !important;box-shadow:0 -10px 34px rgba(0,0,0,.58) !important}
+  body.mobile-layout:not(.mode-design) .battleTopHud{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:4px;margin-bottom:5px}
+  body.mobile-layout:not(.mode-design) .battleTopHud div{min-width:0;font-size:9px;line-height:1.1;padding:4px 4px;border-radius:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body.mobile-layout:not(.mode-design) .battleTopHud b{font-size:12.5px;line-height:1.1;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.mobile-layout:not(.mode-design) .sideBattleControls{position:static !important;display:flex !important;gap:5px;margin:0 0 5px 0 !important;padding:4px !important;border-radius:10px !important;min-height:0}
+  body.mobile-layout:not(.mode-design) .speedControls{width:100%;gap:4px;padding:3px 4px;justify-content:space-between;font-size:9px}
+  body.mobile-layout:not(.mode-design) .speedControls span{display:none}
+  body.mobile-layout:not(.mode-design) .speedBtn{flex:1;min-width:0 !important;padding:5px 2px !important;font-size:11px;border-radius:8px}
+  body.mobile-layout:not(.mode-design) .autoReserveControl{display:grid !important;grid-template-columns:auto 58px !important;gap:6px;align-items:center;margin:0 0 5px 0 !important;padding:5px 7px !important;border-radius:10px !important;font-size:10px}
+  body.mobile-layout:not(.mode-design) .autoReserveControl b{font-size:11.5px;white-space:nowrap}
+  body.mobile-layout:not(.mode-design) .autoReserveControl input{width:58px !important;font-size:17px !important;line-height:1 !important;padding:3px 5px !important;border-radius:8px}
+  body.mobile-layout:not(.mode-design) .autoReserveControl span{display:none !important}
+  body.mobile-layout:not(.mode-design) .slotPanel .panelTitle{display:none !important}
+  body.mobile-layout:not(.mode-design) .slots{display:grid !important;grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:5px !important;overflow:visible !important;padding:0 !important}
+  body.mobile-layout:not(.mode-design) .slot{min-width:0 !important;min-height:96px !important;padding:5px !important;border-radius:11px !important;touch-action:manipulation !important}
+  body.mobile-layout:not(.mode-design) .slotHead{gap:3px;margin-bottom:4px}
+  body.mobile-layout:not(.mode-design) .keyBadge{width:22px !important;height:22px !important;min-width:22px !important;font-size:10px !important;border-radius:8px !important}
+  body.mobile-layout:not(.mode-design) .slotName{font-size:10.5px !important;line-height:1.12;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.mobile-layout:not(.mode-design) .slot.empty .small{display:none}
+  body.mobile-layout:not(.mode-design) .slotStats{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:2px !important;font-size:8px !important;line-height:1.05;margin:0 !important}
+  body.mobile-layout:not(.mode-design) .slotStats span{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.mobile-layout:not(.mode-design) .slotStats b{font-size:12.5px !important;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.mobile-layout:not(.mode-design) .slotStats b.specialValue{font-size:9.5px !important}
+  body.mobile-layout:not(.mode-design) .slotModeRow{margin-top:3px !important;font-size:9px !important;justify-content:center}
+  body.mobile-layout:not(.mode-design) .slotModeRow>span:first-child{display:none}
+  body.mobile-layout:not(.mode-design) .manualOnlyBadge{font-size:9px;padding:3px 5px}
+  body.mobile-layout:not(.mode-design) .autoSwitch{min-width:46px !important;font-size:9px !important;padding:3px 5px 3px 20px !important;border-radius:999px}
+  body.mobile-layout:not(.mode-design) .autoSwitch::before{width:11px;height:11px;left:5px}
+  body.mobile-layout:not(.mode-design) .autoSwitch.on{padding-left:5px !important;padding-right:20px !important}
+  body.mobile-layout:not(.mode-design) .autoSwitch.on::before{left:calc(100% - 16px)}
+
+  /* Designer view: no horizontal page overflow; top action buttons are fixed but not overlapping. */
+  body.mobile-layout.mode-design{padding-bottom:8px !important;overflow-x:hidden}
+  body.mobile-layout.mode-design .designerPanel{margin:0 !important;width:100% !important;max-width:100% !important;min-height:100dvh !important;padding:9px !important;border-radius:14px !important;overflow:visible !important}
+  body.mobile-layout.mode-design .designerPanel>.panelTitle{padding:46px 0 0 0 !important;min-height:0 !important;align-items:flex-start !important}
+  body.mobile-layout.mode-design .designerPanel>.panelTitle>span{font-size:18px;line-height:1.2}
+  body.mobile-layout.mode-design .designerPanel>.panelTitle em{display:block;width:100%;font-size:11px}
+  body.mobile-layout.mode-design .designerCloseBtn{position:fixed !important;top:calc(8px + env(safe-area-inset-top)) !important;left:8px !important;right:auto !important;z-index:150 !important}
+  body.mobile-layout.mode-design .designerLayout{display:grid !important;grid-template-columns:1fr !important;gap:10px !important}
+  body.mobile-layout.mode-design .row{gap:6px;margin-bottom:8px}
+  body.mobile-layout.mode-design .row label{font-size:13px;display:flex;align-items:center;gap:5px}
+  body.mobile-layout.mode-design select,
+  body.mobile-layout.mode-design input,
+  body.mobile-layout.mode-design button{font-size:14px;border-radius:10px}
+  body.mobile-layout.mode-design #frameW,
+  body.mobile-layout.mode-design #frameH{width:64px;padding:7px 8px}
+  body.mobile-layout.mode-design #rotateBtn{padding:7px 9px}
+  body.mobile-layout.mode-design .toolBar{display:grid !important;grid-template-columns:repeat(5,minmax(0,1fr)) !important;gap:6px !important;margin-bottom:8px}
+  body.mobile-layout.mode-design .toolBtn{width:auto !important;min-width:0 !important;height:42px !important;padding:4px !important;border-radius:10px}
+  body.mobile-layout.mode-design .toolIconSvg{width:34px;height:34px}
+  body.mobile-layout.mode-design .toolBtn.locked::after{font-size:8px;right:-3px;top:-7px;padding:1px 4px}
+  body.mobile-layout.mode-design .toolInfo{font-size:12px;line-height:1.35;padding:8px;border-radius:12px}
+  body.mobile-layout.mode-design .boardWrap{max-height:none !important;overflow:visible !important;padding:6px !important;border-radius:12px}
+  body.mobile-layout.mode-design .designBoard{touch-action:none;margin:0 auto !important;will-change:transform}
+  body.mobile-layout.mode-design .gridCell{border-radius:7px}
+  body.mobile-layout.mode-design .help{font-size:12px;line-height:1.45;margin-top:8px;max-height:150px;overflow:auto}
+  body.mobile-layout.mode-design .sideControls{gap:8px}
+  body.mobile-layout.mode-design .statGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:6px}
+  body.mobile-layout.mode-design .statCard{min-height:50px;padding:7px;border-radius:10px}
+  body.mobile-layout.mode-design .statCard span{font-size:11px}
+  body.mobile-layout.mode-design .statCard b{font-size:18px}
+  body.mobile-layout.mode-design .breakdown{max-height:130px;font-size:11px}
+  body.mobile-layout.mode-design .loadButtons{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+  body.mobile-layout.mode-design .loadButtons button{font-size:11px;padding:7px 2px}
+  body.mobile-layout.mode-design .deckControls{padding:8px;border-radius:12px}
+  body.mobile-layout.mode-design .deckRow,
+  body.mobile-layout.mode-design .deckNameRow{grid-template-columns:1fr !important;gap:6px}
+
+  /* Modal screens */
+  body.mobile-layout .mapModal,
+  body.mobile-layout .keySettingsModal{padding:8px !important;align-items:stretch !important;place-items:stretch !important}
+  body.mobile-layout .mapBox,
+  body.mobile-layout .keySettingsBox{width:100% !important;max-width:100% !important;max-height:calc(100dvh - 16px) !important;padding:10px !important;border-radius:16px !important}
+  body.mobile-layout .mapBox .panelTitle,
+  body.mobile-layout .keySettingsBox .panelTitle{align-items:flex-start;gap:6px}
+  body.mobile-layout .mapStarSummary{margin-left:0;width:100%;text-align:left;font-size:13px}
+  body.mobile-layout .unlockCodeRow,
+  body.mobile-layout .runModeRow{grid-template-columns:1fr !important;gap:7px !important;padding:8px !important}
+  body.mobile-layout .modeNote{grid-column:auto !important}
+  body.mobile-layout .mapCards{grid-template-columns:1fr !important;gap:9px !important}
+  body.mobile-layout .mapCard{min-height:auto !important;padding:11px !important;border-radius:14px !important}
+  body.mobile-layout .mapCard h3{font-size:19px}
+  body.mobile-layout .mapDesc{min-height:0;font-size:13px}
+  body.mobile-layout .mapRecordGrid{gap:6px}
+  body.mobile-layout .mapRecord,
+  body.mobile-layout .mapUnlock,
+  body.mobile-layout .mapThreshold{padding:8px;border-radius:10px}
+  body.mobile-layout .keySettingsGrid{grid-template-columns:1fr !important;gap:8px !important}
+  body.mobile-layout .keySettingSection{padding:10px;border-radius:14px}
+  body.mobile-layout .keySettingRow{grid-template-columns:1fr 74px !important;padding:7px}
+  body.mobile-layout .keySettingsFooter{justify-content:stretch}
+  body.mobile-layout .keySettingsFooter button{flex:1}
+  body.mobile-layout .languageBox{padding:22px;border-radius:20px}
+}
+
+@media (max-width: 380px){
+  body.mobile-layout:not(.mode-design){padding-bottom:258px !important}
+  body.mobile-layout:not(.mode-design) .slotPanel{max-height:250px !important}
+  body.mobile-layout:not(.mode-design) .battleButtons{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.mobile-layout:not(.mode-design) .slot{min-height:101px !important;padding:4px !important}
+  body.mobile-layout:not(.mode-design) .slotName{display:none}
+  body.mobile-layout:not(.mode-design) .slotStats b{font-size:11.5px !important}
+}
+
+@media (orientation: landscape) and (max-height: 520px){
+  body.mobile-layout:not(.mode-design){padding-bottom:0 !important}
+  body.mobile-layout:not(.mode-design) .layout{display:grid !important;grid-template-columns:1fr 240px !important;gap:6px !important}
+  body.mobile-layout:not(.mode-design) .slotPanel{position:static !important;max-height:calc(100dvh - 16px) !important;border-radius:14px !important;overflow:auto !important;padding:6px !important}
+  body.mobile-layout:not(.mode-design) .battleTopHud{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+  body.mobile-layout:not(.mode-design) .slots{grid-template-columns:1fr !important;overflow:visible !important}
+  body.mobile-layout:not(.mode-design) .slot{min-height:74px !important}
+}
+
+</style>
+</head>
+<body>
+
+<div id="languageModal" class="languageModal" role="dialog" aria-modal="true" aria-labelledby="languageTitle">
+  <div class="languageBox">
+    <div id="languageTitle" class="languageLogo">Jesulkr</div>
+    <div class="languageSub">언어를 선택하세요.<br>Select your language.</div>
+    <div class="languageButtons">
+      <button id="langKoBtn" type="button">한국어</button>
+      <button id="langEnBtn" type="button">English</button>
+    </div>
+    <div class="languageFoot">처음 선택한 언어는 이 브라우저에 저장됩니다.</div>
+  </div>
+</div>
+<div id="mainMenuWrap" class="mainMenuWrap" aria-label="메뉴">
+  <button id="mainMenuBtn" class="mainMenuBtn" type="button">메뉴</button>
+  <div id="mainMenuPanel" class="mainMenuPanel hidden">
+    <div class="mainMenuTitle">메뉴</div>
+    <button id="menuKeySettingsBtn" type="button">키 설정</button>
+    <div class="mainMenuLang">
+      <div class="mainMenuLangLabel">언어</div>
+      <div class="mainMenuLangButtons">
+        <button id="menuLangKoBtn" type="button">한국어</button>
+        <button id="menuLangEnBtn" type="button">English</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="hud">
+  <div class="title">Jesulkr</div>
+  <div class="hudItem">점수 <b id="hudScore">0</b></div>
+  <div class="hudItem">마나 <b id="hudMana">20 / 20</b></div>
+  <div class="hudItem">기지 HP <b id="hudBase">20</b></div>
+  <div class="hudItem">생존 <b id="hudTime">0초</b></div>
+  <div class="hudItem">상태 <b id="hudState">설계 중</b></div>
+  <div class="hudItem">맵 <b id="hudMap">-</b></div>
+</div>
+
+<div class="layout">
+  <section class="panel combatPanel">
+    <div class="panelTitle"><span>전투 화면</span><em>커스텀키: 술식 사용 / 클릭: 타겟 지정 / 발사시간 고정</em></div>
+    <canvas id="battleCanvas" width="720" height="520"></canvas>
+    <div class="battleButtons">
+      <!-- [전투 조작 버튼]
+           기본 전투 조작만 이 줄에 둔다. 키 설정/언어는 우측 상단 메뉴 안으로 이동했다.
+           버튼 문구는 renderControlButtonLabels()에서 현재 키 설정값으로 자동 갱신된다. -->
+      <button id="openDesignerBtn">설계 열기 (D)</button>
+      <button id="pauseBtn">일시정지 (SPC)</button>
+      <button id="restartBtn">전투 재시작 (R)</button>
+      <button id="mapSelectBtn">맵 선택 (M)</button>
+    </div>
+  </section>
+  <aside class="panel slotPanel">
+    <!-- 전투 중 계속 봐야 하는 HUD는 슬롯 패널 상단에 둔다.
+         전투 캔버스 위에 HUD를 올리면 세로 공간이 줄어들고 캔버스 비율이 깨지기 쉬움. -->
+    <div class="battleTopHud">
+      <div>맵 <b id="battleHudMap">-</b></div>
+      <div>점수 <b id="battleHudScore">0</b></div>
+      <div>마나 <b id="battleHudMana">20 / 20</b></div>
+      <div>기지 HP <b id="battleHudBase">20</b></div>
+    </div>
+    <!-- [전투 속도 고정 영역]
+         오른쪽 슬롯 패널 상단에는 전투 중 자주 누르는 배속 버튼을 둔다. -->
+    <div class="sideBattleControls">
+      <div class="speedControls sideSpeedControls" aria-label="전투 속도">
+        <span>배속</span>
+        <button class="speedBtn active" data-speed="1" type="button" title="1배속">x1</button>
+        <button class="speedBtn" data-speed="2" type="button" title="2배속">x2</button>
+        <button class="speedBtn" data-speed="4" type="button" title="4배속">x4</button>
+        <button class="speedBtn" data-speed="8" type="button" title="8배속">x8</button>
+      </div>
+    </div>
+    <label class="autoReserveControl" title="자동 발사는 사용 후 마나가 이 값보다 낮아지면 대기합니다.">
+      <b>자동 마나 보존</b>
+      <input id="autoReserveInput" type="number" min="0" max="20" step="1" value="0">
+      <span>자동 발사는 사용 후 마나가 이 값 미만이면 대기합니다. 기본값 0.</span>
+    </label>
+    <div class="panelTitle"><span>술식 슬롯</span><em>마나 / 일반 / 특수 / 쿨타임만 표시</em></div>
+    <div id="slots" class="slots"></div>
+  </aside>
+</div>
+
+<section id="designerPanel" class="panel designerPanel">
+  <div class="panelTitle"><span>술식 설계</span><em>도선은 맵 2에서 해금되고 연결된 마나를 전달함</em><div class="row" style="margin:0"><button id="closeDesignerBtn" class="designerCloseBtn">전투 화면으로</button></div></div>
+  <div class="designerLayout">
+    <div>
+      <div class="row">
+        <label>프레임 가로 <select id="frameW"></select></label>
+        <label>세로 <select id="frameH"></select></label>
+        <button id="rotateBtn">회전: 가로</button>
+      </div>
+      <div id="toolBar" class="toolBar">
+        <button class="toolBtn active" data-tool="red">빨간 점 마나</button>
+        <button class="toolBtn" data-tool="blueGen">파란 마나 생성기</button>
+        <button class="toolBtn" data-tool="wire">도선</button>
+        <button class="toolBtn" data-tool="circle">1칸 회로</button>
+        <button class="toolBtn" data-tool="oval">2칸 타원</button>
+        <button class="toolBtn" data-tool="kernel">2x2 핵</button>
+        <button class="toolBtn" data-tool="mixed2">2칸 혼합</button>
+        <button class="toolBtn" data-tool="mixedCore">9칸 혼합 핵</button>
+        <button class="toolBtn" data-tool="eraser">지우개</button>
+      </div>
+      <div id="toolInfo" class="toolInfo"></div>
+      <div class="boardWrap"><div id="designBoard" class="designBoard"></div></div>
+      <div class="help">
+        빨간 점은 기본 마나입니다. 파란 마나 생성기는 빨간 마나와 연결되어야 작동하고 추가 마나 2를 씁니다.<br>
+        도선은 맵 2에서 해금됩니다. 멀리 있는 마나를 회로에 연결하고, 연결된 마나는 인접 마나처럼 계산됩니다.<br>
+        2칸 혼합 회로는 빨강+파랑 한 쌍당 일반 데미지 8, 9칸 혼합 핵은 빨강 1개+파랑 2개+작동 중인 1칸 회로 1개 묶음마다 일반 데미지 60과 특수 데미지 분산 3을 줍니다. 분산은 기지에 가까운 적 최대 3개에게 각각 피해를 주는 방식입니다.<br>
+        배치 팁: 마우스를 누른 채 움직이면 선택한 부품을 연속 배치합니다. 우클릭하면 해당 칸 부품을 즉시 삭제하고, 지우개는 드래그 삭제가 됩니다. 설계판 위에서 마우스 휠을 굴리면 가로/세로가 바뀝니다. 단축키는 키 설정 메뉴에서 바꿀 수 있습니다.
+      </div>
+    </div>
+    <div class="sideControls">
+      <label>술식 이름 <input id="spellName" maxlength="18" placeholder="이름 없는 술식"></label>
+      <div id="spellStats" class="statsBox"></div>
+      <label>저장할 슬롯
+        <select id="slotSelect">
+          <option value="0">1번 슬롯</option><option value="1">2번 슬롯</option><option value="2">3번 슬롯</option><option value="3">4번 슬롯</option><option value="4">5번 슬롯</option>
+        </select>
+      </label>
+      <button id="saveBtn" class="good">슬롯에 저장</button>
+      <div class="deckControls designerDeckControls">
+        <div class="deckHead"><b>덱 관리</b><span>5개 슬롯 묶음 10개 저장</span></div>
+        <div class="deckRow deckNameRow">
+          <select id="deckSelect" aria-label="덱 선택"></select>
+          <input id="deckNameInput" maxlength="18" placeholder="덱 이름">
+          <button id="saveDeckNameBtn" type="button">이름 저장</button>
+        </div>
+        <div class="deckRow">
+          <button id="saveDeckBtn" type="button">현재 슬롯을 덱에 저장</button>
+          <button id="loadDeckBtn" type="button">덱 불러오기</button>
+          <div id="deckStatus" class="small deckStatus">덱 상태</div>
+        </div>
+      </div>
+      <div><div class="small" style="margin-bottom:6px">기존 슬롯 불러오기</div><div id="loadButtons" class="loadButtons"></div></div>
+      <button id="clearDesignBtn">설계 초기화</button>
+      <button id="clearStorageBtn" class="danger">저장 데이터 전체 삭제</button>
+      <button id="startBattleBtn" class="good" disabled>전투 시작</button>
+    </div>
+  </div>
+</section>
+
+<div id="mapModal" class="mapModal hidden">
+  <div class="mapBox">
+    <div class="panelTitle"><span>맵 선택</span><em>별 1개 이상이면 다음 맵 해금</em><div id="mapStarSummary" class="mapStarSummary">★ 0/9</div><button id="mapCloseBtn">닫기</button></div>
+    <div class="unlockCodeRow"><span>테스트 해금 비밀번호</span><input id="unlockCodeInput" type="password" inputmode="numeric" placeholder="1111"><button id="unlockCodeBtn">모든 맵 해금</button></div>
+    <div class="runModeRow">
+      <span>기록 모드</span>
+      <button class="runModeBtn active" data-run-mode="assist" type="button">자동 모드</button>
+      <button class="runModeBtn" data-run-mode="pure" type="button">수동 모드</button>
+      <div class="modeNote">별/맵 해금 조건은 자동 모드 기록으로도 달성됩니다. 수동 모드 기록은 별도로 저장됩니다.</div>
+    </div>
+    <div id="mapCards" class="mapCards"></div>
+  </div>
+</div>
+
+<div id="keySettingsModal" class="keySettingsModal hidden">
+  <div class="keySettingsBox">
+    <div class="panelTitle"><span>키 설정</span><em>술식, 설계 전환, 정지, 재시작, 배속을 모두 여기서 설정</em><button id="keySettingsCloseBtn">닫기</button></div>
+    <div class="small">버튼을 누른 뒤 원하는 키를 입력하세요. Esc는 취소입니다. 같은 키를 두 기능에 중복 지정할 수 없습니다.</div>
+    <div id="keySettingsGrid" class="keySettingsGrid"></div>
+    <div class="keySettingsFooter">
+      <button id="resetKeyBindingsBtn" class="danger" type="button">모든 키 기본값으로</button>
+      <button id="keySettingsCloseBtn2" type="button">닫기</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/*
+  [개발 각주 / 미래 수정용 메모]
+  1) 화면 상태는 setState() 하나로만 바꾼다.
+     - design: 설계 화면만 보임
+     - ready: 전투 화면은 보이지만 아직 진행하지 않는 대기 상태
+     - battle: 실제 전투 진행 상태
+     - paused/gameover: 전투 화면은 보이지만 틱 업데이트가 멈춘 상태
+  2) PC에서 설계 화면이 전투 화면 위를 덮어 조작을 막지 않도록,
+     design 상태에서는 .layout 자체를 숨기고 설계 화면만 보여준다.
+     battle/ready/paused/gameover 상태에서는 designerPanel을 숨긴다.
+  3) 전개시간(castTime)은 명중 지연이 아니라 슬롯 쿨타임이다.
+     실제 명중까지의 시간은 HIT_DELAY_TICKS로 모든 술식이 동일하다.
+  4) 점수는 몬스터 처치 시 maxHp * 10. 별/맵 해금/마나 보너스는 checkMapUnlocks()와 getTotalStars()에서 처리한다.
+  5) 술식 계산 규칙은 calculateSpellStats(), 도선 연결 규칙은 buildConnectionGraph(),
+     회로가 읽는 마나는 getConnectedComponents()를 먼저 확인하면 된다.
+  6) 전투 배속은 game.battleSpeed로 관리하고 loop()에서 실제 틱 처리량만 늘린다.
+     쿨타임/마나회복/몹 이동/보스 주기가 모두 같은 배속으로 빨라진다. 버튼 표기는 1/2/4/8이지만 실제 의미는 1x/2x/4x/8x다.
+     일반 몬스터와 보스의 스폰 주기에는 게임 밸런스용 하한을 두지 않는다.
+     단, 한 틱에 무한 생성되는 실행 오류만 막기 위해 최소 타이머는 1틱으로 처리한다.
+  7) 덱은 5개 슬롯 전체를 저장하는 묶음이다. 현재 슬롯과 덱 저장은 분리되어 있으니,
+     슬롯을 바꾼 뒤 오래 보관하려면 "현재 슬롯을 덱에 저장"을 눌러야 한다.
+  8) 도구 해금은 isToolUnlocked()가 담당한다. 맵2 해금 시 파란 생성기/도선/2칸 혼합,
+     맵3 해금 시 9칸 혼합 핵을 사용할 수 있다.
+  9) 맵별 별은 최고 점수로만 계산한다. 총 별 5개 이상이면 초당 마나 회복이 6에서 10으로 오른다.
+  10) 설계 편집 단축 조작: 일반 부품 드래그 연속 배치, 우클릭 삭제, 지우개 드래그 삭제, 설계판 휠 회전.
+      배치 좌표는 createComponentFromPointer()에서 실제 마우스 위치를 부품 중심으로 삼아 top-left를 계산한다.
+      1x2/2x2처럼 중심이 칸 사이에 걸리는 부품도 마우스 위치의 좌우/상하 절반에 따라 자연스럽게 스냅된다.
+      술식 슬롯 키는 KEY_BINDING_STORAGE_KEY, 공통 조작 키는 CONTROL_BINDING_STORAGE_KEY에 저장된다.
+*/
+
+const STORAGE_KEY = "magic_design_game_slots_v2";
+const LEGACY_STORAGE_KEY = "magic_design_game_slots_v1";
+const DECK_STORAGE_KEY = "magic_design_game_decks_v1";
+const DECK_NAME_STORAGE_KEY = "magic_design_game_deck_names_v1";
+const KEY_BINDING_STORAGE_KEY = "magic_design_game_key_bindings_v1";
+const CONTROL_BINDING_STORAGE_KEY = "magic_design_game_control_bindings_v1";
+const SLOT_AUTO_STORAGE_KEY = "magic_design_game_slot_auto_modes_v1";
+const AUTO_MANA_RESERVE_STORAGE_KEY = "magic_design_game_auto_mana_reserve_v1";
+const LANGUAGE_STORAGE_KEY = "jesulkr_language_v1";
+const RUN_MODE_STORAGE_KEY = "magic_design_game_selected_run_mode_v1";
+const RECORD_STORAGE_KEY = "magic_design_game_map_records_v3";
+const LEGACY_RECORD_STORAGE_KEY = "magic_design_game_map_records_v2";
+const UNLOCK_KEY = "magic_design_game_map_unlocks_star_v2";
+const OLD_RECORD_KEY = "magic_design_game_map_records_v1";
+const STAR_THRESHOLDS = {
+  1:[15000,20000,25000],
+  2:[55000,65000,75000],
+  3:[60000,70000,80000]
+};
+const MANA_BONUS_STAR_COUNT = 5;
+const MAPS = [
+  null,
+  {id:1, shortName:"맵 1", name:"맵 1: 기본 침공", desc:"몬스터 HP가 1~20 사이로 등장합니다. 별 조건: 15,000 / 20,000 / 25,000점.", minHp:1, maxHp:20},
+  {id:2, shortName:"맵 2", name:"맵 2: 강화 침공", desc:"몬스터 HP가 1~50 사이로 등장합니다. 별 조건: 55,000 / 60,000 / 65,000점. 파란 마나 생성기, 도선, 2칸 혼합 회로가 해금됩니다.", minHp:1, maxHp:50},
+  {id:3, shortName:"맵 3", name:"맵 3: 반복 보스", desc:"HP 1~20 몬스터와 HP 500 보스가 반복 등장합니다. 별 조건: 60,000 / 70,000 / 80,000점. 9칸 혼합 핵이 해금됩니다.", minHp:1, maxHp:20, repeatingBoss:true, firstBossAt:30, bossHp:500, bossInterval:30, bossIntervalDecay:0.84}
+];
+const TICK_SEC = 1 / 20;
+const HIT_DELAY_TICKS = 4;
+const CORE_AOE_TARGET_LIMIT = 3;
+const MAX_MANA = 20;
+const BASE_MANA_REGEN = 6;
+const STAR_MANA_REGEN = 10;
+const LANES = 5;
+const CELL = 58;
+const GAP = 4;
+const MAX_FRAME = 11;
+
+const CONTROL_ACTIONS = [
+  {id:"toggleDesign", name:"설계 열기/닫기", desc:"전투 화면과 설계 화면을 전환", def:{code:"KeyD", key:"d", label:"D"}},
+  {id:"pause", name:"일시정지", desc:"전투 중 정지/재개", def:{code:"Space", key:" ", label:"SPC"}},
+  {id:"restart", name:"전투 재시작", desc:"현재 선택된 맵으로 바로 재시작", def:{code:"KeyR", key:"r", label:"R"}},
+  {id:"mapSelect", name:"맵 선택", desc:"맵 선택창 열기", def:{code:"KeyM", key:"m", label:"M"}},
+  {id:"speed1", name:"전투 속도 1x", desc:"전투 배속을 1배로 변경", def:{code:"KeyZ", key:"z", label:"Z"}},
+  {id:"speed2", name:"전투 속도 2x", desc:"전투 배속을 2배로 변경", def:{code:"KeyX", key:"x", label:"X"}},
+  {id:"speed4", name:"전투 속도 4x", desc:"전투 배속을 4배로 변경", def:{code:"KeyC", key:"c", label:"C"}},
+  {id:"speed8", name:"전투 속도 8x", desc:"전투 배속을 8배로 변경", def:{code:"KeyV", key:"v", label:"V"}}
+];
+
+const TOOL_DESCRIPTIONS = {
+  red:{name:"빨간 점 마나", text:"기본 마나 소스입니다. 배치 1개당 마나 비용 +1. 기존 빨간 회로와 혼합 회로가 읽을 수 있습니다.", formula:"비용 +1"},
+  blueGen:{name:"파란 마나 생성기", text:"빨간 마나와 직접 인접하거나 도선으로 연결되어야 작동합니다. 작동하면 추가 마나 2를 쓰고 파란 마나 1개를 제공합니다.", formula:"연결 빨간 마나 ≥ 1 → 파란 마나 1개, 비용 +2"},
+  wire:{name:"도선", text:"맵 2에서 해금됩니다. 마나를 먼 회로에 연결합니다. 같은 도선망에 연결된 마나는 회로에 인접한 마나처럼 계산됩니다. 자체 비용과 일반 데미지는 없습니다.", formula:"연결 전달"},
+  circle:{name:"1칸 회로", text:"연결된 빨간 마나를 일반 데미지로 바꿉니다. 일반 데미지가 1 이상 나오는 작동 중 상태일 때만 9칸 혼합 핵의 조건 부품으로 인정됩니다.", formula:"연결 빨간 마나 수 × 1"},
+  oval:{name:"2칸 타원", text:"기존 빨간 2칸 회로입니다. 연결된 빨간 마나 2개 묶음마다 일반 데미지 5를 냅니다.", formula:"floor(빨간 마나 / 2) × 5"},
+  kernel:{name:"2x2 핵", text:"기존 빨간 2x2 핵입니다. 연결된 빨간 마나 3개 묶음마다 일반 데미지 12를 냅니다.", formula:"floor(빨간 마나 / 3) × 12"},
+  mixed2:{name:"2칸 혼합 회로", text:"빨간 마나와 파란 마나를 한 쌍으로 묶어 고효율 일반 데미지를 냅니다.", formula:"min(빨간 마나, 파란 마나) × 8"},
+  mixedCore:{name:"9칸 혼합 핵", text:"3x3 고위 회로입니다. 빨간 마나 1개, 파란 마나 2개, 작동 중인 1칸 회로 1개가 한 묶음입니다. 묶음마다 일반 데미지 60과 특수 데미지 분산 3을 줍니다. 분산은 기지에 가까운 적 최대 3개에게 각각 피해를 주는 방식입니다.", formula:"min(빨강 마나, floor(파란 마나 / 2), 인접 활성 1칸 회로 수) × (일반 60 + 분산 3)"},
+  eraser:{name:"지우개", text:"클릭하거나 드래그한 칸의 부품을 제거합니다. 지우개가 아니어도 설계판에서 우클릭하면 즉시 삭제됩니다.", formula:"제거"}
+};
+const TOOL_ORDER = ["red","blueGen","wire","circle","oval","kernel","mixed2","mixedCore","eraser"];
+
+
+
+let currentLanguage = loadLanguage();
+let translationObserver = null;
+let isTranslatingDom = false;
+
+const EN_REPLACEMENTS = [
+  ["마법 설계 게임","Jesulkr"],["점수","Score"],["마나","Mana"],["기지 HP","Base HP"],["생존","Survival"],["상태","State"],["맵","Map"],
+  ["전투 화면","Battle"],["커스텀키: 술식 사용 / 클릭: 타겟 지정 / 발사시간 고정","Custom keys: cast spells / click: target / fixed hit delay"],
+  ["메뉴","Menu"],["언어","Language"],["한국어","Korean"],["키 설정","Key Settings"],["설계 열기","Open Designer"],["일시정지","Pause"],["전투 재시작","Restart Battle"],["맵 선택","Map Select"],
+  ["배속","Speed"],["자동 마나 보존","Auto Mana Reserve"],["자동 발사는 사용 후 마나가 이 값 미만이면 대기합니다. 기본값 0.","Auto-cast waits if mana would fall below this value. Default 0."],
+  ["술식 슬롯","Spell Slots"],["마나 / 일반 / 특수 / 쿨타임만 표시","Shows mana / normal / special / cooldown"],
+  ["술식 설계","Spell Designer"],["도선은 맵 2에서 해금되고 연결된 마나를 전달함","Wires unlock on Map 2 and transmit connected mana"],["전투 화면으로","To Battle"],
+  ["프레임 가로","Frame Width"],["세로","Height"],["회전: 가로","Rotate: Horizontal"],["회전: 세로","Rotate: Vertical"],
+  ["빨간 점 마나","Red Mana"],["파란 마나 생성기","Blue Mana Generator"],["도선","Wire"],["1칸 회로","1-cell Circuit"],["2칸 타원","2-cell Oval"],["2x2 핵","2x2 Core"],["2칸 혼합","2-cell Hybrid"],["9칸 혼합 핵","9-cell Hybrid Core"],["지우개","Eraser"],
+  ["술식 이름","Spell Name"],["이름 없는 술식","Unnamed Spell"],["저장할 슬롯","Save Slot"],["슬롯에 저장","Save to Slot"],["덱 관리","Deck Manager"],
+  ["5개 슬롯 묶음 10개 저장","Save up to 10 decks of 5 slots"],["덱 이름","Deck Name"],["이름 저장","Save Name"],["현재 슬롯을 덱에 저장","Save Current Slots to Deck"],["덱 불러오기","Load Deck"],["덱 상태","Deck Status"],
+  ["기존 슬롯 불러오기","Load Existing Slot"],["설계 초기화","Clear Design"],["저장 데이터 전체 삭제","Delete All Save Data"],["전투 시작","Start Battle"],
+  ["맵 선택","Map Select"],["별 1개 이상이면 다음 맵 해금","Earn at least 1 star to unlock the next map"],["닫기","Close"],["테스트 해금 비밀번호","Test Unlock Password"],["모든 맵 해금","Unlock All Maps"],
+  ["기록 모드","Record Mode"],["자동 모드","Auto Mode"],["수동 모드","Manual Mode"],["별/맵 해금 조건은 자동 모드 기록으로도 달성됩니다. 수동 모드 기록은 별도로 저장됩니다.","Stars/map unlocks can be earned in Auto Mode. Manual Mode records are saved separately."],
+  ["별 5개 → 초당 마나 10","5 stars → mana regen 10/sec"],["현재","Current"],["적용 중","active"],
+  ["기본 침공","Basic Invasion"],["강화 침공","Reinforced Invasion"],["반복 보스","Repeating Boss"],
+  ["상태","Status"],["해금됨","Unlocked"],["잠김","Locked"],["최고 기록","Best Record"],["자동 모드 최고 기록","Auto Mode Best"],["수동 모드 최고 기록","Manual Mode Best"],["별 조건","Star Requirements"],["술식 필요","Spell Needed"],
+  ["쿨타임","Cooldown"],["일반 데미지","Normal Damage"],["특수 데미지","Special Damage"],["일반","Normal"],["특수","Special"],["분산","Scatter"],
+  ["저장 가능","Can Save"],["저장 불가","Cannot Save"],["파란 마나","Blue Mana"],["비활성","inactive"],["활성","active"],["회로가 없습니다.","No circuits."],["총 일반 데미지","Total normal damage"],
+  ["대기 중","Ready"],["설계 중","Designing"],["전투 중","Fighting"],["게임 오버","Game Over"],
+  ["발사 방식","Cast Mode"],["자동","Auto"],["수동","Manual"],["이 슬롯에는 술식이 없습니다.","This slot has no spell."],["마나 부족","Not enough mana"],["대상 없음","No target"],
+  ["전투 중에만 술식을 사용할 수 있습니다.","Spells can be cast only during battle."],["아직 전개 중입니다.","Still on cooldown."],
+  ["언어를 선택하세요.","Select your language."],["처음 선택한 언어는 이 브라우저에 저장됩니다.","Your language choice is saved in this browser."]
+].sort((a,b)=>b[0].length-a[0].length);
+
+EN_REPLACEMENTS.push(...[
+  ["전투 속도","Battle Speed"], ["1배속","1x"], ["2배속","2x"], ["4배속","4x"], ["8배속","8x"], ["배","x"],
+  ["자동 발사는 사용 후 마나가 이 값보다 낮아지면 대기합니다.","Auto-cast waits if mana would fall below this value after casting."],
+  ["덱 선택","Deck Select"],
+  ["몬스터 HP가 1~20 사이로 등장합니다. 별 조건: 15,000 / 20,000 / 25,000점.","Monsters appear with HP 1-20. Star goals: 15,000 / 20,000 / 25,000 pts."],
+  ["몬스터 HP가 1~50 사이로 등장합니다. 별 조건: 55,000 / 60,000 / 65,000점. 파란 마나 생성기, 도선, 2칸 혼합 회로가 해금됩니다.","Monsters appear with HP 1-50. Star goals: 55,000 / 60,000 / 65,000 pts. Unlocks Blue Mana Generator, Wire, and 2-cell Hybrid Circuit."],
+  ["HP 1~20 몬스터와 HP 500 보스가 반복 등장합니다. 별 조건: 60,000 / 70,000 / 80,000점. 9칸 혼합 핵이 해금됩니다.","HP 1-20 monsters and a recurring HP 500 boss appear. Star goals: 60,000 / 70,000 / 80,000 pts. Unlocks the 9-cell Hybrid Core."],
+  ["전투 화면과 설계 화면을 전환","Switch between the battle screen and the designer"], ["전투 중 정지/재개","Pause/resume during battle"], ["현재 선택된 맵으로 바로 재시작","Restart immediately on the selected map"], ["맵 선택창 열기","Open the map selection window"],
+  ["전투 배속을 1배로 변경","Set battle speed to 1x"], ["전투 배속을 2배로 변경","Set battle speed to 2x"], ["전투 배속을 4배로 변경","Set battle speed to 4x"], ["전투 배속을 8배로 변경","Set battle speed to 8x"],
+  ["기본 마나 소스입니다. 배치 1개당 마나 비용 +1. 기존 빨간 회로와 혼합 회로가 읽을 수 있습니다.","A basic mana source. Each placed red mana adds +1 mana cost. Red circuits and hybrid circuits can read it."],
+  ["빨간 마나와 직접 인접하거나 도선으로 연결되어야 작동합니다. 작동하면 추가 마나 2를 쓰고 파란 마나 1개를 제공합니다.","Works only when directly adjacent to red mana or connected by wires. When active, it spends +2 extra mana and provides 1 blue mana."],
+  ["맵 2에서 해금됩니다. 마나를 먼 회로에 연결합니다. 같은 도선망에 연결된 마나는 회로에 인접한 마나처럼 계산됩니다. 자체 비용과 일반 데미지는 없습니다.","Unlocks on Map 2. Connects distant mana to circuits. Mana on the same wire network counts as adjacent to the circuit. It has no cost and deals no normal damage."],
+  ["연결된 빨간 마나를 일반 데미지로 바꿉니다. 일반 데미지가 1 이상 나오는 작동 중 상태일 때만 9칸 혼합 핵의 조건 부품으로 인정됩니다.","Converts connected red mana into normal damage. It counts as a condition for the 9-cell Hybrid Core only while active, meaning it deals at least 1 normal damage."],
+  ["기존 빨간 2칸 회로입니다. 연결된 빨간 마나 2개 묶음마다 일반 데미지 5를 냅니다.","A standard red 2-cell circuit. Deals 5 normal damage for each bundle of 2 connected red mana."],
+  ["기존 빨간 2x2 핵입니다. 연결된 빨간 마나 3개 묶음마다 일반 데미지 12를 냅니다.","A standard red 2x2 core. Deals 12 normal damage for each bundle of 3 connected red mana."],
+  ["빨간 마나와 파란 마나를 한 쌍으로 묶어 고효율 일반 데미지를 냅니다.","Pairs red mana and blue mana to produce high-efficiency normal damage."],
+  ["3x3 고위 회로입니다. 빨간 마나 1개, 파란 마나 2개, 작동 중인 1칸 회로 1개가 한 묶음입니다. 묶음마다 일반 데미지 60과 특수 데미지 분산 3을 줍니다. 분산은 기지에 가까운 적 최대 3개에게 각각 피해를 주는 방식입니다.","An advanced 3x3 circuit. One bundle requires 1 red mana, 2 blue mana, and 1 active 1-cell circuit. Each bundle gives 60 normal damage and special damage Scatter 3. Scatter hits up to 3 enemies closest to the base."],
+  ["클릭하거나 드래그한 칸의 부품을 제거합니다. 지우개가 아니어도 설계판에서 우클릭하면 즉시 삭제됩니다.","Removes parts on clicked or dragged cells. Right-click on the board also deletes immediately, even without the eraser."],
+  ["비용 +1","Cost +1"], ["연결 빨간 마나 ≥ 1 → 파란 마나 1개, 비용 +2","connected red mana ≥ 1 → 1 blue mana, cost +2"], ["연결 전달","Transmit connection"], ["제거","Remove"],
+  ["연결 빨간 마나 수 × 1","connected red mana × 1"], ["floor(빨간 마나 / 2) × 5","floor(red mana / 2) × 5"], ["floor(빨간 마나 / 3) × 12","floor(red mana / 3) × 12"], ["min(빨간 마나, 파란 마나) × 8","min(red mana, blue mana) × 8"],
+  ["min(빨강 마나, floor(파란 마나 / 2), 인접 활성 1칸 회로 수) × (일반 60 + 분산 3)","min(red mana, floor(blue mana / 2), adjacent active 1-cell circuits) × (normal 60 + Scatter 3)"],
+  ["맵은 볼 수 있지만 전투 시작에는 저장된 술식이 필요합니다.","You can view maps, but you need a saved spell to start battle."], ["비밀번호가 틀렸습니다.","Wrong password."], ["테스트 모드: 모든 맵과 별 9개 해금","Test mode: all maps and 9 stars unlocked."], ["저장된 술식이 필요합니다.","A saved spell is required."],
+  ["전투 화면에서 재시작할 수 있습니다.","Restart is available from the battle screen."], ["술식을 하나 이상 저장해야 전투를 시작할 수 있습니다.","Save at least one spell before starting battle."], ["전투 재개","Battle resumed"],
+  ["보스 돌파","Boss breach"], ["기지 피해","Base damage"], ["HP 500 보스 등장","HP 500 boss appeared"], ["타겟 지정: HP ","Target selected: HP "], ["이 술식은 맵 ","This spell requires Map "], [" 해금 후 사용할 수 있습니다."," to be unlocked."], ["아직 쿨타임입니다.","Still on cooldown."],
+  ["맵 선택으로 전투를 시작하거나 설계 열기로 술식을 수정하세요.","Start battle from Map Select, or open the Designer to edit spells."], ["술식을 설계하고 슬롯에 저장하세요.","Design a spell and save it to a slot."], ["로 전투를 재개합니다."," to resume battle."], ["전투 재시작 버튼으로 다시 시작합니다.","Use Restart Battle to start again."],
+  ["전투 중에는 슬롯 클릭으로 설계 화면을 열지 않습니다.","Clicking slots during battle does not open the designer."], ["클릭하면 설계 화면으로 불러옵니다.","Click to load into the designer."], ["설계 화면에서 직접 만든 술식을 저장하세요.","Save a spell you made in the designer."], ["수동 모드에서는 자동 발사를 사용할 수 없습니다.","Auto-cast is disabled in Manual Mode."],
+  ["이 부품은 아직 해금되지 않았습니다.","This part is not unlocked yet."], ["그 위치에는 배치할 수 없습니다.","Cannot place there."], ["가로 배치","Horizontal placement"], ["세로 배치","Vertical placement"], ["프레임 밖 부품을 제거했습니다.","Removed parts outside the frame."], ["해금 필요","Requires unlock"], ["해금되지 않은 부품: ","Locked parts: "], ["아직 해금되지 않은 부품이 있습니다: ","Some parts are not unlocked yet: "], ["유효한 술식이 아닙니다.","This spell is not valid."],
+  ["파란 마나 생성기 ","Blue Mana Generator "], [": 연결 빨간 마나 ",": connected red mana "], ["개 → 활성, 비용 +2"," → active, cost +2"], [": 연결 빨간 마나 없음 → 비활성",": no connected red mana → inactive"],
+  ["빨간 ","red "], ["빨강 ","red "], [", 파란 ",", blue "], [", floor(파란 ",", floor(blue "], ["파랑추가","blue extra"], ["인접 활성 1칸 회로 ","adjacent active 1-cell circuits "], ["비활성 1칸 회로 ","inactive 1-cell circuits "], ["개 제외"," excluded"], ["개 × 1"," × 1"], ["묶음 × 5"," bundles × 5"], ["묶음 × 12"," bundles × 12"], ["쌍 × 8"," pairs × 8"], ["묶음 × (일반 60 + 분산 3)"," bundles × (normal 60 + Scatter 3)"],
+  ["특수 데미지: 분산 ","Special Damage: Scatter "], [" (기지에 가까운 적 최대 "," (up to "], ["개)"," enemies)"], ["총 일반 데미지: ","Total Normal Damage: "],
+  ["덱 선택","Deck Select"], ["덱 이름을 저장했습니다.","Deck name saved."], ["현재 5개 슬롯을 ","Current 5 slots saved to "], ["에 저장했습니다.","."], ["이 덱은 비어 있습니다.","This deck is empty."], ["을 현재 슬롯에 불러왔습니다."," loaded into current slots."], ["/5 저장됨 · 현재 슬롯: ","/5 saved · current slots: "],
+  ["기본 해금","Unlocked by default"], ["맵 1에서 별 1개 이상","Earn at least 1 star on Map 1"], ["맵 2에서 별 1개 이상","Earn at least 1 star on Map 2"], ["맵 2 해금!","Map 2 unlocked!"], ["맵 3 해금!","Map 3 unlocked!"], ["별 획득! ★ ","Star earned! ★ "], ["별 5개 달성: 초당 마나 ","5 stars reached: mana regen "], ["저장된 술식, 덱, 맵 해금 진행도를 모두 삭제할까요?","Delete all saved spells, decks, and map unlock progress?"], ["저장 데이터를 초기화했습니다.","Save data reset."],
+  ["입력...","Press key..."], ["클릭 후 새 단축키를 누르세요.","Click, then press a new shortcut."], ["에 지정할 키를 누르세요. Esc로 취소",". Press a key to assign. Esc cancels."], ["키 설정 취소","Key assignment cancelled"], ["이 키는 사용할 수 없습니다.","This key cannot be used."], ["이미 ","Already used by "], ["에서 사용 중입니다.","."], ["모든 키를 기본값으로 초기화했습니다.","All keys reset to defaults."],
+  ["공통 조작 / 배속","Common Controls / Speed"], ["전투 중 해당 슬롯 술식 사용","Use this spell slot during battle"], ["모든 키 기본값으로","Reset All Keys"],
+  ["없음","None"], ["비어 있음","Empty"], ["미적용","inactive"], ["적용 중","active"], ["저장 가능","Can Save"], ["저장 불가","Cannot Save"], ["회로가 없습니다.","No circuits."], ["시작","Start"], ["닫기","Close"], ["잠김","Locked"], ["해금됨","Unlocked"], ["비용","cost"], ["연결","connected"], ["부품","part"], ["설계판","designer board"], ["우클릭","right-click"], ["클릭","click"], ["드래그","drag"]
+]);
+EN_REPLACEMENTS.sort((a,b)=>b[0].length-a[0].length);
+EN_REPLACEMENTS.push(...[
+  ["빨간 점은 기본 마나입니다. 파란 마나 생성기는 빨간 마나와 연결되어야 작동하고 추가 마나 2를 씁니다.","Red mana is the basic mana source. Blue Mana Generators must be connected to red mana and spend +2 extra mana when active."],
+  ["도선은 맵 2에서 해금됩니다. 멀리 있는 마나를 회로에 연결하고, 연결된 마나는 인접 마나처럼 계산됩니다.","Wires unlock on Map 2. They connect distant mana to circuits, and connected mana counts like adjacent mana."],
+  ["2칸 혼합 회로는 빨강+파랑 한 쌍당 일반 데미지 8, 9칸 혼합 핵은 빨강 1개+파랑 2개+작동 중인 1칸 회로 1개 묶음마다 일반 데미지 60과 특수 데미지 분산 3을 줍니다. 분산은 기지에 가까운 적 최대 3개에게 각각 피해를 주는 방식입니다.","A 2-cell Hybrid Circuit deals 8 Normal Damage per red+blue pair. A 9-cell Hybrid Core uses bundles of red 1 + blue 2 + active 1-cell circuit 1; each bundle gives Normal Damage 60 and Special Damage Scatter 3. Scatter hits up to 3 enemies closest to the base."],
+  ["배치 팁: 마우스를 누른 채 움직이면 선택한 부품을 연속 배치합니다. 우클릭하면 해당 칸 부품을 즉시 삭제하고, 지우개는 드래그 삭제가 됩니다. 설계판 위에서 마우스 휠을 굴리면 가로/세로가 바뀝니다. 단축키는 키 설정 메뉴에서 바꿀 수 있습니다.","Placement tip: hold the mouse button and move to place the selected part repeatedly. Right-click deletes the part under the cursor. The Eraser can delete by dragging. Use the mouse wheel on the designer board to switch horizontal/vertical orientation. Shortcuts can be changed in the Key Settings menu."],
+  ["저장할 슬롯","Save Slot"],
+  ["1번 슬롯","Slot 1"],["2번 슬롯","Slot 2"],["3번 슬롯","Slot 3"],["4번 슬롯","Slot 4"],["5번 슬롯","Slot 5"],
+
+  ["쿨타임 종료 시 즉시 발사","Cast immediately when cooldown ends"],
+  ["로 전투 시작"," - Start Battle"],
+  ["번 슬롯을 불러왔습니다."," slot loaded."],
+  ["번 슬롯에 저장했습니다."," slot saved."],
+  ["번 슬롯:","Slot "],
+  ["배속 단축키:","Speed shortcuts:"],
+  ["단축키","shortcut"],
+  ["발사","Hit"],
+  ["쿨","Cooldown"],
+  ["덱 ","Deck "],
+  ["슬롯 ","Slot "],
+  ["/9<br><span>별 ","/9<br><span>Stars "],
+  ["개 → 초당 마나 "," stars → mana regen "],
+  ["점"," pts"],
+  ["틱"," ticks"],
+  ["초","s"],
+  ["분","m"],
+  [" 키:"," key:"],
+  ["번",""]
+]);
+EN_REPLACEMENTS.sort((a,b)=>b[0].length-a[0].length);
+
+
+function loadLanguage(){
+  const raw = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+  return raw === "en" || raw === "ko" ? raw : null;
+}
+function setLanguage(lang, opts={}){
+  currentLanguage = lang === "en" ? "en" : "ko";
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, currentLanguage);
+  document.documentElement.lang = currentLanguage === "en" ? "en" : "ko";
+  document.title = "Jesulkr";
+  if(opts.reload){ location.reload(); return; }
+  if(els.languageModal) els.languageModal.classList.add("hidden");
+  updateMenuLanguageButtons();
+  refreshLocalizedStaticPieces();
+  buildDeckSelector();
+  renderDeckNameInput();
+  renderDeckStatus();
+  startTranslationObserver();
+  applyLanguage();
+  updateHud();
+  renderToolState();
+  renderSlots();
+  renderMapCards();
+  renderDesignerStats();
+  renderControlButtonLabels();
+}
+function initLanguageGate(){
+  if(currentLanguage){
+    document.documentElement.lang = currentLanguage === "en" ? "en" : "ko";
+    if(els.languageModal) els.languageModal.classList.add("hidden");
+    startTranslationObserver();
+    applyLanguage();
+  }else{
+    if(els.languageModal) els.languageModal.classList.remove("hidden");
+  }
+}
+
+function updateMenuLanguageButtons(){
+  if(els.menuLangKoBtn) els.menuLangKoBtn.classList.toggle("activeLang", currentLanguage !== "en");
+  if(els.menuLangEnBtn) els.menuLangEnBtn.classList.toggle("activeLang", currentLanguage === "en");
+}
+function isMainMenuOpen(){
+  return !!(els.mainMenuPanel && !els.mainMenuPanel.classList.contains("hidden"));
+}
+function openMainMenu(){
+  if(!els.mainMenuPanel) return;
+  updateMenuLanguageButtons();
+  els.mainMenuPanel.classList.remove("hidden");
+}
+function closeMainMenu(){
+  if(els.mainMenuPanel) els.mainMenuPanel.classList.add("hidden");
+}
+function toggleMainMenu(){
+  if(isMainMenuOpen()) closeMainMenu(); else openMainMenu();
+}
+function translateForLang(text){
+  if(currentLanguage !== "en") return String(text);
+  let out = String(text);
+  for(const [ko,en] of EN_REPLACEMENTS){ out = out.split(ko).join(en); }
+  out = out
+    .replace(/맵\s*(\d+)/g,"Map $1")
+    .replace(/슬롯\s*(\d+)/g,"Slot $1")
+    .replace(/(\d+)\s*슬롯/g,"Slot $1")
+    .replace(/(\d+)번\s*슬롯/g,"Slot $1")
+    .replace(/(\d+)번/g,"$1")
+    .replace(/(\d+)배속/g,"$1x")
+    .replace(/(\d+)\s*분\s*(\d+)\s*초/g,"$1m $2s")
+    .replace(/([\d,]+)점/g,"$1 pts")
+    .replace(/([\d,]+)틱/g,"$1 ticks")
+    .replace(/(\d+(?:\.\d+)?)초/g,"$1s")
+    .replace(/\/초/g,"/s")
+    .replace(/초당/g,"per sec")
+    .replace(/([\d,]+)개/g,"$1")
+    .replace(/\s+([.,])/g,"$1")
+    .replace(/\s{2,}/g," ");
+  return out;
+}
+
+function refreshLocalizedStaticPieces(){
+  const isEn = currentLanguage === "en";
+  const help = document.querySelector(".help");
+  if(help){
+    help.innerHTML = isEn ?
+      'Red mana is the basic mana source. Blue Mana Generators must be connected to red mana and spend +2 extra mana when active.<br>'+
+      'Wires unlock on Map 2. They connect distant mana to circuits, and connected mana counts like adjacent mana.<br>'+
+      'A 2-cell Hybrid Circuit deals 8 Normal Damage per red+blue pair. A 9-cell Hybrid Core uses bundles of red 1 + blue 2 + active 1-cell circuit 1; each bundle gives Normal Damage 60 and Special Damage Scatter 3. Scatter hits up to 3 enemies closest to the base.<br>'+
+      'Placement tip: hold the mouse button and move to place the selected part repeatedly. Right-click deletes the part under the cursor. The Eraser can delete by dragging. Use the mouse wheel on the designer board to switch horizontal/vertical orientation. Shortcuts can be changed in the Key Settings menu.'
+      :
+      '빨간 점은 기본 마나입니다. 파란 마나 생성기는 빨간 마나와 연결되어야 작동하고 추가 마나 2를 씁니다.<br>'+
+      '도선은 맵 2에서 해금됩니다. 멀리 있는 마나를 회로에 연결하고, 연결된 마나는 인접 마나처럼 계산됩니다.<br>'+
+      '2칸 혼합 회로는 빨강+파랑 한 쌍당 일반 데미지 8, 9칸 혼합 핵은 빨강 1개+파랑 2개+작동 중인 1칸 회로 1개 묶음마다 일반 데미지 60과 특수 데미지 분산 3을 줍니다. 분산은 기지에 가까운 적 최대 3개에게 각각 피해를 주는 방식입니다.<br>'+
+      '배치 팁: 마우스를 누른 채 움직이면 선택한 부품을 연속 배치합니다. 우클릭하면 해당 칸 부품을 즉시 삭제하고, 지우개는 드래그 삭제가 됩니다. 설계판 위에서 마우스 휠을 굴리면 가로/세로가 바뀝니다. 단축키는 키 설정 메뉴에서 바꿀 수 있습니다.';
+  }
+  if(typeof els !== "undefined" && els.slotSelect){
+    [...els.slotSelect.options].forEach((opt, i)=>{ opt.textContent = isEn ? ('Slot '+(i+1)) : ((i+1)+'번 슬롯'); });
+  }
+  if(typeof els !== "undefined" && els.deckNameInput && els.deckSelect){
+    renderDeckNameInput();
+    renderDeckStatus();
+  }
+}
+
+function applyLanguage(root=document.body){
+  if(currentLanguage !== "en" || !root) return;
+  isTranslatingDom = true;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      const p=node.parentElement;
+      if(!p || ["SCRIPT","STYLE","TEXTAREA"].includes(p.tagName)) return NodeFilter.FILTER_REJECT;
+      if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const nodes=[];
+  while(walker.nextNode()) nodes.push(walker.currentNode);
+  for(const node of nodes){
+    const next = translateForLang(node.nodeValue);
+    if(next !== node.nodeValue) node.nodeValue = next;
+  }
+  document.querySelectorAll("input[placeholder], textarea[placeholder], button[title], [title]").forEach(el=>{
+    if(el.placeholder) el.placeholder = translateForLang(el.placeholder);
+    if(el.title) el.title = translateForLang(el.title);
+  });
+  isTranslatingDom = false;
+}
+function startTranslationObserver(){
+  if(currentLanguage !== "en" || translationObserver) return;
+  translationObserver = new MutationObserver(muts=>{
+    if(isTranslatingDom) return;
+    requestAnimationFrame(()=>applyLanguage(document.body));
+  });
+  translationObserver.observe(document.body,{childList:true,subtree:true,characterData:true});
+}
+
+const $ = id => document.getElementById(id);
+const els = {
+  canvas: $("battleCanvas"), slots: $("slots"), autoReserveInput: $("autoReserveInput"), designerPanel: $("designerPanel"),
+  frameW: $("frameW"), frameH: $("frameH"), rotateBtn: $("rotateBtn"), designBoard: $("designBoard"),
+  spellStats: $("spellStats"), spellName: $("spellName"), slotSelect: $("slotSelect"), saveBtn: $("saveBtn"),
+  loadButtons: $("loadButtons"), clearDesignBtn: $("clearDesignBtn"), clearStorageBtn: $("clearStorageBtn"), startBattleBtn: $("startBattleBtn"),
+  openDesignerBtn: $("openDesignerBtn"), pauseBtn: $("pauseBtn"), restartBtn: $("restartBtn"), mapSelectBtn: $("mapSelectBtn"), closeDesignerBtn: $("closeDesignerBtn"),
+  mainMenuWrap: $("mainMenuWrap"), mainMenuBtn: $("mainMenuBtn"), mainMenuPanel: $("mainMenuPanel"), menuKeySettingsBtn: $("menuKeySettingsBtn"), menuLangKoBtn: $("menuLangKoBtn"), menuLangEnBtn: $("menuLangEnBtn"),
+  keySettingsModal: $("keySettingsModal"), keySettingsGrid: $("keySettingsGrid"), keySettingsCloseBtn: $("keySettingsCloseBtn"), keySettingsCloseBtn2: $("keySettingsCloseBtn2"),
+  toast: $("toast"), toolInfo: $("toolInfo"),
+  hudScore: $("hudScore"), hudMana: $("hudMana"), hudBase: $("hudBase"), hudTime: $("hudTime"), hudState: $("hudState"), hudMap: $("hudMap"),
+  battleHudMap: $("battleHudMap"), battleHudScore: $("battleHudScore"), battleHudMana: $("battleHudMana"), battleHudBase: $("battleHudBase"),
+  deckSelect: $("deckSelect"), deckNameInput: $("deckNameInput"), saveDeckNameBtn: $("saveDeckNameBtn"), saveDeckBtn: $("saveDeckBtn"), loadDeckBtn: $("loadDeckBtn"), deckStatus: $("deckStatus"),
+  keySettingsGrid: $("keySettingsGrid"), resetKeyBindingsBtn: $("resetKeyBindingsBtn"),
+  languageModal: $("languageModal"), langKoBtn: $("langKoBtn"), langEnBtn: $("langEnBtn"),
+  mapModal: $("mapModal"), mapCards: $("mapCards"), mapStarSummary: $("mapStarSummary"), mapCloseBtn: $("mapCloseBtn"), unlockCodeInput: $("unlockCodeInput"), unlockCodeBtn: $("unlockCodeBtn")
+};
+const ctx = els.canvas.getContext("2d");
+
+const game = {
+  state:"design", slots:[null,null,null,null,null], score:0, mana:MAX_MANA, baseHp:20, survival:0,
+  monsters:[], casts:[], effects:[], cooldowns:[0,0,0,0,0], selectedTargetId:null,
+  spawnTimer:12, nextMonsterId:1, nextCastId:1, lastTime:0, accumulator:0,
+  battleStarted:false, currentMap:MAPS[1], activeRunMapId:null, activeRunMode:null, selectedRunMode:loadSelectedRunMode(), unlocks:loadUnlocks(), nextBossAt:Infinity, bossInterval:30,
+  battleSpeed:1, slotAutoModes:loadSlotAutoModes(), autoManaReserve:loadAutoManaReserve(), decks:loadDecks(), deckNames:loadDeckNames(), records:loadRecords(), keyBindings:loadKeyBindings(), controlBindings:loadControlBindings(), keyCaptureTarget:null, erasingDrag:false, placingDrag:false, lastDragPlaceKey:null, returnStateAfterDesign:"ready"
+};
+
+const designer = { width:2, height:2, components:[], tool:"red", rotation:0, nextId:1, previewX:null, previewY:null };
+
+
+function isMobileLayout(){
+  return document.body && document.body.classList.contains("mobile-layout");
+}
+function shouldUseMobileLayout(){
+  return window.matchMedia("(pointer: coarse)").matches || window.matchMedia("(max-width: 820px)").matches;
+}
+function updateMobileLayout(){
+  const useMobile = shouldUseMobileLayout();
+  document.body.classList.toggle("mobile-layout", useMobile);
+}
+
+function init(){
+  initLanguageGate();
+  updateMobileLayout();
+  if(els.autoReserveInput) els.autoReserveInput.value = String(game.autoManaReserve);
+  buildFrameSelectors(); setupToolButtons(); buildDeckSelector(); loadSlots(); setupEvents(); refreshLocalizedStaticPieces(); renderLoadButtons(); renderKeyBindings(); renderSlots(); renderDesigner(); renderMapCards(); renderDeckNameInput();
+  // 저장된 현재 슬롯이 있거나 덱이 있으면 바로 대기 화면을 보여준다.
+  // 현재 슬롯이 비어 있어도 덱이 있으면 먼저 덱을 불러올 수 있어야 한다.
+  setState((hasSavedSpell()||hasSavedDeck())?"ready":"design");
+  if(currentLanguage==="en") applyLanguage(document.body);
+  requestAnimationFrame(loop);
+}
+
+function buildFrameSelectors(){
+  for(let i=1;i<=MAX_FRAME;i++){
+    const a=document.createElement("option"); a.value=String(i); a.textContent=String(i);
+    const b=a.cloneNode(true); els.frameW.appendChild(a); els.frameH.appendChild(b);
+  }
+  els.frameW.value=String(designer.width); els.frameH.value=String(designer.height);
+}
+
+function setupEvents(){
+  if(els.langKoBtn) els.langKoBtn.addEventListener("click",()=>setLanguage("ko"));
+  if(els.langEnBtn) els.langEnBtn.addEventListener("click",()=>setLanguage("en"));
+  if(els.mainMenuBtn) els.mainMenuBtn.addEventListener("click", e=>{ e.stopPropagation(); toggleMainMenu(); });
+  if(els.mainMenuPanel) els.mainMenuPanel.addEventListener("click", e=>e.stopPropagation());
+  if(els.menuKeySettingsBtn) els.menuKeySettingsBtn.addEventListener("click", ()=>{ closeMainMenu(); openKeySettings(); });
+  if(els.menuLangKoBtn) els.menuLangKoBtn.addEventListener("click", ()=>setLanguage("ko", {reload:true}));
+  if(els.menuLangEnBtn) els.menuLangEnBtn.addEventListener("click", ()=>setLanguage("en", {reload:true}));
+  document.addEventListener("click", closeMainMenu);
+  document.querySelectorAll("[data-tool]").forEach(btn=>btn.addEventListener("click",()=>{designer.tool=btn.dataset.tool; renderToolState();}));
+  els.frameW.addEventListener("change",()=>{designer.width=Number(els.frameW.value); trimComponentsToFrame(); renderDesigner();});
+  els.frameH.addEventListener("change",()=>{designer.height=Number(els.frameH.value); trimComponentsToFrame(); renderDesigner();});
+  els.rotateBtn.addEventListener("click", rotateTool);
+  els.saveBtn.addEventListener("click", saveSpellToSlot);
+  els.clearDesignBtn.addEventListener("click", clearDesigner);
+  els.clearStorageBtn.addEventListener("click", clearAllStorage);
+  if(els.resetKeyBindingsBtn) els.resetKeyBindingsBtn.addEventListener("click", resetKeyBindings);
+  // 키 설정은 우측 상단 메뉴 안의 버튼에서만 연다.
+  if(els.keySettingsCloseBtn) els.keySettingsCloseBtn.addEventListener("click", closeKeySettings);
+  if(els.keySettingsCloseBtn2) els.keySettingsCloseBtn2.addEventListener("click", closeKeySettings);
+  // [설계 입력] 배치판 전체가 클릭 영역이다. 셀 사이의 틈(GAP)에 커서를 올려도 중심 기준 배치가 되도록
+  // 개별 타일이 아니라 board 자체에서 클릭 좌표를 읽는다.
+  // 클릭이 아니라 mousedown에서 바로 배치한다. 이렇게 하면 타일 사이 GAP 위에서도 안정적으로 배치된다.
+  els.designBoard.addEventListener("mousedown", onDesignBoardMouseDown);
+  els.designBoard.addEventListener("mousemove", onDesignBoardMouseMove);
+  els.designBoard.addEventListener("mouseleave", clearPlacementPreview);
+  els.designBoard.addEventListener("wheel", onDesignWheel, {passive:false});
+  els.designBoard.addEventListener("contextmenu", e=>e.preventDefault());
+  document.addEventListener("mouseup",()=>{ game.erasingDrag=false; game.placingDrag=false; game.lastDragPlaceKey=null; });
+  els.startBattleBtn.addEventListener("click", openMapSelect);
+  els.mapCloseBtn.addEventListener("click", closeMapSelect);
+  els.unlockCodeBtn.addEventListener("click", tryUnlockAllMaps);
+  els.unlockCodeInput.addEventListener("keydown", e=>{ if(e.key==="Enter") tryUnlockAllMaps(); });
+  els.deckSelect.addEventListener("change",()=>{ renderDeckNameInput(); renderDeckStatus(); });
+  els.saveDeckNameBtn.addEventListener("click", saveDeckName);
+  els.saveDeckBtn.addEventListener("click", saveCurrentSlotsToDeck);
+  els.loadDeckBtn.addEventListener("click", loadSelectedDeckToSlots);
+  document.querySelectorAll(".speedBtn").forEach(btn=>btn.addEventListener("click",()=>setBattleSpeed(Number(btn.dataset.speed))));
+  if(els.autoReserveInput) els.autoReserveInput.addEventListener("input", updateAutoManaReserve);
+  document.querySelectorAll("[data-run-mode]").forEach(btn=>btn.addEventListener("click",()=>setSelectedRunMode(btn.dataset.runMode)));
+  els.slots.addEventListener("click", onSlotPanelClick, true);
+  if(els.mapSelectBtn) els.mapSelectBtn.addEventListener("click", openMapSelect);
+  if(els.openDesignerBtn) els.openDesignerBtn.addEventListener("click", openDesigner);
+  if(els.closeDesignerBtn) els.closeDesignerBtn.addEventListener("click", closeDesigner);
+  if(els.pauseBtn) els.pauseBtn.addEventListener("click", togglePause);
+  if(els.restartBtn) els.restartBtn.addEventListener("click", restartCurrentBattle);
+  els.canvas.addEventListener("click", onCanvasClick);
+  document.addEventListener("keydown", onKeyDown);
+  window.addEventListener("resize", updateMobileLayout);
+  window.addEventListener("orientationchange", updateMobileLayout);
+}
+
+function onKeyDown(e){
+  // [키 설정 보호]
+  // 키 설정창이 열려 있을 때 D/R/Space/슬롯키 같은 게임 단축키가 뒤에서 실행되면 안 된다.
+  // 단, 특정 항목의 키를 새로 입력받는 중(game.keyCaptureTarget)에는 아래에서 설정용으로만 처리한다.
+  if(game.keyCaptureTarget){
+    e.preventDefault();
+    e.stopPropagation();
+    handleKeyCapture(e);
+    return;
+  }
+
+  const keySettingsOpen = els.keySettingsModal && !els.keySettingsModal.classList.contains("hidden");
+  if(keySettingsOpen){
+    e.preventDefault();
+    e.stopPropagation();
+    if(e.key==="Escape") closeKeySettings();
+    return;
+  }
+
+  if(isMainMenuOpen()){
+    e.preventDefault();
+    e.stopPropagation();
+    if(e.key==="Escape") closeMainMenu();
+    return;
+  }
+
+  const tag=document.activeElement && document.activeElement.tagName;
+  if(["INPUT","SELECT","TEXTAREA"].includes(tag) && e.key!=="Escape") return;
+  if(e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if(e.key==="Escape"){
+    if(isMainMenuOpen()){ closeMainMenu(); return; }
+    if(!els.mapModal.classList.contains("hidden")){ closeMapSelect(); return; }
+    if(game.state==="design"){ closeDesigner(); return; }
+  }
+
+  const customSlot=getSlotIndexForEvent(e);
+  if(customSlot!==-1 && game.state==="battle"){
+    e.preventDefault();
+    castSlot(customSlot);
+    return;
+  }
+
+  const action=getControlActionForEvent(e);
+  if(action){
+    e.preventDefault();
+    runControlAction(action);
+    return;
+  }
+}
+
+function loop(t){
+  if(!game.lastTime) game.lastTime=t;
+  const dt=Math.min(0.1,(t-game.lastTime)/1000); game.lastTime=t;
+  if(game.state==="battle") game.accumulator += dt * game.battleSpeed;
+  else game.accumulator = 0;
+  while(game.accumulator>=TICK_SEC){ fixedTick(); game.accumulator-=TICK_SEC; }
+  renderBattle(); updateHud(); updateCooldownBars(); requestAnimationFrame(loop);
+}
+function fixedTick(){ if(game.state==="battle") updateBattleTick(); }
+function setState(state){
+  game.state=state;
+  const isDesign=state==="design";
+  els.designerPanel.classList.toggle("hidden", !isDesign);
+  document.body.classList.toggle("mode-design", isDesign);
+  document.body.classList.toggle("mode-play", !isDesign);
+  updateStartBattleButton();
+  renderSlots();
+  updateHud();
+}
+function openDesigner(){
+  if(game.state!=="design") game.returnStateAfterDesign=game.state;
+  setState("design");
+}
+function closeDesigner(){
+  const fallback=game.battleStarted?"battle":"ready";
+  const next=(game.returnStateAfterDesign && game.returnStateAfterDesign!=="design") ? game.returnStateAfterDesign : fallback;
+  setState(next);
+}
+function stateLabel(){ const label=game.state==="ready"?"대기 중":game.state==="design"?"설계 중":game.state==="battle"?"전투 중":game.state==="paused"?"일시정지":game.state==="gameover"?"게임 오버":game.state; return translateForLang(label); }
+function updateHud(){
+  els.hudScore.textContent=String(game.score); els.hudMana.textContent=game.mana.toFixed(1)+" / "+MAX_MANA+" (+"+getEffectiveManaRegen()+"/초)";
+  els.hudBase.textContent=String(Math.max(0,game.baseHp)); els.hudTime.textContent=Math.floor(game.survival)+"초";
+  const displayMap=((game.state==="battle"||game.state==="paused"||game.state==="gameover") && game.activeRunMapId) ? MAPS[game.activeRunMapId] : game.currentMap;
+  els.hudState.textContent=stateLabel(); els.hudMap.textContent=displayMap?displayMap.shortName:"-";
+  const hudMode=((game.state==="battle"||game.state==="paused") ? (game.activeRunMode||game.selectedRunMode) : game.selectedRunMode);
+  const modeLabel=getRunModeShortLabel(hudMode);
+  els.battleHudMap.textContent=(displayMap?displayMap.shortName:"-")+" · "+modeLabel;
+  els.battleHudScore.textContent=String(game.score);
+  els.battleHudMana.textContent=game.mana.toFixed(1)+" / "+MAX_MANA+" (+"+getEffectiveManaRegen()+"/초)";
+  els.battleHudBase.textContent=String(Math.max(0,game.baseHp));
+}
+function toast(text,type){ els.toast.textContent=translateForLang(text); els.toast.className="show "+(type||""); clearTimeout(toast.timer); toast.timer=setTimeout(()=>{els.toast.className="";},1400); }
+
+function freshBattle(){
+  game.score=0; game.mana=MAX_MANA; game.baseHp=20; game.survival=0; game.monsters=[]; game.casts=[]; game.effects=[];
+  game.cooldowns=[0,0,0,0,0]; game.selectedTargetId=null; game.spawnTimer=10; game.nextMonsterId=1; game.nextCastId=1;
+  const map=game.currentMap || MAPS[1];
+  // BUGFIX: 맵 선택창에서 다른 맵을 고른 직후 startBattle()가 이전 전투 기록을 저장할 때,
+  // currentMap은 이미 새 맵으로 바뀌어 있을 수 있다.
+  // activeRunMapId는 실제 진행 중인 전투의 맵을 고정 저장해 기록 복제를 막는다.
+  game.activeRunMapId=map.id;
+  game.activeRunMode=game.selectedRunMode || "assist";
+  game.bossInterval=map.bossInterval || 30;
+  game.nextBossAt=map.repeatingBoss ? (map.firstBossAt || 30) : Infinity;
+}
+function openMapSelect(){
+  if(game.state==="battle") setState("paused");
+  renderMapCards();
+  els.mapModal.classList.remove("hidden");
+  if(!hasSavedSpell()) toast("맵은 볼 수 있지만 전투 시작에는 저장된 술식이 필요합니다.","bad");
+}
+function closeMapSelect(){ els.mapModal.classList.add("hidden"); }
+function renderMapCards(){
+  renderMapStarSummary();
+  renderRunModeButtons();
+  els.mapCards.innerHTML="";
+  for(let i=1;i<=3;i++){
+    const map=MAPS[i];
+    const unlocked=isMapUnlocked(i);
+    const active=game.currentMap && game.currentMap.id===i;
+    const card=document.createElement("div");
+    card.className="mapCard"+(active?" active":"")+(unlocked?"":" locked");
+    const status=unlocked ? translateForLang("해금됨") : translateForLang(getUnlockText(i));
+    const assistRec=getMapRecord(i,"assist");
+    const pureRec=getMapRecord(i,"pure");
+    const stars=getMapStars(i);
+    const thresholds=STAR_THRESHOLDS[i] || [];
+    card.innerHTML='<h3>'+escapeHtml(map.name)+'</h3><div class="mapDesc">'+escapeHtml(map.desc)+'</div>'+ 
+      '<div class="mapUnlock">'+escapeHtml(translateForLang('상태'))+' <b>'+escapeHtml(status)+'</b></div>'+ 
+      '<div class="mapRecordGrid">'+
+        '<div class="mapRecord"><span class="recordLabel">'+escapeHtml(translateForLang('자동 모드 최고 기록'))+'</span><br><b>'+assistRec.score.toLocaleString()+'</b>'+escapeHtml(translateForLang('점'))+' · '+formatTime(assistRec.time)+'<br><span class="starLine">'+renderStars(stars)+'</span></div>'+ 
+        '<div class="mapRecord"><span class="recordLabel">'+escapeHtml(translateForLang('수동 모드 최고 기록'))+'</span><br><b>'+pureRec.score.toLocaleString()+'</b>'+escapeHtml(translateForLang('점'))+' · '+formatTime(pureRec.time)+'</div>'+ 
+      '</div>'+ 
+      '<div class="mapThreshold">'+escapeHtml(translateForLang('별 조건'))+'<br>★1 '+thresholds[0].toLocaleString()+escapeHtml(translateForLang('점'))+' · ★2 '+thresholds[1].toLocaleString()+escapeHtml(translateForLang('점'))+' · ★3 '+thresholds[2].toLocaleString()+escapeHtml(translateForLang('점'))+'</div>';
+    const btn=document.createElement("button");
+    const canStart=unlocked && hasSavedSpell();
+    btn.className=unlocked?"good":"";
+    btn.textContent=!unlocked?translateForLang("잠김"):(hasSavedSpell()?translateForLang(getRunModeShortLabel(game.selectedRunMode)+"로 전투 시작"):translateForLang("술식 필요"));
+    btn.disabled=!canStart;
+    btn.addEventListener("click",()=>{ if(!canStart) return; game.currentMap=map; closeMapSelect(); startBattle(); });
+    card.appendChild(btn); els.mapCards.appendChild(card);
+  }
+}
+function setSelectedRunMode(mode){
+  game.selectedRunMode=(mode==="pure")?"pure":"assist";
+  localStorage.setItem(RUN_MODE_STORAGE_KEY, game.selectedRunMode);
+  renderRunModeButtons();
+  renderMapCards();
+  renderSlots();
+  updateHud();
+  toast("기록 모드: "+getRunModeLabel(game.selectedRunMode),"good");
+}
+function loadSelectedRunMode(){
+  const raw=localStorage.getItem(RUN_MODE_STORAGE_KEY);
+  return raw==="pure" ? "pure" : "assist";
+}
+function getRunModeLabel(mode){ return mode==="pure" ? "수동 모드" : "자동 모드"; }
+function getRunModeShortLabel(mode){ return mode==="pure" ? "수동 모드" : "자동 모드"; }
+function renderRunModeButtons(){
+  document.querySelectorAll("[data-run-mode]").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.runMode===game.selectedRunMode);
+  });
+}
+function tryUnlockAllMaps(){
+  const code=(els.unlockCodeInput.value||"").trim();
+  if(code!=="1111"){
+    toast("비밀번호가 틀렸습니다.","bad");
+    return;
+  }
+
+  // 테스트용 치트 코드: 모든 맵을 열고, 모든 별도 획득 처리한다.
+  // 별 개수는 최고 기록 점수로 계산되므로 각 맵 기록을 3별 기준 점수 이상으로 채운다.
+  game.unlocks={"1":true,"2":true,"3":true};
+  for(const id of [1,2,3]){
+    const thresholds=STAR_THRESHOLDS[id] || [];
+    const threeStarScore=thresholds[2] || 0;
+    const rec=getMapRecord(id,"assist");
+    setMapRecord(id,"assist",{
+      score:Math.max(rec.score||0, threeStarScore),
+      time:Math.max(rec.time||0, 1)
+    });
+  }
+  saveUnlocks();
+  saveRecords();
+
+  els.unlockCodeInput.value="";
+  renderMapCards(); renderToolState(); renderDesignerStats(); updateHud();
+  toast("테스트 모드: 모든 맵과 별 9개 해금", "good");
+}
+
+function restartCurrentBattle(){
+  if(!hasSavedSpell()){
+    setState("design");
+    toast("저장된 술식이 필요합니다.","bad");
+    return;
+  }
+  if(!game.currentMap || !isMapUnlocked(game.currentMap.id)) game.currentMap=getFirstUnlockedMap();
+  startBattle();
+}
+function runControlAction(action){
+  if(action==="toggleDesign"){
+    if(game.state==="design") closeDesigner();
+    else openDesigner();
+    return;
+  }
+  if(action==="pause"){
+    togglePause();
+    return;
+  }
+  if(action==="restart"){
+    if(game.state==="design"){ toast("전투 화면에서 재시작할 수 있습니다.","bad"); return; }
+    restartCurrentBattle();
+    return;
+  }
+  if(action==="mapSelect"){
+    openMapSelect();
+    return;
+  }
+  if(action==="speed1") return setBattleSpeed(1);
+  if(action==="speed2") return setBattleSpeed(2);
+  if(action==="speed4") return setBattleSpeed(4);
+  if(action==="speed8") return setBattleSpeed(8);
+}
+function startBattle(){
+  if(!hasSavedSpell()){ toast("술식을 하나 이상 저장해야 전투를 시작할 수 있습니다.","bad"); setState("design"); return; }
+  if(game.battleStarted && game.state!=="gameover") recordCurrentRun();
+  if(!game.currentMap || !isMapUnlocked(game.currentMap.id)) game.currentMap=getFirstUnlockedMap();
+  freshBattle(); game.battleStarted=true; setState("battle"); toast(game.currentMap.shortName+" 시작","good");
+}
+function togglePause(){ if(game.state==="battle"){setState("paused"); toast("일시정지");} else if(game.state==="paused"){setState("battle"); toast("전투 재개","good");} }
+function hasSavedSpell(){ return game.slots.some(Boolean); }
+function hasSavedDeck(){ return !!(game.decks && game.decks.some(deck=>Array.isArray(deck) && deck.some(Boolean))); }
+function updateStartBattleButton(){ els.startBattleBtn.disabled=!hasSavedSpell(); }
+function setBattleSpeed(speed){
+  game.battleSpeed=[1,2,4,8].includes(speed)?speed:1;
+  document.querySelectorAll(".speedBtn").forEach(btn=>btn.classList.toggle("active",Number(btn.dataset.speed)===game.battleSpeed));
+  toast("전투 속도 "+game.battleSpeed+"배");
+}
+
+function updateBattleTick(){
+  game.survival+=TICK_SEC; game.mana=Math.min(MAX_MANA, game.mana + getEffectiveManaRegen()*TICK_SEC);
+  for(let i=0;i<game.cooldowns.length;i++) if(game.cooldowns[i]>0) game.cooldowns[i]--;
+  updateAutoSlots();
+  game.spawnTimer--;
+  const map=game.currentMap || MAPS[1];
+  if(map.repeatingBoss && game.survival>=game.nextBossAt){
+    spawnMonster(map.bossHp || 500, true);
+    // 스폰 주기 하한 제거: 보스 주기는 계속 짧아진다.
+    // 엔진 안정성 때문에 같은 틱에서 무한 루프는 돌리지 않고, 다음 틱에 다시 검사한다.
+    game.bossInterval = game.bossInterval * (map.bossIntervalDecay || 0.84);
+    game.nextBossAt += game.bossInterval;
+  }
+  if(game.spawnTimer<=0){
+    spawnMonster();
+    // 일반 몬스터 스폰 간격 하한 제거.
+    // interval이 0 이하로 내려가면 다음 틱마다 생성되도록 1틱으로만 고정한다.
+    // 즉 게임 규칙상 하한은 없고, 실행 안전상 한 틱에 무한 생성만 막는다.
+    const interval = 1.35 - game.survival * 0.008;
+    const nextTicks = Math.floor(interval / TICK_SEC * (0.75 + Math.random() * 0.5));
+    game.spawnTimer = Math.max(1, nextTicks);
+  }
+  const baseY=els.canvas.height-34;
+  for(const m of game.monsters){
+    m.y += m.speed*TICK_SEC;
+    if(m.y>baseY){
+      m.reached=true;
+      // 맵 3의 HP 500 보스는 기지에 닿는 순간 즉시 게임 오버.
+      // 일반 몬스터는 기존처럼 기지 HP 1만 깎는다.
+      if(m.boss || m.maxHp>=500){
+        game.baseHp = 0;
+      }else{
+        game.baseHp -= 1;
+      }
+      game.effects.push({type:"base",x:m.x,y:baseY,t:0,life:.5,text:(m.boss||m.maxHp>=500)?"보스 돌파":"기지 피해"});
+      if(game.selectedTargetId===m.id) game.selectedTargetId=null;
+    }
+  }
+  game.monsters=game.monsters.filter(m=>!m.reached && m.hp>0);
+  for(const c of game.casts){ c.remainingTicks--; if(c.remainingTicks<=0){ c.done=true; resolveCast(c); } }
+  game.casts=game.casts.filter(c=>!c.done);
+  for(const e of game.effects) e.t+=TICK_SEC;
+  game.effects=game.effects.filter(e=>e.t<e.life);
+  if(game.baseHp<=0){ game.baseHp=0; recordCurrentRun(); setState("gameover"); toast("게임 오버","bad"); }
+}
+function spawnMonster(forcedHp, boss){
+  const lane=Math.floor(Math.random()*LANES); const laneW=els.canvas.width/LANES; const map=game.currentMap || MAPS[1];
+  const hp=forcedHp || (map.minHp + Math.floor(Math.random()*(map.maxHp-map.minHp+1)));
+  const speed=boss?25:(42+game.survival*.45+Math.random()*18);
+  game.monsters.push({id:game.nextMonsterId++, lane, x:laneW*lane+laneW/2, y:boss?-42:-26, hp, maxHp:hp, speed, boss:!!boss});
+  if(boss) toast("HP 500 보스 등장", "bad");
+}
+function onCanvasClick(e){
+  const rect=els.canvas.getBoundingClientRect(); const x=(e.clientX-rect.left)*els.canvas.width/rect.width; const y=(e.clientY-rect.top)*els.canvas.height/rect.height;
+  let picked=null, best=Infinity;
+  for(const m of game.monsters){ const d=Math.hypot(m.x-x,m.y-y); const r=m.boss?44:30; if(d<r && d<best){picked=m; best=d;} }
+  if(picked){ game.selectedTargetId=picked.id; toast("타겟 지정: HP "+picked.hp); }
+}
+function getAutoTarget(){ let best=null; for(const m of game.monsters){ if(m.hp<=0) continue; if(!best || m.y>best.y) best=m; } return best; }
+function getCurrentTarget(){ return game.monsters.find(m=>m.id===game.selectedTargetId && m.hp>0) || getAutoTarget(); }
+function castSlot(index){
+  return tryCastSlot(index,{manual:true,silent:false});
+}
+function tryCastSlot(index,opts){
+  opts=opts||{};
+  const silent=!!opts.silent;
+  const spell=game.slots[index];
+  if(!spell){ if(!silent) toast("이 슬롯에는 술식이 없습니다.","bad"); return false; }
+  const reqMap=getSpellRequiredMap(spell);
+  if(!isMapUnlocked(reqMap)){ if(!silent) toast("이 술식은 맵 "+reqMap+" 해금 후 사용할 수 있습니다.","bad"); return false; }
+  if(game.state!=="battle"){ if(!silent) toast("전투 중에만 술식을 사용할 수 있습니다.","bad"); return false; }
+  if(game.cooldowns[index]>0){ if(!silent) toast("아직 쿨타임입니다.","bad"); return false; }
+  if(game.mana<spell.manaCost){ if(!silent) toast("마나 부족","bad"); return false; }
+  // [자동 발사 마나 보존]
+  // 수동 입력은 항상 기존처럼 발사한다. 자동 발사만 사용 후 남는 마나가 autoManaReserve 미만이면 대기한다.
+  // 예: 보존값 10, 현재 마나 12, 술식 비용 3이면 9가 되므로 자동 발사하지 않는다.
+  if(opts.auto && (game.mana - spell.manaCost) < game.autoManaReserve){ return false; }
+  const target=getCurrentTarget(); if(!target){ if(!silent) toast("대상 없음","bad"); return false; }
+  game.mana-=spell.manaCost; game.cooldowns[index]=spell.castTime;
+  game.casts.push({id:game.nextCastId++, spell:clone(spell), targetId:target.id, slotIndex:index, remainingTicks:HIT_DELAY_TICKS, totalTicks:HIT_DELAY_TICKS});
+  return true;
+}
+function updateAutoSlots(){
+  if(game.state!=="battle") return;
+  if((game.activeRunMode||game.selectedRunMode)==="pure") return;
+  for(let i=0;i<5;i++){
+    if(!game.slotAutoModes[i]) continue;
+    if(game.cooldowns[i]>0) continue;
+    tryCastSlot(i,{manual:false,silent:true,auto:true});
+  }
+}
+function resolveCast(cast){
+  let target=game.monsters.find(m=>m.id===cast.targetId && m.hp>0); if(!target) target=getAutoTarget(); if(!target) return;
+  const dmg=cast.spell.damage; target.hp-=dmg; game.effects.push({type:"hit",x:target.x,y:target.y,t:0,life:.5,text:"-"+dmg});
+
+  // [9칸 혼합 핵 특수 데미지: 분산]
+  // 술식 안에서 9칸 혼합 핵이 실제로 발동한 경우 calculateSpellStats()가 aoeDamage를 기록한다. 화면에는 이 값을 "분산 N"으로 표시한다.
+  // 명중 시점에 살아 있는 적 중 기지에 가까운 순서로 최대 CORE_AOE_TARGET_LIMIT개에게 분산 피해를 준다.
+  // 9칸 혼합 핵 묶음 수가 늘어나면 분산도 3, 6, 9...처럼 함께 증가한다.
+  // 이 피해로 죽은 적도 정상적으로 점수를 준다.
+  const aoe=Number(cast.spell.aoeDamage)||0;
+  if(aoe>0){
+    const aoeTargets = game.monsters
+      .filter(m => m.hp > 0)
+      .sort((a,b) => b.y - a.y)
+      .slice(0, CORE_AOE_TARGET_LIMIT);
+    for(const m of aoeTargets){
+      m.hp-=aoe;
+      game.effects.push({type:"hit",x:m.x,y:m.y,t:0,life:.42,text:"-"+aoe});
+    }
+    game.effects.push({type:"aoe",x:els.canvas.width/2,y:els.canvas.height/2,t:0,life:.55,text:"분산 "+aoe});
+  }
+
+  let killedAny=false;
+  for(const m of game.monsters){
+    if(m.hp<=0){
+      killedAny=true;
+      game.score += m.maxHp*10;
+      game.effects.push({type:"kill",x:m.x,y:m.y,t:0,life:.7,text:"+"+(m.maxHp*10)});
+      if(game.selectedTargetId===m.id) game.selectedTargetId=null;
+    }
+  }
+  if(killedAny) checkMapUnlocks();
+  game.monsters=game.monsters.filter(m=>m.hp>0);
+}
+function renderBattle(){
+  const w=els.canvas.width, h=els.canvas.height, laneW=w/LANES; ctx.clearRect(0,0,w,h); ctx.save();
+  ctx.fillStyle="#07101e"; ctx.fillRect(0,0,w,h);
+  for(let i=0;i<=LANES;i++){ const x=i*laneW; ctx.strokeStyle="rgba(81,168,255,.22)"; ctx.lineWidth=2; ctx.setLineDash([8,10]); ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  ctx.setLineDash([]); ctx.fillStyle="rgba(255,70,92,.12)"; ctx.fillRect(0,h-38,w,38); ctx.strokeStyle="rgba(255,70,92,.65)"; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(0,h-38); ctx.lineTo(w,h-38); ctx.stroke();
+  for(const cast of game.casts){
+    const target=game.monsters.find(m=>m.id===cast.targetId) || getAutoTarget(); const progress=1-cast.remainingTicks/Math.max(1,cast.totalTicks);
+    const sx=w/2, sy=h-22, tx=target?target.x:sx, ty=target?target.y:h*.35, mx=sx+(tx-sx)*progress, my=sy+(ty-sy)*progress;
+    ctx.strokeStyle="rgba(81,168,255,.75)"; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(mx,my); ctx.stroke();
+    ctx.strokeStyle="rgba(255,70,92,.9)"; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(mx,my,10+10*progress,0,Math.PI*2); ctx.stroke();
+    ctx.fillStyle="rgba(234,244,255,.9)"; ctx.font="700 12px system-ui"; ctx.fillText(translateForLang(cast.spell.name),mx+14,my-10);
+  }
+  for(const m of game.monsters){
+    const selected=m.id===game.selectedTargetId, r=m.boss?38:(selected?27:23);
+    ctx.fillStyle=selected?"rgba(255,215,109,.22)":m.boss?"rgba(255,70,92,.16)":"rgba(81,168,255,.12)"; ctx.beginPath(); ctx.arc(m.x,m.y,r+5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="rgba(13,26,45,.96)"; ctx.strokeStyle=selected?"#ffd76d":m.boss?"#ff465c":"#51a8ff"; ctx.lineWidth=selected?4:2; ctx.beginPath(); ctx.arc(m.x,m.y,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle="#eaf4ff"; ctx.font=m.boss?"900 18px system-ui":"900 18px system-ui"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(String(Math.max(0,m.hp)),m.x,m.y);
+    ctx.fillStyle="rgba(255,70,92,.75)"; const hpW=(m.boss?74:42)*Math.max(0,m.hp/m.maxHp); ctx.fillRect(m.x-(m.boss?37:21),m.y+r+8,hpW,5);
+  }
+  for(const e of game.effects){
+    const p=e.t/e.life; ctx.globalAlpha=Math.max(0,1-p);
+    if(e.type==="hit"){ctx.strokeStyle="#ff465c";ctx.lineWidth=4;ctx.beginPath();ctx.arc(e.x,e.y,18+28*p,0,Math.PI*2);ctx.stroke();ctx.fillStyle="#ffb7bf";ctx.font="900 20px system-ui";ctx.textAlign="center";ctx.fillText(translateForLang(e.text),e.x,e.y-34-10*p);}
+    else if(e.type==="kill"){ctx.strokeStyle="#70ffc0";ctx.lineWidth=3;ctx.beginPath();ctx.arc(e.x,e.y,20+40*p,0,Math.PI*2);ctx.stroke();ctx.fillStyle="#d8ffef";ctx.font="800 16px system-ui";ctx.textAlign="center";ctx.fillText(translateForLang(e.text),e.x,e.y-24-14*p);}
+    else if(e.type==="aoe"){ctx.strokeStyle="rgba(125,172,255,.9)";ctx.lineWidth=4;ctx.beginPath();ctx.arc(e.x,e.y,80+260*p,0,Math.PI*2);ctx.stroke();ctx.fillStyle="#cfe1ff";ctx.font="900 24px system-ui";ctx.textAlign="center";ctx.fillText(translateForLang(e.text),e.x,e.y-10-20*p);}
+    else{ctx.fillStyle="#ff99a5";ctx.font="800 16px system-ui";ctx.textAlign="center";ctx.fillText(translateForLang(e.text),e.x,e.y-10-18*p);}
+    ctx.globalAlpha=1;
+  }
+  if(game.state!=="battle"){
+    ctx.fillStyle="rgba(3,8,16,.58)"; ctx.fillRect(0,0,w,h); ctx.fillStyle="#eaf4ff"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.font="900 34px system-ui"; ctx.fillText(stateLabel(),w/2,h/2-12);
+    ctx.font="500 15px system-ui"; ctx.fillStyle="rgba(234,244,255,.75)"; const msg=game.state==="ready"?"맵 선택으로 전투를 시작하거나 설계 열기로 술식을 수정하세요.":game.state==="design"?"술식을 설계하고 슬롯에 저장하세요.":game.state==="paused"?getControlKeyLabel("pause")+"로 전투를 재개합니다.":"전투 재시작 버튼으로 다시 시작합니다."; ctx.fillText(translateForLang(msg),w/2,h/2+28);
+  }
+  ctx.restore();
+}
+function updateCooldownBars(){ for(let i=0;i<5;i++){ const bar=document.getElementById("cooldown"+i); if(!bar) continue; const spell=game.slots[i]; const pct=spell && game.cooldowns[i]>0 ? Math.min(100,game.cooldowns[i]/Math.max(1,spell.castTime)*100) : 0; bar.style.width=pct+"%"; } }
+
+function formatSpecialDamage(obj){
+  const v=Number(obj && obj.aoeDamage)||0;
+  return v>0 ? "분산 "+v : "없음";
+}
+
+function renderSlots(){
+  els.slots.innerHTML="";
+  const slotMode=((game.state==="battle"||game.state==="paused") ? (game.activeRunMode||game.selectedRunMode) : game.selectedRunMode);
+  const pureMode=slotMode==="pure";
+  for(let i=0;i<5;i++){
+    const spell=game.slots[i]; const card=document.createElement("div"); card.className="slot"+(spell?"":" empty");
+    const head=document.createElement("div"); head.className="slotHead"; head.innerHTML='<div class="keyBadge">'+escapeHtml(getSlotKeyLabel(i))+'</div><div class="slotName">'+(spell?escapeHtml(spell.name):"비어 있음")+'</div>'; card.appendChild(head);
+    if(spell){
+      const stats=document.createElement("div"); stats.className="slotStats"; stats.innerHTML='<div><span>쿨타임</span><b>'+spell.castTime+'틱</b></div><div><span>마나</span><b>'+spell.manaCost+'</b></div><div><span>일반</span><b>'+spell.damage+'</b></div><div><span>특수</span><b class="specialValue">'+formatSpecialDamage(spell)+'</b></div>'; card.appendChild(stats);
+      const mode=document.createElement("div");
+      mode.className="slotModeRow";
+      if(pureMode){
+        mode.innerHTML='<span>발사 방식</span><span class="manualOnlyBadge">수동 모드</span>';
+      }else{
+        const isAuto=!!game.slotAutoModes[i];
+        mode.innerHTML='<span>발사 방식</span><button class="autoSwitch '+(isAuto?'on':'')+'" data-auto-slot="'+i+'" type="button" title="쿨타임 종료 시 즉시 발사">'+(isAuto?'자동':'수동')+'</button>';
+      }
+      card.appendChild(mode);
+      card.title=(game.state==="battle"||game.state==="paused"||game.state==="gameover") ? (isMobileLayout()?"탭해서 발사":"전투 중에는 슬롯 클릭으로 설계 화면을 열지 않습니다.") : "클릭하면 설계 화면으로 불러옵니다."; card.addEventListener("click",ev=>{ if(ev.target && ev.target.closest && ev.target.closest("[data-auto-slot]")) return; if(game.state==="battle"){ if(isMobileLayout()) castSlot(i); return; } if(game.state==="paused"||game.state==="gameover") return; loadSpellFromSlot(i); });
+    }else{ const empty=document.createElement("div"); empty.className="small"; empty.textContent="설계 화면에서 직접 만든 술식을 저장하세요."; card.appendChild(empty); }
+    const cd=document.createElement("div"); cd.className="cooldown"; cd.id="cooldown"+i; card.appendChild(cd); els.slots.appendChild(card);
+  }
+  renderLoadButtons(); renderDeckStatus();
+}
+function onSlotPanelClick(e){
+  const btn=e.target && e.target.closest ? e.target.closest("[data-auto-slot]") : null;
+  if(!btn) return;
+  e.preventDefault(); e.stopPropagation();
+  toggleSlotAuto(Number(btn.dataset.autoSlot));
+}
+function toggleSlotAuto(index){
+  const slotMode=((game.state==="battle"||game.state==="paused") ? (game.activeRunMode||game.selectedRunMode) : game.selectedRunMode);
+  if(slotMode==="pure"){
+    toast("수동 모드에서는 자동 발사를 사용할 수 없습니다.","bad");
+    return;
+  }
+  if(!game.slots[index]){ toast("이 슬롯에는 술식이 없습니다.","bad"); return; }
+  game.slotAutoModes[index]=!game.slotAutoModes[index];
+  saveSlotAutoModes();
+  renderSlots();
+  toast((index+1)+"번 슬롯: "+(game.slotAutoModes[index]?"자동":"수동"), game.slotAutoModes[index]?"good":"");
+}
+function createPreview(spell,size){
+  const gap=2; const wrap=document.createElement("div"); wrap.className="preview"; wrap.style.width=(spell.width*size+(spell.width-1)*gap)+"px"; wrap.style.height=(spell.height*size+(spell.height-1)*gap)+"px";
+  for(let y=0;y<spell.height;y++) for(let x=0;x<spell.width;x++){ const cell=document.createElement("div"); cell.className="previewCell"; cell.style.left=(x*(size+gap))+"px"; cell.style.top=(y*(size+gap))+"px"; cell.style.width=size+"px"; cell.style.height=size+"px"; wrap.appendChild(cell); }
+  for(const c of spell.components){ const p=document.createElement("div"); p.className="previewPiece "+c.type+(c.h>c.w?" vertical":" horizontal"); p.style.left=(c.x*(size+gap))+"px"; p.style.top=(c.y*(size+gap))+"px"; p.style.width=(c.w*size+(c.w-1)*gap)+"px"; p.style.height=(c.h*size+(c.h-1)*gap)+"px"; wrap.appendChild(p); }
+  return wrap;
+}
+function renderLoadButtons(){ els.loadButtons.innerHTML=""; for(let i=0;i<5;i++){ const btn=document.createElement("button"); btn.textContent=translateForLang((i+1)+"번"); btn.disabled=!game.slots[i]; btn.addEventListener("click",()=>loadSpellFromSlot(i)); els.loadButtons.appendChild(btn); } }
+function loadSpellFromSlot(index){ const spell=game.slots[index]; if(!spell){toast("이 슬롯에는 술식이 없습니다.","bad"); return;} designer.width=spell.width; designer.height=spell.height; designer.components=clone(spell.components); designer.nextId=1+designer.components.reduce((m,c)=>Math.max(m,Number(c.id)||0),0); els.spellName.value=spell.name; els.slotSelect.value=String(index); if(game.state!=="design") game.returnStateAfterDesign=game.state; setState("design"); renderDesigner(); toast((index+1)+"번 슬롯을 불러왔습니다.","good"); }
+
+function renderDesigner(){
+  ensureUnlockedTool();
+  els.frameW.value=String(designer.width); els.frameH.value=String(designer.height); els.rotateBtn.textContent=designer.rotation===0?"회전: 가로":"회전: 세로"; renderToolState();
+  const board=els.designBoard; board.innerHTML=""; board.style.width=boardSize(designer.width)+"px"; board.style.height=boardSize(designer.height)+"px";
+  for(let y=0;y<designer.height;y++) for(let x=0;x<designer.width;x++){ const cell=document.createElement("div"); cell.className="gridCell"; cell.style.left=pos(x)+"px"; cell.style.top=pos(y)+"px"; cell.style.width=CELL+"px"; cell.style.height=CELL+"px"; board.appendChild(cell); }
+  for(const c of designer.components){ const piece=document.createElement("div"); piece.className="piece "+c.type+(c.h>c.w?" vertical":" horizontal"); piece.style.left=pos(c.x)+"px"; piece.style.top=pos(c.y)+"px"; piece.style.width=pieceSize(c.w)+"px"; piece.style.height=pieceSize(c.h)+"px"; board.appendChild(piece); }
+  renderPlacementGhost();
+  renderDesignerStats();
+}
+function boardSize(n){return n*CELL+(n-1)*GAP;} function pos(n){return n*(CELL+GAP);} function pieceSize(n){return n*CELL+(n-1)*GAP;}
+function setupToolButtons(){
+  document.querySelectorAll("[data-tool]").forEach(btn=>{
+    const tool=btn.dataset.tool;
+    const info=TOOL_DESCRIPTIONS[tool] || {name:tool};
+    // SVG 아이콘은 viewBox 기준으로 그려서 버튼 크기가 바뀌어도 원/타원 비율이 찌그러지지 않는다.
+    btn.innerHTML=toolIconSvg(tool)+'<span class="srOnly">'+escapeHtml(info.name)+'</span>';
+    btn.title=translateForLang(info.name);
+    btn.setAttribute("aria-label", translateForLang(info.name));
+  });
+}
+function toolIconSvg(tool){
+  const common='class="toolIconSvg" viewBox="0 0 64 64" aria-hidden="true" focusable="false"';
+  const red='var(--red)', blue='var(--blue)', text='var(--text)';
+  // [아이콘 규칙]
+  // 설계판의 .piece 모양과 최대한 같은 비율로 축소해서 보여준다.
+  // 원/타원 비율이 또 어긋나면 여기 SVG 좌표만 수정하면 된다.
+  const map={
+    red:'<svg '+common+'><defs><filter id="glowRed"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="32" cy="32" r="8" fill="'+red+'" filter="url(#glowRed)"/><circle cx="29" cy="29" r="3" fill="#fff" opacity=".35"/></svg>',
+    blueGen:'<svg '+common+'><defs><filter id="glowBlue"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="32" cy="32" r="14" fill="none" stroke="'+red+'" stroke-width="4" stroke-opacity=".72"/><circle cx="32" cy="32" r="8" fill="'+blue+'" filter="url(#glowBlue)"/><circle cx="29" cy="29" r="3" fill="#fff" opacity=".36"/></svg>',
+    wire:'<svg '+common+'><rect x="15" y="28" width="34" height="8" rx="4" fill="'+blue+'" opacity=".94"/><rect x="28" y="15" width="8" height="34" rx="4" fill="'+blue+'" opacity=".94"/><circle cx="32" cy="32" r="4" fill="#d8ecff" opacity=".55"/></svg>',
+    circle:'<svg '+common+'><circle cx="32" cy="32" r="17" fill="none" stroke="'+red+'" stroke-width="6"/></svg>',
+    oval:'<svg '+common+'><ellipse cx="32" cy="32" rx="23" ry="11" fill="none" stroke="'+red+'" stroke-width="6"/></svg>',
+    kernel:'<svg '+common+'><rect x="16" y="16" width="32" height="32" rx="13" fill="none" stroke="'+red+'" stroke-width="6"/></svg>',
+    mixed2:'<svg '+common+'><ellipse cx="32" cy="32" rx="23" ry="11" fill="none" stroke="'+blue+'" stroke-width="6"/><path d="M22 38 L43 26" stroke="'+red+'" stroke-width="6" stroke-linecap="round"/></svg>',
+    mixedCore:'<svg '+common+'><circle cx="32" cy="32" r="20" fill="none" stroke="'+blue+'" stroke-width="4.5"/><ellipse cx="32" cy="32" rx="27" ry="9" fill="none" stroke="'+blue+'" stroke-width="4" transform="rotate(-28 32 32)"/><circle cx="32" cy="32" r="7" fill="'+red+'" opacity=".78"/></svg>',
+    eraser:'<svg '+common+'><path d="M19 40 L38 20 Q40 18 43 21 L50 28 Q52 30 50 33 L31 53 Z" fill="#ff7380"/><path d="M31 53 L50 33 L55 38 Q57 40 55 43 L44 54 Z" fill="'+text+'" opacity=".86"/></svg>'
+  };
+  return map[tool] || map.red;
+}
+function requiredMapForTool(tool){
+  if(tool==="blueGen" || tool==="wire" || tool==="mixed2") return 2;
+  if(tool==="mixedCore") return 3;
+  return 1;
+}
+function isToolUnlocked(tool){ return isMapUnlocked(requiredMapForTool(tool)); }
+function getLockedToolNamesFromComponents(components){
+  const names=[]; const seen=new Set();
+  for(const c of components||[]){
+    const req=requiredMapForTool(c.type);
+    if(req>1 && !isMapUnlocked(req) && !seen.has(c.type)){ seen.add(c.type); names.push((TOOL_DESCRIPTIONS[c.type]&&TOOL_DESCRIPTIONS[c.type].name)||c.type); }
+  }
+  return names;
+}
+function getSpellRequiredMap(spell){
+  let req=1;
+  for(const c of (spell&&spell.components)||[]) req=Math.max(req, requiredMapForTool(c.type));
+  return req;
+}
+function ensureUnlockedTool(){
+  if(!isToolUnlocked(designer.tool)){
+    const first=TOOL_ORDER.find(isToolUnlocked) || "red";
+    designer.tool=first;
+  }
+}
+function renderToolState(){
+  document.querySelectorAll("[data-tool]").forEach(btn=>{
+    const tool=btn.dataset.tool;
+    const unlocked=isToolUnlocked(tool);
+    btn.classList.toggle("active",tool===designer.tool);
+    btn.classList.toggle("locked",!unlocked);
+    btn.disabled=!unlocked;
+    const info=TOOL_DESCRIPTIONS[tool] || {name:tool};
+    const req=requiredMapForTool(tool);
+    btn.title=translateForLang(unlocked ? info.name : info.name+" - 맵 "+req+" 해금 필요");
+  });
+  const info=TOOL_DESCRIPTIONS[designer.tool] || TOOL_DESCRIPTIONS.red;
+  const req=requiredMapForTool(designer.tool);
+  const lockedText=isToolUnlocked(designer.tool) ? "" : '<br><span class="formula">'+escapeHtml(translateForLang('맵 '+req+' 해금 필요'))+'</span>';
+  els.toolInfo.innerHTML='<b>'+escapeHtml(translateForLang(info.name))+'</b><br>'+escapeHtml(translateForLang(info.text))+'<br><span class="formula">'+escapeHtml(translateForLang(info.formula))+'</span>'+lockedText;
+}
+
+// [설계 입력] 배치 미리보기
+// 마우스 포인터 위치를 부품 중심으로 보고, 실제 배치될 칸을 반투명하게 보여준다.
+// 타일 사이 GAP 위에 커서가 있어도 getBoardGridCoordFromPointer()가 fractional grid 좌표를 만들어준다.
+function updatePlacementPreview(e){
+  if(game.state!=="design") return;
+  if(!e || designer.tool==="eraser"){ clearPlacementPreview(); return; }
+  const coord=getBoardGridCoordFromPointer(e);
+  if(!coord){ clearPlacementPreview(); return; }
+  if(designer.previewX===coord.gx && designer.previewY===coord.gy) return;
+  designer.previewX=coord.gx;
+  designer.previewY=coord.gy;
+  renderPlacementGhost();
+}
+function clearPlacementPreview(){
+  if(designer.previewX===null && designer.previewY===null) return;
+  designer.previewX=null;
+  designer.previewY=null;
+  renderPlacementGhost();
+}
+function renderPlacementGhost(){
+  const board=els.designBoard;
+  if(!board) return;
+  board.querySelectorAll(".placementGhost,.placementCellHint").forEach(el=>el.remove());
+  if(designer.previewX===null || designer.previewY===null) return;
+  if(designer.tool==="eraser") return;
+  if(!isToolUnlocked(designer.tool)) return;
+
+  const comp=createComponentFromGridCoord(designer.tool,designer.previewX,designer.previewY);
+  const valid=canPlaceComponent(comp,designer.components,designer.width,designer.height);
+
+  // 부품이 차지할 칸을 먼저 표시한다. 프레임 밖 칸은 그리지 않지만, valid=false라 빨간 힌트가 뜬다.
+  for(let yy=comp.y; yy<comp.y+comp.h; yy++){
+    for(let xx=comp.x; xx<comp.x+comp.w; xx++){
+      if(xx<0 || yy<0 || xx>=designer.width || yy>=designer.height) continue;
+      const hint=document.createElement("div");
+      hint.className="placementCellHint"+(valid?"":" invalid");
+      hint.style.left=pos(xx)+"px";
+      hint.style.top=pos(yy)+"px";
+      hint.style.width=CELL+"px";
+      hint.style.height=CELL+"px";
+      board.appendChild(hint);
+    }
+  }
+
+  const ghost=document.createElement("div");
+  ghost.className="piece placementGhost "+comp.type+(comp.h>comp.w?" vertical":" horizontal")+(valid?"":" invalid");
+  ghost.style.left=pos(comp.x)+"px";
+  ghost.style.top=pos(comp.y)+"px";
+  ghost.style.width=pieceSize(comp.w)+"px";
+  ghost.style.height=pieceSize(comp.h)+"px";
+  board.appendChild(ghost);
+}
+
+function onDesignBoardClick(e){ return; }
+function onDesignBoardMouseDown(e){
+  if(game.state!=="design") return;
+  if(e.target && e.target.closest && e.target.closest("button,input,select")) return;
+
+  // 우클릭은 현재 도구와 상관없이 즉시 삭제한다.
+  if(e.button===2){
+    e.preventDefault();
+    eraseAtPointer(e,true);
+    return;
+  }
+
+  if(e.button!==0) return;
+  e.preventDefault();
+
+  if(designer.tool==="eraser"){
+    game.erasingDrag=true;
+    eraseAtPointer(e,true);
+    return;
+  }
+
+  // [드래그 배치]
+  // 지우개뿐 아니라 모든 배치 도구도 마우스를 누른 채 움직이면 연속 배치된다.
+  // 이미 점유된 칸이나 프레임 밖은 드래그 중에는 조용히 건너뛰고, 첫 클릭 실패 때만 경고를 띄운다.
+  game.placingDrag=true;
+  game.lastDragPlaceKey=null;
+  placeComponentAtPointer(e,true);
+}
+function onDesignBoardMouseMove(e){
+  if(game.state!=="design") return;
+  if(game.erasingDrag && designer.tool==="eraser"){
+    eraseAtPointer(e,false);
+    return;
+  }
+  if(game.placingDrag && designer.tool!=="eraser"){
+    placeComponentAtPointer(e,false);
+    updatePlacementPreview(e);
+    return;
+  }
+  updatePlacementPreview(e);
+}
+function placeComponentAtPointer(e,notify){
+  if(!isToolUnlocked(designer.tool)){ if(notify) toast("이 부품은 아직 해금되지 않았습니다.","bad"); return false; }
+  const coord=getBoardGridCoordFromPointer(e);
+  if(!coord){ if(notify) invalidBoard(); return false; }
+  const comp=createComponentFromGridCoord(designer.tool,coord.gx,coord.gy);
+  const key=comp.type+":"+comp.x+","+comp.y+":"+comp.w+"x"+comp.h+":"+comp.rotation;
+  if(game.placingDrag && game.lastDragPlaceKey===key) return false;
+  game.lastDragPlaceKey=key;
+  if(!canPlaceComponent(comp,designer.components,designer.width,designer.height)){ if(notify) invalidBoard(); return false; }
+  designer.components.push(comp);
+  designer.nextId++;
+  renderDesigner();
+  return true;
+}
+function eraseAtPointer(e,notify){
+  const comp=componentAtPointer(e);
+  if(comp){
+    designer.components=designer.components.filter(c=>c.id!==comp.id);
+    renderDesigner();
+    return true;
+  }
+  const cell=getNearestCellFromPointer(e);
+  if(cell && eraseCellAt(cell.x,cell.y,false)) return true;
+  if(notify) invalidBoard();
+  return false;
+}
+function eraseCellAt(x,y,notify){
+  const removed=removeComponentAt(x,y);
+  if(removed){ renderDesigner(); return true; }
+  if(notify) invalidBoard();
+  return false;
+}
+function onDesignWheel(e){
+  if(game.state!=="design") return;
+  e.preventDefault();
+  rotateTool(true);
+}
+function invalidBoard(){ els.designBoard.classList.remove("invalidShake"); void els.designBoard.offsetWidth; els.designBoard.classList.add("invalidShake"); toast("그 위치에는 배치할 수 없습니다.","bad"); }
+function getBoardLocalFromPointer(e){
+  const board=els.designBoard;
+  if(!board || !e) return null;
+  const rect=board.getBoundingClientRect();
+  if(!rect.width || !rect.height) return null;
+  const bw=boardSize(designer.width), bh=boardSize(designer.height);
+  const localX=(e.clientX-rect.left) * (bw/rect.width);
+  const localY=(e.clientY-rect.top) * (bh/rect.height);
+  if(localX<0 || localY<0 || localX>bw || localY>bh) return null;
+  return {x:localX,y:localY};
+}
+function getBoardGridCoordFromPointer(e){
+  const local=getBoardLocalFromPointer(e);
+  if(!local) return null;
+  return {gx:gridCoordFromLocal(local.x), gy:gridCoordFromLocal(local.y)};
+}
+function getNearestCellFromPointer(e){
+  const local=getBoardLocalFromPointer(e);
+  if(!local) return null;
+  const step=CELL+GAP;
+  const x=Math.max(0,Math.min(designer.width-1,Math.round((local.x-CELL/2)/step)));
+  const y=Math.max(0,Math.min(designer.height-1,Math.round((local.y-CELL/2)/step)));
+  return {x,y};
+}
+function componentAtPointer(e){
+  const local=getBoardLocalFromPointer(e);
+  if(!local) return null;
+  // 큰 부품은 타일 사이 GAP까지 시각적으로 차지하므로 픽셀 사각형으로 판정한다.
+  for(let i=designer.components.length-1;i>=0;i--){
+    const c=designer.components[i];
+    const left=pos(c.x), top=pos(c.y), right=left+pieceSize(c.w), bottom=top+pieceSize(c.h);
+    if(local.x>=left && local.x<=right && local.y>=top && local.y<=bottom) return c;
+  }
+  return null;
+}
+function gridCoordFromLocal(local){
+  const step=CELL+GAP;
+  const i=Math.floor(local/step);
+  const inside=local-i*step;
+  // 타일 내부는 0~1, 타일 사이 GAP는 정확히 다음 타일 경계(1.0)로 취급한다.
+  // 따라서 2칸/2x2 부품을 타일 사이에 올려도 그 경계를 중심으로 스냅된다.
+  const frac=Math.max(0,Math.min(1,inside/CELL));
+  return i+frac;
+}
+function createComponentFromGridCoord(type,gx,gy){
+  const dim=dimensionsFor(type,designer.rotation);
+  // [배치 기준]
+  // 실제 마우스 위치를 부품 전체의 중심으로 보고 top-left 좌표를 계산한다.
+  // 홀수 크기(3x3)는 가운데 칸에 스냅되고, 짝수 크기(1x2/2x2)는 마우스가 칸의 어느 절반에 있는지에 따라
+  // 왼쪽/오른쪽 또는 위/아래로 자연스럽게 스냅된다. 그래서 2칸 부품도 좌상단 기준처럼 느껴지지 않는다.
+  const x=Math.round(gx-dim.w/2);
+  const y=Math.round(gy-dim.h/2);
+  return {id:designer.nextId,type,x,y,w:dim.w,h:dim.h,rotation:dim.rotation};
+}
+function createComponentFromCellCenter(type,cellX,cellY){
+  return createComponentFromGridCoord(type,cellX+0.5,cellY+0.5);
+}
+function dimensionsFor(type,rotation){
+  if(type==="oval" || type==="mixed2"){ const r=rotation===1?1:0; return r?{w:1,h:2,rotation:1}:{w:2,h:1,rotation:0}; }
+  if(type==="kernel") return {w:2,h:2,rotation:0};
+  if(type==="mixedCore") return {w:3,h:3,rotation:0};
+  return {w:1,h:1,rotation:0};
+}
+function canPlaceComponent(comp,components,width,height){ if(comp.x<0||comp.y<0||comp.x+comp.w>width||comp.y+comp.h>height) return false; for(const other of components) if(componentsOverlap(comp,other)) return false; return true; }
+function componentsOverlap(a,b){ return a.x<b.x+b.w && a.x+a.w>b.x && a.y<b.y+b.h && a.y+a.h>b.y; }
+function componentAt(components,x,y){ return components.find(c=>x>=c.x && x<c.x+c.w && y>=c.y && y<c.y+c.h) || null; }
+function removeComponentAt(x,y){ const before=designer.components.length; designer.components=designer.components.filter(c=>!(x>=c.x && x<c.x+c.w && y>=c.y && y<c.y+c.h)); return designer.components.length!==before; }
+function rotateTool(silent){ designer.rotation=designer.rotation===0?1:0; els.rotateBtn.textContent=designer.rotation===0?"회전: 가로":"회전: 세로"; renderPlacementGhost(); if(!silent) toast(designer.rotation===0?"가로 배치":"세로 배치"); }
+function trimComponentsToFrame(){ const before=designer.components.length; designer.components=designer.components.filter(c=>c.x+c.w<=designer.width && c.y+c.h<=designer.height); if(before!==designer.components.length) toast("프레임 밖 부품을 제거했습니다."); }
+function clearDesigner(){ designer.components=[]; els.spellName.value=""; renderDesigner(); }
+function renderDesignerStats(){
+  const stats=calculateSpellStats({width:designer.width,height:designer.height,components:designer.components});
+  const dpm=stats.manaCost>0?(stats.damage/stats.manaCost).toFixed(2):"-"; const dpt=stats.castTime>0?(stats.damage/stats.castTime).toFixed(2):"-";
+  const lockedNames=getLockedToolNamesFromComponents(designer.components);
+  const canSave=stats.valid && lockedNames.length===0;
+  const saveText=lockedNames.length ? "해금 필요" : (stats.valid?"저장 가능":"저장 불가");
+  const specialText=formatSpecialDamage(stats);
+  const lines=stats.breakdown.slice();
+  if(lockedNames.length) lines.push("해금되지 않은 부품: "+lockedNames.join(", "));
+  els.spellStats.innerHTML='<div class="statGrid">'+
+    '<div class="statCard"><span>쿨타임</span><b>'+stats.castTime+'</b><div class="small">발사 '+(HIT_DELAY_TICKS*TICK_SEC).toFixed(2)+'초 / 쿨 '+stats.seconds.toFixed(2)+'초</div></div>'+
+    '<div class="statCard"><span>마나 비용</span><b>'+stats.manaCost+'</b><div class="small">빨강 '+stats.redCount+' + 파랑추가 '+(stats.activeBlueCount*2)+'</div></div>'+
+    '<div class="statCard"><span>일반 데미지</span><b>'+stats.damage+'</b><div class="small">'+saveText+'</div></div>'+
+    '<div class="statCard"><span>특수 데미지</span><b>'+specialText+'</b></div>'+
+    '<div class="statCard"><span>일반 / 마나</span><b>'+dpm+'</b></div>'+
+    '<div class="statCard"><span>일반 / 쿨타임</span><b>'+dpt+'</b></div>'+
+    '<div class="statCard"><span>파란 마나</span><b>'+stats.activeBlueCount+'</b><div class="small">비활성 '+stats.inactiveBlueCount+'</div></div>'+ '</div>'+
+    '<div class="breakdown">'+escapeHtml(lines.join("\n"))+'</div>';
+  els.saveBtn.disabled=!canSave;
+}
+function saveSpellToSlot(){
+  const stats=calculateSpellStats({width:designer.width,height:designer.height,components:designer.components});
+  if(!stats.valid){toast("유효한 술식이 아닙니다.","bad"); return;}
+  const lockedNames=getLockedToolNamesFromComponents(designer.components);
+  if(lockedNames.length){toast("아직 해금되지 않은 부품이 있습니다: "+lockedNames.join(", "),"bad"); return;}
+  const index=Number(els.slotSelect.value); const name=(els.spellName.value||"").trim() || "이름 없는 술식";
+  const spell={id:"spell_"+Date.now(),name,width:designer.width,height:designer.height,components:clone(designer.components),castTime:stats.castTime,manaCost:stats.manaCost,damage:stats.damage,aoeDamage:stats.aoeDamage||0,breakdown:stats.breakdown};
+  game.slots[index]=spell; saveSlots(); renderSlots(); updateStartBattleButton(); toast((index+1)+"번 슬롯에 저장했습니다.","good");
+}
+
+// [계산 핵심] 술식의 마나 비용, 쿨타임, 일반 데미지와 특수 데미지를 한 번에 산출한다.
+// 규칙 변경이 필요하면 이 함수와 TOOL_DESCRIPTIONS를 같이 수정하면 된다.
+function calculateSpellStats(model){
+  const width=model.width, height=model.height, components=model.components||[];
+  const graph=buildConnectionGraph(components);
+  const redSources=components.filter(c=>c.type==="red");
+  const blueGens=components.filter(c=>c.type==="blueGen");
+  const activeBlueIds=new Set();
+  const breakdown=[];
+  for(const b of blueGens){
+    const red=getConnectedComponents(b,components,graph,c=>c.type==="red").length;
+    if(red>=1){ activeBlueIds.add(b.id); breakdown.push("파란 마나 생성기 "+b.id+": 연결 빨간 마나 "+red+"개 → 활성, 비용 +2"); }
+    else breakdown.push("파란 마나 생성기 "+b.id+": 연결 빨간 마나 없음 → 비활성");
+  }
+  let damage=0, aoeDamage=0;
+  const circuits=components.filter(c=>["circle","oval","kernel","mixed2","mixedCore"].includes(c.type));
+  for(const c of circuits){
+    const red=getConnectedComponents(c,components,graph,x=>x.type==="red").length;
+    const blue=getConnectedComponents(c,components,graph,x=>x.type==="blueGen" && activeBlueIds.has(x.id)).length;
+    let d=0, label="", detail="";
+    if(c.type==="circle"){
+      d=red; label="1칸 회로"; detail="빨간 "+red+"개 × 1";
+    }else if(c.type==="oval"){
+      const groups=Math.floor(red/2); d=groups*5; label="2칸 타원"; detail="floor(빨간 "+red+" / 2) = "+groups+"묶음 × 5";
+    }else if(c.type==="kernel"){
+      const groups=Math.floor(red/3); d=groups*12; label="2x2 핵"; detail="floor(빨간 "+red+" / 3) = "+groups+"묶음 × 12";
+    }else if(c.type==="mixed2"){
+      const pairs=Math.min(red,blue); d=pairs*8; label="2칸 혼합 회로"; detail="min(빨간 "+red+", 파란 "+blue+") = "+pairs+"쌍 × 8";
+    }else if(c.type==="mixedCore"){
+      const neighborCircles=getDirectNeighborComponents(c,components).filter(x=>x.type==="circle");
+      const activeCircleCount=neighborCircles.filter(x=>getConnectedComponents(x,components,graph,y=>y.type==="red").length>=1).length;
+      const inactiveCircleCount=neighborCircles.length-activeCircleCount;
+      const bluePairs=Math.floor(blue/2); const groups=Math.min(red, bluePairs, activeCircleCount); d=groups*60; if(groups>0) aoeDamage += groups*3; label="9칸 혼합 핵"; detail="min(빨강 "+red+", floor(파란 "+blue+" / 2) = "+bluePairs+", 인접 활성 1칸 회로 "+activeCircleCount+") = "+groups+"묶음 × (일반 60 + 분산 3)"+(groups>0?" / 일반 "+d+", 특수 분산 "+(groups*3):"")+(inactiveCircleCount>0?" / 비활성 1칸 회로 "+inactiveCircleCount+"개 제외":"");
+    }
+    damage += d; breakdown.push(label+" "+c.id+": "+detail+" → "+d);
+  }
+  if(circuits.length===0) breakdown.push("회로가 없습니다.");
+  if(aoeDamage>0) breakdown.push("특수 데미지: 분산 "+aoeDamage+" (기지에 가까운 적 최대 "+CORE_AOE_TARGET_LIMIT+"개)");
+  breakdown.push("총 일반 데미지: "+damage);
+  const redCount=redSources.length, activeBlueCount=activeBlueIds.size, inactiveBlueCount=blueGens.length-activeBlueCount;
+  const manaCost=redCount + activeBlueCount*2; const castTime=width*height;
+  return {castTime, seconds:castTime*TICK_SEC, manaCost, redCount, activeBlueCount, inactiveBlueCount, damage, aoeDamage, breakdown, valid:redCount>=1 && circuits.length>=1 && damage>=1};
+}
+
+// [도선 규칙] 서로 붙은 도선을 하나의 네트워크로 묶고, 그 도선망에 닿은 부품들을 기록한다.
+function buildConnectionGraph(components){
+  const wireMap=new Map(); for(const c of components) if(c.type==="wire") wireMap.set(c.x+","+c.y,c);
+  const visited=new Set(), groups=[], compGroups=new Map();
+  for(const wire of components.filter(c=>c.type==="wire")){
+    if(visited.has(wire.id)) continue;
+    const q=[wire], ids=new Set([wire.id]), cells=new Set([wire.x+","+wire.y]); visited.add(wire.id);
+    while(q.length){
+      const w=q.shift();
+      for(const [nx,ny] of neighborCells(w.x,w.y)){
+        const other=wireMap.get(nx+","+ny);
+        if(other && !visited.has(other.id)){ visited.add(other.id); ids.add(other.id); cells.add(other.x+","+other.y); q.push(other); }
+      }
+    }
+    groups.push({ids,cells,components:new Set()});
+  }
+  for(let gi=0;gi<groups.length;gi++){
+    const group=groups[gi];
+    for(const key of group.cells){
+      const [x,y]=key.split(",").map(Number);
+      for(const [nx,ny] of neighborCells(x,y)){
+        const comp=componentAt(components,nx,ny);
+        if(comp && comp.type!=="wire"){ group.components.add(comp.id); if(!compGroups.has(comp.id)) compGroups.set(comp.id,new Set()); compGroups.get(comp.id).add(gi); }
+      }
+    }
+  }
+  return {groups, compGroups};
+}
+// [마나 읽기 규칙] 직접 상하좌우 인접 + 같은 도선망에 연결된 부품을 모두 인접처럼 취급한다.
+function getConnectedComponents(component,components,graph,predicate){
+  const result=new Map();
+  for(const other of getDirectNeighborComponents(component,components)) if(predicate(other)) result.set(other.id,other);
+  const groupIds=graph.compGroups.get(component.id);
+  if(groupIds){
+    for(const gi of groupIds){
+      for(const compId of graph.groups[gi].components){
+        if(compId===component.id) continue;
+        const other=components.find(c=>c.id===compId);
+        if(other && predicate(other)) result.set(other.id,other);
+      }
+    }
+  }
+  return [...result.values()];
+}
+function getDirectNeighborComponents(component,components){
+  const result=new Map();
+  const own=new Set();
+  for(let y=component.y;y<component.y+component.h;y++) for(let x=component.x;x<component.x+component.w;x++) own.add(x+","+y);
+  for(let y=component.y;y<component.y+component.h;y++) for(let x=component.x;x<component.x+component.w;x++){
+    for(const [nx,ny] of neighborCells(x,y)){
+      if(own.has(nx+","+ny)) continue;
+      const other=componentAt(components,nx,ny); if(other && other.id!==component.id) result.set(other.id,other);
+    }
+  }
+  return [...result.values()];
+}
+function neighborCells(x,y){ return [[x+1,y],[x-1,y],[x,y+1],[x,y-1]]; }
+
+function emptyRecord(){ return {score:0,time:0}; }
+function defaultRecords(){
+  const maps={"1":emptyRecord(),"2":emptyRecord(),"3":emptyRecord()};
+  return {assist:clone(maps), pure:clone(maps)};
+}
+function normalizeRecordShape(saved){
+  const records=defaultRecords();
+  if(!saved || typeof saved!=="object") return records;
+  // v3 형태: {assist:{1:{score,time}}, pure:{...}}
+  if(saved.assist || saved.pure){
+    for(const mode of ["assist","pure"]){
+      for(const id of ["1","2","3"]){
+        if(saved[mode] && saved[mode][id]){
+          records[mode][id]={score:Math.max(0,Number(saved[mode][id].score)||0), time:Math.max(0,Number(saved[mode][id].time)||0)};
+        }
+      }
+    }
+    return records;
+  }
+  // v1/v2 형태: {1:{score,time},2:{...}} → 일반 모드 기록으로 이관
+  for(const id of ["1","2","3"]){
+    if(saved[id]){
+      records.assist[id]={score:Math.max(0,Number(saved[id].score)||0), time:Math.max(0,Number(saved[id].time)||0)};
+    }
+  }
+  return records;
+}
+function loadRecords(){
+  let raw=localStorage.getItem(RECORD_STORAGE_KEY);
+  if(!raw) raw=localStorage.getItem(LEGACY_RECORD_STORAGE_KEY);
+  if(!raw) raw=localStorage.getItem(OLD_RECORD_KEY);
+  if(!raw) return defaultRecords();
+  try{ return normalizeRecordShape(JSON.parse(raw)); }catch(e){ return defaultRecords(); }
+}
+function saveRecords(){ localStorage.setItem(RECORD_STORAGE_KEY, JSON.stringify(game.records)); }
+function getMapRecord(id,mode){
+  const m=(mode==="pure")?"pure":"assist";
+  return (game.records && game.records[m] && game.records[m][String(id)]) || {score:0,time:0};
+}
+function setMapRecord(id,mode,record){
+  const m=(mode==="pure")?"pure":"assist";
+  if(!game.records) game.records=defaultRecords();
+  if(!game.records[m]) game.records[m]={"1":emptyRecord(),"2":emptyRecord(),"3":emptyRecord()};
+  game.records[m][String(id)]={score:Math.max(0,Number(record.score)||0), time:Math.max(0,Number(record.time)||0)};
+}
+function getMapProgressScore(id){
+  return Math.max(getMapRecord(id,"assist").score||0, getMapRecord(id,"pure").score||0);
+}
+function getMapProgressTime(id){
+  const a=getMapRecord(id,"assist"), p=getMapRecord(id,"pure");
+  if((p.score||0)>(a.score||0)) return p.time||0;
+  if((a.score||0)>(p.score||0)) return a.time||0;
+  return Math.max(a.time||0,p.time||0);
+}
+function getMapStars(id, scoreOverride){
+  const thresholds=STAR_THRESHOLDS[id] || [];
+  const score=scoreOverride==null ? getMapProgressScore(id) : Number(scoreOverride)||0;
+  return thresholds.reduce((n,need)=>n+(score>=need?1:0),0);
+}
+function getTotalStars(includeCurrentRun){
+  let total=0;
+  // IMPORTANT: Only the map that actually started the current run may contribute live score.
+  // Never fall back to currentMap here; currentMap can change while the map menu is open.
+  const runId=(includeCurrentRun && game.battleStarted) ? Number(game.activeRunMapId || 0) : 0;
+  for(const id of [1,2,3]){
+    let score=getMapProgressScore(id);
+    // 현재 진행 중 점수도 실제 전투 맵(activeRunMapId)에만 임시 반영한다.
+    if(includeCurrentRun && runId===id) score=Math.max(score, game.score||0);
+    total += getMapStars(id, score);
+  }
+  return total;
+}
+function getEffectiveManaRegen(){ return getTotalStars(true)>=MANA_BONUS_STAR_COUNT ? STAR_MANA_REGEN : BASE_MANA_REGEN; }
+function renderStars(count){
+  let html="";
+  for(let i=1;i<=3;i++) html += i<=count ? "★" : '<span class="starOff">☆</span>';
+  return html;
+}
+function renderMapStarSummary(){
+  if(!els.mapStarSummary) return;
+  const total=getTotalStars(true);
+  const regen=getEffectiveManaRegen();
+  const state=total>=MANA_BONUS_STAR_COUNT ? "적용 중" : "미적용";
+  els.mapStarSummary.innerHTML='★ '+total+'/9<br><span>별 '+MANA_BONUS_STAR_COUNT+'개 → 초당 마나 '+STAR_MANA_REGEN+' · 현재 '+regen+' ('+state+')</span>';
+}
+function recordCurrentRun(){
+  // 최고 기록은 실제 이번 전투가 시작된 맵(activeRunMapId)과 모드(activeRunMode)에만 저장한다.
+  // currentMap은 맵 선택창에서 먼저 바뀔 수 있고, 저장 초기화 후에는 기본 맵으로 바뀔 수 있으므로
+  // 여기서 fallback으로 쓰면 다른 맵에 점수가 복제되는 버그가 생긴다.
+  if(!game.battleStarted) return false;
+  const id=String(game.activeRunMapId || "");
+  if(!id || !MAPS[Number(id)]) return false;
+  const mode=(game.activeRunMode==="pure")?"pure":"assist";
+  const rec=getMapRecord(id,mode);
+  const next={score:Math.max(rec.score||0, game.score||0), time:Math.max(rec.time||0, game.survival||0)};
+  const changed=(next.score!==rec.score)||(next.time!==rec.time);
+  setMapRecord(id,mode,next);
+  if(changed) saveRecords();
+  renderMapCards();
+  updateHud();
+  return changed;
+}
+function formatTime(sec){
+  sec=Math.floor(Number(sec)||0);
+  const m=Math.floor(sec/60), ss=sec%60;
+  if(currentLanguage==="en") return m>0 ? (m+"m "+ss+"s") : (ss+"s");
+  return m>0 ? (m+"분 "+ss+"초") : (ss+"초");
+}
+
+function defaultUnlocks(){ return {"1":true,"2":false,"3":false}; }
+function loadUnlocks(){
+  localStorage.removeItem(OLD_RECORD_KEY);
+  const unlocks=defaultUnlocks();
+  const raw=localStorage.getItem(UNLOCK_KEY);
+  if(!raw) return unlocks;
+  try{ const saved=JSON.parse(raw); for(const id of ["1","2","3"]){ if(saved && typeof saved[id]==="boolean") unlocks[id]=saved[id]; } }catch(e){}
+  unlocks["1"]=true;
+  return unlocks;
+}
+function saveUnlocks(){ localStorage.setItem(UNLOCK_KEY,JSON.stringify(game.unlocks)); }
+function isMapUnlocked(id){
+  id=Number(id);
+  if(id===1) return true;
+  if(game.unlocks && game.unlocks[String(id)]) return true; // 비밀번호 1111 테스트 해금
+  if(id===2) return getMapStars(1)>=1;
+  if(id===3) return getMapStars(2)>=1;
+  return false;
+}
+function getFirstUnlockedMap(){ for(let i=3;i>=1;i--) if(isMapUnlocked(i)) return MAPS[i]; return MAPS[1]; }
+function getUnlockText(id){
+  if(id===1) return "기본 해금";
+  if(id===2) return "맵 1에서 별 1개 이상";
+  if(id===3) return "맵 2에서 별 1개 이상";
+  return "잠김";
+}
+function checkMapUnlocks(){
+  // activeRunMapId가 없으면 현재 점수가 어떤 맵의 전투인지 보장할 수 없으므로 기록하지 않는다.
+  if(!game.activeRunMapId) return;
+  const before2=isMapUnlocked(2), before3=isMapUnlocked(3), beforeStars=getTotalStars(false), beforeRegen=(beforeStars>=MANA_BONUS_STAR_COUNT?STAR_MANA_REGEN:BASE_MANA_REGEN);
+  recordCurrentRun();
+  const after2=isMapUnlocked(2), after3=isMapUnlocked(3), afterStars=getTotalStars(false), afterRegen=(afterStars>=MANA_BONUS_STAR_COUNT?STAR_MANA_REGEN:BASE_MANA_REGEN);
+  if(!before2 && after2) toast("맵 2 해금!", "good");
+  else if(!before3 && after3) toast("맵 3 해금!", "good");
+  else if(beforeStars<afterStars) toast("별 획득! ★ "+afterStars+"/9", "good");
+  if(beforeRegen<afterRegen) toast("별 5개 달성: 초당 마나 "+STAR_MANA_REGEN, "good");
+  renderMapCards(); renderToolState(); renderDesignerStats(); updateHud();
+}
+
+function emptyDeck(){ return [null,null,null,null,null]; }
+function createEmptyDecks(){ return Array.from({length:10}, emptyDeck); }
+function createDefaultDeckNames(){ return Array.from({length:10},(_,i)=>"덱 "+(i+1)); }
+function loadDecks(){
+  const decks=createEmptyDecks();
+  const raw=localStorage.getItem(DECK_STORAGE_KEY);
+  if(!raw) return decks;
+  try{
+    const saved=JSON.parse(raw);
+    if(!Array.isArray(saved)) return decks;
+    for(let d=0; d<10; d++){
+      const rawDeck=Array.isArray(saved[d]) ? saved[d] : (saved[d] && Array.isArray(saved[d].slots) ? saved[d].slots : null);
+      if(!rawDeck) continue;
+      decks[d]=emptyDeck();
+      for(let i=0; i<5; i++) decks[d][i]=normalizeSpell(rawDeck[i]);
+    }
+  }catch(e){}
+  return decks;
+}
+function loadDeckNames(){
+  const names=createDefaultDeckNames();
+  const raw=localStorage.getItem(DECK_NAME_STORAGE_KEY);
+  if(!raw) return names;
+  try{
+    const saved=JSON.parse(raw);
+    if(!Array.isArray(saved)) return names;
+    for(let i=0;i<10;i++){
+      const name=String(saved[i]||"").trim();
+      if(name) names[i]=name.slice(0,18);
+    }
+  }catch(e){}
+  return names;
+}
+function saveDecks(){ localStorage.setItem(DECK_STORAGE_KEY, JSON.stringify(game.decks)); }
+function saveDeckNames(){ localStorage.setItem(DECK_NAME_STORAGE_KEY, JSON.stringify(game.deckNames)); }
+function getDeckName(index){ return (game.deckNames && game.deckNames[index]) || ("덱 "+(index+1)); }
+function getDeckDisplayName(index){
+  const raw=getDeckName(index);
+  if(currentLanguage==="en" && /^덱\s*\d+$/.test(raw)) return "Deck "+(index+1);
+  return translateForLang(raw);
+}
+function buildDeckSelector(){
+  if(!els.deckSelect) return;
+  const selected=els.deckSelect.value || "0";
+  els.deckSelect.innerHTML="";
+  for(let i=0; i<10; i++){
+    const opt=document.createElement("option");
+    opt.value=String(i);
+    opt.textContent=getDeckDisplayName(i);
+    els.deckSelect.appendChild(opt);
+  }
+  els.deckSelect.value=selected;
+}
+function renderDeckNameInput(){
+  if(!els.deckNameInput || !els.deckSelect) return;
+  const idx=Number(els.deckSelect.value || 0);
+  els.deckNameInput.value=getDeckDisplayName(idx);
+}
+function renderDeckStatus(){
+  if(!els.deckStatus || !game.decks) return;
+  const idx=Number(els.deckSelect.value || 0);
+  const deck=game.decks[idx] || emptyDeck();
+  const count=deck.filter(Boolean).length;
+  const current=game.slots.filter(Boolean).length;
+  els.deckStatus.textContent=translateForLang(getDeckDisplayName(idx)+": "+count+"/5 저장됨 · 현재 슬롯: "+current+"/5");
+}
+function saveDeckName(){
+  const idx=Number(els.deckSelect.value || 0);
+  const name=(els.deckNameInput.value||"").trim() || ("덱 "+(idx+1));
+  game.deckNames[idx]=name.slice(0,18);
+  saveDeckNames();
+  buildDeckSelector();
+  els.deckSelect.value=String(idx);
+  renderDeckNameInput();
+  renderDeckStatus();
+  toast("덱 이름을 저장했습니다.","good");
+}
+function saveCurrentSlotsToDeck(){
+  const idx=Number(els.deckSelect.value || 0);
+  const name=(els.deckNameInput.value||"").trim();
+  if(name){ game.deckNames[idx]=name.slice(0,18); saveDeckNames(); buildDeckSelector(); els.deckSelect.value=String(idx); }
+  game.decks[idx]=clone(game.slots);
+  saveDecks();
+  renderDeckStatus();
+  toast("현재 5개 슬롯을 "+getDeckDisplayName(idx)+"에 저장했습니다.","good");
+}
+function loadSelectedDeckToSlots(){
+  const idx=Number(els.deckSelect.value || 0);
+  const deck=(game.decks[idx] || emptyDeck()).map(spell=>spell?normalizeSpell(spell):null);
+  if(!deck.some(Boolean)){
+    toast("이 덱은 비어 있습니다.","bad");
+    return;
+  }
+  game.slots=deck;
+  saveSlots();
+  renderSlots();
+  updateStartBattleButton();
+  toast(getDeckDisplayName(idx)+"을 현재 슬롯에 불러왔습니다.","good");
+}
+
+
+function defaultKeyBindings(){
+  return [1,2,3,4,5].map(n=>({code:"Digit"+n, key:String(n), label:String(n)}));
+}
+function defaultControlBindings(){
+  const result={};
+  for(const action of CONTROL_ACTIONS) result[action.id]=clone(action.def);
+  return result;
+}
+function loadKeyBindings(){
+  const defaults=defaultKeyBindings();
+  const raw=localStorage.getItem(KEY_BINDING_STORAGE_KEY);
+  if(!raw) return defaults;
+  try{
+    const saved=JSON.parse(raw);
+    if(!Array.isArray(saved)) return defaults;
+    return defaults.map((def,i)=>normalizeKeyBinding(saved[i]) || def);
+  }catch(e){ return defaults; }
+}
+function loadControlBindings(){
+  const defaults=defaultControlBindings();
+  const raw=localStorage.getItem(CONTROL_BINDING_STORAGE_KEY);
+  if(!raw) return defaults;
+  try{
+    const saved=JSON.parse(raw);
+    const result=defaultControlBindings();
+    if(!saved || typeof saved!=="object") return defaults;
+    for(const action of CONTROL_ACTIONS){
+      result[action.id]=normalizeKeyBinding(saved[action.id]) || result[action.id];
+    }
+    return result;
+  }catch(e){ return defaults; }
+}
+function normalizeKeyBinding(raw){
+  if(!raw || typeof raw!=="object") return null;
+  const code=String(raw.code||"").trim();
+  const key=String(raw.key||"");
+  const label=String(raw.label||formatKeyLabel(code,key)||"").trim();
+  if(!code && !key) return null;
+  return {code, key, label:label.slice(0,7)};
+}
+function saveKeyBindings(){ localStorage.setItem(KEY_BINDING_STORAGE_KEY, JSON.stringify(game.keyBindings)); }
+function saveControlBindings(){ localStorage.setItem(CONTROL_BINDING_STORAGE_KEY, JSON.stringify(game.controlBindings)); }
+function formatKeyLabel(code,key){
+  if(code && code.startsWith("Key")) return code.slice(3).toUpperCase();
+  if(code && code.startsWith("Digit")) return code.slice(5);
+  if(code && code.startsWith("Numpad")) return "N"+code.slice(6);
+  if(code==="Space") return "SPC";
+  if(code==="Tab") return "TAB";
+  if(code==="ArrowUp") return "↑";
+  if(code==="ArrowDown") return "↓";
+  if(code==="ArrowLeft") return "←";
+  if(code==="ArrowRight") return "→";
+  if(key && key.length===1) return key.toUpperCase();
+  return (key || code || "?").replace("Control","Ctrl").slice(0,7);
+}
+function eventToBinding(e){
+  const blocked=["Escape","CapsLock","ShiftLeft","ShiftRight","ControlLeft","ControlRight","AltLeft","AltRight","MetaLeft","MetaRight"];
+  if(blocked.includes(e.code)) return null;
+  return {code:e.code||"", key:e.key||"", label:formatKeyLabel(e.code,e.key)};
+}
+function getSlotKeyLabel(index){
+  const b=(game.keyBindings && game.keyBindings[index]) || defaultKeyBindings()[index];
+  return b.label || formatKeyLabel(b.code,b.key) || String(index+1);
+}
+function getControlKeyLabel(actionId){
+  const b=(game.controlBindings && game.controlBindings[actionId]) || defaultControlBindings()[actionId];
+  return b.label || formatKeyLabel(b.code,b.key) || "?";
+}
+function sameBinding(binding,e){
+  if(!binding || !e) return false;
+  if(binding.code && e.code && binding.code===e.code) return true;
+  if(binding.key && e.key && String(binding.key).toLowerCase()===String(e.key).toLowerCase()) return true;
+  return false;
+}
+function getSlotIndexForEvent(e){
+  for(let i=0;i<5;i++) if(sameBinding(game.keyBindings[i],e)) return i;
+  return -1;
+}
+function getControlActionForEvent(e){
+  for(const action of CONTROL_ACTIONS){
+    if(sameBinding(game.controlBindings[action.id],e)) return action.id;
+  }
+  return null;
+}
+function bindingNameForTarget(target){
+  if(!target) return "";
+  if(target.type==="slot") return "슬롯 "+(target.index+1);
+  const action=CONTROL_ACTIONS.find(a=>a.id===target.id);
+  return action ? action.name : target.id;
+}
+function bindingForTarget(target){
+  if(target.type==="slot") return game.keyBindings[target.index];
+  return game.controlBindings[target.id];
+}
+function setBindingForTarget(target,binding){
+  if(target.type==="slot"){
+    game.keyBindings[target.index]=binding;
+    saveKeyBindings();
+  }else{
+    game.controlBindings[target.id]=binding;
+    saveControlBindings();
+  }
+}
+function findBindingConflict(target,binding){
+  for(let i=0;i<5;i++){
+    if(!(target.type==="slot" && target.index===i) && sameBinding(game.keyBindings[i],binding)) return "슬롯 "+(i+1);
+  }
+  for(const action of CONTROL_ACTIONS){
+    if(!(target.type==="control" && target.id===action.id) && sameBinding(game.controlBindings[action.id],binding)) return action.name;
+  }
+  return null;
+}
+function openKeySettings(){
+  game.keyCaptureTarget=null;
+  renderKeyBindings();
+  els.keySettingsModal.classList.remove("hidden");
+}
+function closeKeySettings(){
+  game.keyCaptureTarget=null;
+  renderKeyBindings();
+  els.keySettingsModal.classList.add("hidden");
+}
+function renderKeyBindings(){
+  renderKeySettings();
+  renderControlButtonLabels();
+}
+function renderKeySettings(){
+  if(!els.keySettingsGrid) return;
+  els.keySettingsGrid.innerHTML="";
+
+  const slotSection=document.createElement("div");
+  slotSection.className="keySettingSection";
+  slotSection.innerHTML="<h3>술식 슬롯</h3>";
+  const slotRows=document.createElement("div");
+  slotRows.className="keySettingRows";
+  for(let i=0;i<5;i++){
+    slotRows.appendChild(createKeySettingRow("슬롯 "+(i+1), "전투 중 해당 슬롯 술식 사용", getSlotKeyLabel(i), {type:"slot", index:i}));
+  }
+  slotSection.appendChild(slotRows);
+  els.keySettingsGrid.appendChild(slotSection);
+
+  const controlSection=document.createElement("div");
+  controlSection.className="keySettingSection";
+  controlSection.innerHTML="<h3>공통 조작 / 배속</h3>";
+  const controlRows=document.createElement("div");
+  controlRows.className="keySettingRows";
+  for(const action of CONTROL_ACTIONS){
+    controlRows.appendChild(createKeySettingRow(action.name, action.desc, getControlKeyLabel(action.id), {type:"control", id:action.id}));
+  }
+  controlSection.appendChild(controlRows);
+  els.keySettingsGrid.appendChild(controlSection);
+}
+function createKeySettingRow(name,desc,label,target){
+  const row=document.createElement("div");
+  row.className="keySettingRow";
+  const isCapturing=game.keyCaptureTarget && game.keyCaptureTarget.type===target.type && ((target.type==="slot" && game.keyCaptureTarget.index===target.index) || (target.type==="control" && game.keyCaptureTarget.id===target.id));
+  const text=document.createElement("span");
+  text.innerHTML=escapeHtml(name)+"<small>"+escapeHtml(desc)+"</small>";
+  const btn=document.createElement("button");
+  btn.type="button";
+  btn.className=isCapturing?"capturing":"";
+  btn.textContent=isCapturing ? "입력..." : label;
+  btn.title="클릭 후 새 단축키를 누르세요.";
+  btn.addEventListener("click",()=>startCaptureKey(target));
+  row.appendChild(text);
+  row.appendChild(btn);
+  return row;
+}
+function renderControlButtonLabels(){
+  if(els.openDesignerBtn) els.openDesignerBtn.textContent="설계 열기 ("+getControlKeyLabel("toggleDesign")+")";
+  if(els.pauseBtn) els.pauseBtn.textContent="일시정지 ("+getControlKeyLabel("pause")+")";
+  if(els.restartBtn) els.restartBtn.textContent="전투 재시작 ("+getControlKeyLabel("restart")+")";
+  if(els.mapSelectBtn) els.mapSelectBtn.textContent="맵 선택 ("+getControlKeyLabel("mapSelect")+")";
+  document.querySelectorAll(".speedBtn").forEach(btn=>{
+    const speed=Number(btn.dataset.speed);
+    const id="speed"+speed;
+    // [전투 조작 UI] 화면에는 1/2/4/8만 크게 보이게 하고, 단축키는 마우스 오버와 키 설정 메뉴에서 확인한다.
+    btn.textContent="x"+String(speed);
+    btn.title=speed+"배속 단축키: "+getControlKeyLabel(id);
+  });
+}
+function startCaptureKey(target){
+  game.keyCaptureTarget=target;
+  renderKeyBindings();
+  toast(bindingNameForTarget(target)+"에 지정할 키를 누르세요. Esc로 취소");
+}
+function handleKeyCapture(e){
+  if(e.key==="Escape"){
+    game.keyCaptureTarget=null;
+    renderKeyBindings();
+    toast("키 설정 취소");
+    return;
+  }
+  const binding=eventToBinding(e);
+  if(!binding){
+    toast("이 키는 사용할 수 없습니다.","bad");
+    return;
+  }
+  const conflict=findBindingConflict(game.keyCaptureTarget,binding);
+  if(conflict){
+    toast("이미 "+conflict+"에서 사용 중입니다.","bad");
+    return;
+  }
+  const target=game.keyCaptureTarget;
+  setBindingForTarget(target,binding);
+  game.keyCaptureTarget=null;
+  renderKeyBindings();
+  renderSlots();
+  toast(bindingNameForTarget(target)+" 키: "+binding.label,"good");
+}
+function resetKeyBindings(){
+  game.keyBindings=defaultKeyBindings();
+  game.controlBindings=defaultControlBindings();
+  game.keyCaptureTarget=null;
+  saveKeyBindings();
+  saveControlBindings();
+  renderKeyBindings();
+  renderSlots();
+  toast("모든 키를 기본값으로 초기화했습니다.","good");
+}
+
+
+function loadAutoManaReserve(){
+  const raw=localStorage.getItem(AUTO_MANA_RESERVE_STORAGE_KEY);
+  const n=Math.floor(Number(raw));
+  return Number.isFinite(n) ? Math.max(0, Math.min(MAX_MANA, n)) : 0;
+}
+function saveAutoManaReserve(){ localStorage.setItem(AUTO_MANA_RESERVE_STORAGE_KEY, String(game.autoManaReserve)); }
+function updateAutoManaReserve(){
+  const n=Math.floor(Number(els.autoReserveInput && els.autoReserveInput.value));
+  game.autoManaReserve = Number.isFinite(n) ? Math.max(0, Math.min(MAX_MANA, n)) : 0;
+  if(els.autoReserveInput) els.autoReserveInput.value = String(game.autoManaReserve);
+  saveAutoManaReserve();
+}
+
+function loadSlotAutoModes(){
+  const raw=localStorage.getItem(SLOT_AUTO_STORAGE_KEY);
+  if(!raw) return [false,false,false,false,false];
+  try{
+    const arr=JSON.parse(raw);
+    return Array.from({length:5},(_,i)=>!!(Array.isArray(arr) && arr[i]));
+  }catch(e){ return [false,false,false,false,false]; }
+}
+function saveSlotAutoModes(){ localStorage.setItem(SLOT_AUTO_STORAGE_KEY, JSON.stringify(game.slotAutoModes)); }
+
+function saveSlots(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(game.slots)); }
+function loadSlots(){
+  game.slots=[null,null,null,null,null]; let raw=localStorage.getItem(STORAGE_KEY); if(!raw) raw=localStorage.getItem(LEGACY_STORAGE_KEY); if(!raw) return;
+  try{ const arr=JSON.parse(raw); if(!Array.isArray(arr)) return; for(let i=0;i<5;i++) game.slots[i]=normalizeSpell(arr[i]); }catch(e){game.slots=[null,null,null,null,null];}
+}
+function normalizeType(type){ return type==="mana"?"red":type; }
+function normalizeSpell(raw){
+  if(!raw || !Array.isArray(raw.components)) return null;
+  const width=clampInt(raw.width,1,MAX_FRAME), height=clampInt(raw.height,1,MAX_FRAME), components=[];
+  for(let i=0;i<raw.components.length;i++){
+    const r=raw.components[i]; if(!r) continue; const type=normalizeType(r.type);
+    if(!["red","blueGen","wire","circle","oval","kernel","mixed2","mixedCore"].includes(type)) continue;
+    const x=clampInt(r.x,0,MAX_FRAME-1), y=clampInt(r.y,0,MAX_FRAME-1), rotation=r.rotation===1?1:0, dim=dimensionsFor(type,rotation);
+    const comp={id:Number.isFinite(Number(r.id))?Number(r.id):i+1,type,x,y,w:dim.w,h:dim.h,rotation:dim.rotation};
+    if(canPlaceComponent(comp,components,width,height)) components.push(comp);
+  }
+  const stats=calculateSpellStats({width,height,components}); if(!stats.valid) return null;
+  return {id:raw.id||("loaded_"+Date.now()), name:String(raw.name||"이름 없는 술식").slice(0,18), width,height,components,castTime:stats.castTime,manaCost:stats.manaCost,damage:stats.damage,aoeDamage:stats.aoeDamage||0,breakdown:stats.breakdown};
+}
+function clearAllStorage(){
+  if(!confirm("저장된 술식, 덱, 맵 해금 진행도를 모두 삭제할까요?")) return;
+
+  // 기록 초기화 중에 진행 중이던 전투 점수가 다음에 고른 맵으로 저장되지 않도록
+  // 현재 전투 런을 먼저 완전히 무효화한다.
+  game.battleStarted=false;
+  game.activeRunMapId=null;
+  game.activeRunMode=null;
+  game.score=0;
+  game.mana=MAX_MANA;
+  game.baseHp=20;
+  game.survival=0;
+  game.monsters=[];
+  game.casts=[];
+  game.effects=[];
+  game.cooldowns=[0,0,0,0,0];
+  game.selectedTargetId=null;
+  game.spawnTimer=10;
+  game.nextBossAt=Infinity;
+  game.bossInterval=30;
+
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(LEGACY_STORAGE_KEY);
+  localStorage.removeItem(DECK_STORAGE_KEY);
+  localStorage.removeItem(DECK_NAME_STORAGE_KEY);
+  localStorage.removeItem(KEY_BINDING_STORAGE_KEY);
+  localStorage.removeItem(CONTROL_BINDING_STORAGE_KEY);
+  localStorage.removeItem(UNLOCK_KEY);
+  localStorage.removeItem("magic_design_game_map_unlocks_v1");
+  localStorage.removeItem(RECORD_STORAGE_KEY);
+  localStorage.removeItem(LEGACY_RECORD_STORAGE_KEY);
+  localStorage.removeItem(OLD_RECORD_KEY);
+  localStorage.removeItem(SLOT_AUTO_STORAGE_KEY);
+  localStorage.removeItem(AUTO_MANA_RESERVE_STORAGE_KEY);
+  localStorage.removeItem(RUN_MODE_STORAGE_KEY);
+
+  game.slots=[null,null,null,null,null];
+  game.decks=createEmptyDecks();
+  game.deckNames=createDefaultDeckNames();
+  game.keyBindings=defaultKeyBindings();
+  game.controlBindings=defaultControlBindings();
+  game.keyCaptureTarget=null;
+  game.unlocks=defaultUnlocks();
+  game.records=defaultRecords();
+  game.currentMap=MAPS[1];
+  game.selectedRunMode="assist";
+  game.slotAutoModes=[false,false,false,false,false];
+  game.autoManaReserve=0;
+  game.returnStateAfterDesign="ready";
+  if(els.autoReserveInput) els.autoReserveInput.value="0";
+
+  saveRecords();
+  saveUnlocks();
+  renderKeyBindings();
+  renderSlots();
+  buildDeckSelector();
+  renderDeckNameInput();
+  renderDeckStatus();
+  renderMapCards();
+  renderToolState();
+  renderDesignerStats();
+  updateStartBattleButton();
+  setState("design");
+  updateHud();
+  toast("저장 데이터를 초기화했습니다.","good");
+}
+function clampInt(v,min,max){ const n=Math.floor(Number(v)); if(!Number.isFinite(n)) return min; return Math.max(min,Math.min(max,n)); }
+function clone(obj){ return JSON.parse(JSON.stringify(obj)); }
+function escapeHtml(str){ return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+
+
+/* [MOBILE STABILITY PATCH JS]
+   - Scales the designer board down on phones so 11x11 fits the viewport.
+   - Adds touch placement for the designer board.
+   - Re-applies layout fixes after state/render changes. */
+(function(){
+  if(window.__jesulkrMobileStabilityPatch) return;
+  window.__jesulkrMobileStabilityPatch = true;
+
+  function mobileActive(){
+    return document.body && document.body.classList.contains('mobile-layout');
+  }
+
+  function applyMobileDesignerScale(){
+    if(!els || !els.designBoard || !els.designBoard.parentElement) return;
+    const board = els.designBoard;
+    if(!mobileActive() || game.state !== 'design'){
+      board.style.transform = '';
+      board.style.transformOrigin = '';
+      board.style.marginBottom = '';
+      return;
+    }
+    const wrap = board.parentElement;
+    const fullW = boardSize(designer.width);
+    const fullH = boardSize(designer.height);
+    const available = Math.max(220, wrap.clientWidth - 12);
+    const scale = Math.min(1, available / Math.max(1, fullW));
+    board.style.transform = 'scale(' + scale.toFixed(4) + ')';
+    board.style.transformOrigin = 'top center';
+    board.style.marginBottom = (-(fullH * (1 - scale))).toFixed(1) + 'px';
+  }
+
+  function touchToPseudoMouseEvent(ev){
+    const t = (ev.touches && ev.touches[0]) || (ev.changedTouches && ev.changedTouches[0]);
+    if(!t) return null;
+    return {
+      button:0,
+      clientX:t.clientX,
+      clientY:t.clientY,
+      target:ev.target,
+      preventDefault:function(){ ev.preventDefault(); },
+      stopPropagation:function(){ if(ev.stopPropagation) ev.stopPropagation(); }
+    };
+  }
+
+  function setupMobileTouchSupport(){
+    const board = els && els.designBoard;
+    if(!board || board.dataset.mobileTouchReady === '1') return;
+    board.dataset.mobileTouchReady = '1';
+
+    board.addEventListener('touchstart', function(ev){
+      if(!mobileActive() || game.state !== 'design') return;
+      if(!ev.touches || ev.touches.length !== 1) return;
+      const pseudo = touchToPseudoMouseEvent(ev);
+      if(!pseudo) return;
+      ev.preventDefault();
+      onDesignBoardMouseDown(pseudo);
+    }, {passive:false});
+
+    board.addEventListener('touchmove', function(ev){
+      if(!mobileActive() || game.state !== 'design') return;
+      if(!ev.touches || ev.touches.length !== 1) return;
+      const pseudo = touchToPseudoMouseEvent(ev);
+      if(!pseudo) return;
+      ev.preventDefault();
+      onDesignBoardMouseMove(pseudo);
+    }, {passive:false});
+
+    function endTouch(){
+      game.erasingDrag = false;
+      game.placingDrag = false;
+      game.lastDragPlaceKey = null;
+    }
+    board.addEventListener('touchend', endTouch, {passive:true});
+    board.addEventListener('touchcancel', endTouch, {passive:true});
+  }
+
+  const oldSetupEvents = setupEvents;
+  setupEvents = function(){
+    oldSetupEvents();
+    setupMobileTouchSupport();
+    window.addEventListener('resize', function(){ requestAnimationFrame(applyMobileDesignerScale); });
+    window.addEventListener('orientationchange', function(){ setTimeout(applyMobileDesignerScale, 120); });
+  };
+
+  const oldRenderDesigner = renderDesigner;
+  renderDesigner = function(){
+    oldRenderDesigner();
+    requestAnimationFrame(applyMobileDesignerScale);
+  };
+
+  const oldSetState = setState;
+  setState = function(state){
+    oldSetState(state);
+    requestAnimationFrame(applyMobileDesignerScale);
+  };
+
+  const oldUpdateMobileLayout = updateMobileLayout;
+  updateMobileLayout = function(){
+    oldUpdateMobileLayout();
+    requestAnimationFrame(applyMobileDesignerScale);
+  };
+})();
+
+
+init();
+})();
+</script>
+</body>
+</html>
