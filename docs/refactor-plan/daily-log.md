@@ -279,3 +279,93 @@ Phase 4 잔여 항목 (Phase 5~6으로 이관):
 | `6a0f78b` | Phase 4 cleanup: dead code 제거 |
 | `c070f9a` | Phase 4 final: P0 fix + test 보강 + $state cleanup |
 | `8cd296c` | Phase 4: gameRx no-op bridge 제거 |
+
+---
+
+## 2026-06-11 — Phase 5: Features
+
+> **브랜치**: `refactor/phase-5-features` (base: `refactor/phase-4-prep`)
+> **목표**: 원작 v1.5 기능 구현 + 리뷰 + Fix Plan 적용
+
+### Phase 5 컴포넌트 (초기 구현)
+
+| 컴포넌트 | 라인 | 설명 |
+|----------|------|------|
+| `MapSelectModal.svelte` | 123 | 맵 3개 카드, 별 조건, 기록, 런 모드, 테스트 해금 |
+| `DeckControls.svelte` | 50 | 10개 덱 선택, 이름 편집, 저장/불러오기 |
+| `KeySettingsModal.svelte` | 114 | 5개 슬롯키 + 8개 조작키, 캡처, 충돌 검사, 초기화 |
+| `PlacementGhost.svelte` | 50 | 설계 미리보기 (호버 시 유효성 색상) |
+
+### GameManager Phase 5 헬퍼 (game.ts +168줄)
+
+| 메서드 | 설명 |
+|--------|------|
+| `setCurrentMap(mapId)` | 현재 맵 변경 |
+| `setRunMode(mode)` | 런 모드 변경 + localStorage 저장 |
+| `saveCurrentSlotsToDeck` / `loadDeckToSlots` / `saveDeckName` | 덱 관리 aliases |
+| `getMap(mapId)` / `getUnlockText(mapId)` | 맵 정보 조회 |
+| `renderStars(count)` | ★☆☆ 문자열 렌더링 |
+| `eventToBinding(e)` | KeyboardEvent → KeyBinding 변환 |
+| `findBindingConflict(target, binding)` | 중복 키 검사 |
+| `setBinding(target, binding)` | 키 바인딩 설정 + 저장 |
+| `bindingNameForTarget(target)` | 바인딩 대상 이름 |
+| `resetKeyBindings()` | 모든 키 기본값 초기화 |
+| `saveAutoManaReserve()` | 자동 마나 보존 localStorage 저장 |
+| `getBoardGridCoordFromPointer(e)` | 마우스 좌표 → 그리드 변환 |
+| `placingDrag/erasingDrag/lastDragPlaceKey` | 드래그 연속 배치 상태 |
+| `onDesignBoardMouseDown/Move` | 드래그 배치/삭제 |
+| `endDrag()` | 드래그 종료 |
+
+### Phase 5 리뷰 결과
+
+| 상태 | 개수 | 내역 |
+|------|------|------|
+| ✅ 완료 | 5 | MapSelectModal, DeckControls, KeySettingsModal, PlacementGhost, drag logic |
+| ⚠️ 부분 | 5 | 모달 트리거 미연결, PlacementGhost 미렌더링, drag 미배선, 마나 보존 미저장, 키 피드백 누락 |
+| ❌ 누락 | 3 | 모바일 리사이즈, 터치 이벤트, 보드 스케일링 |
+
+### Fix Plan 적용 (9개 수정)
+
+| # | 우선순위 | 수정 | 파일 |
+|---|---------|------|------|
+| F1 | 🔴 P0 | MainMenu 모달 트리거 + 메뉴 확장 | MainMenu.svelte, +page.svelte |
+| F2 | 🔴 P0 | PlacementGhost DesignerPanel에 렌더링 | DesignerPanel.svelte |
+| F3 | 🔴 P0 | DesignerPanel drag 메서드 배선 | DesignerPanel.svelte |
+| F4 | 🟡 P1 | 자동 마나 보존 localStorage 저장 | SlotPanel.svelte |
+| F5 | 🟡 P1 | 키 설정 토스트 피드백 4건 | KeySettingsModal.svelte |
+| F6 | 🟡 P1 | 모바일 resize/orientation 리스너 | +page.svelte |
+| F7 | 🟡 P1 | 터치 이벤트 지원 | DesignerPanel.svelte |
+| F8 | 🟢 P2 | 모바일 보드 스케일링 함수 | mobile.ts |
+| F9 | 🟢 P2 | MapSelectModal 데드 브랜치 정리 | MapSelectModal.svelte |
+| F10 | 🟢 P3 | 튜토리얼 모달 → Phase 6 이관 | — |
+
+### 검증
+
+| 항목 | 결과 |
+|------|------|
+| `svelte-check` | 0 errors, 0 warnings |
+| `vitest run` | 65/65 passed (5 files) |
+| `vite build` | ✅ 성공 |
+
+### 병합
+
+```
+refactor/phase-5-features → main (8cf35f3)
+refactor/* 브랜치 모두 삭제 (local + remote)
+```
+
+### Phase 6 진입 준비
+
+Phase 5 잔여 항목 (Phase 6으로 이관):
+- `game.ts` `placeComponent()` → `document.getElementById('designBoard')` 제거
+- `DesignerRenderer.ts` → `renderDesigner()` 제거
+- `mobile.ts` → `classList.toggle` → `$effect`로 이동
+- GameManager God Object 분리 (BattleController / DesignerController)
+- 튜토리얼 모달 (`TutorialModal.svelte`)
+- F8 보드 스케일링 - `$effect` 연동 (함수만 구현, 호출부 미구현)
+
+### 커밋
+
+| 커밋 | 내용 |
+|------|------|
+| `5216113` | Phase 5: Features — 13 files, +888줄 |
