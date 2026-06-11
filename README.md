@@ -1,4 +1,4 @@
-# Jesulkr (제술커) v1.5
+# Jesulkr (제슬커) v1.5
 
 > Svelte 5 + SvelteKit으로 제작된 타워 디펜스형 술식 설계 게임  
 > 원작 HTML v1.5를 SvelteKit으로 포팅한 버전
