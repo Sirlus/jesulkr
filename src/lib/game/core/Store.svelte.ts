@@ -79,31 +79,31 @@ function createBattleState(): BattleState {
 
 // ── Full Store ────────────────────────────────────────────────
 export class Store {
-  state: GameState = 'design';
-  returnStateAfterDesign: GameState = 'ready';
+  state = $state<GameState>('design');
+  returnStateAfterDesign = $state<GameState>('ready');
 
-  slots: (SpellData | null)[] = [null, null, null, null, null];
-  slotAutoModes: boolean[] = defaultSlotAutoModes();
-  autoManaReserve: number = 0;
-  manaBonusEnabled: boolean = true;
+  slots = $state<(SpellData | null)[]>([null, null, null, null, null]);
+  slotAutoModes = $state<boolean[]>(defaultSlotAutoModes());
+  autoManaReserve = $state<number>(0);
+  manaBonusEnabled = $state<boolean>(true);
 
-  currentMap: MapDef = MAPS[1]!;
-  selectedRunMode: string = 'assist';
+  currentMap = $state<MapDef>(MAPS[1]!);
+  selectedRunMode = $state<string>('assist');
 
-  unlocks: Record<string, boolean> = defaultUnlocks();
-  records: Records = { assist: {}, pure: {} };
-  decks: (SpellData | null)[][] = [];
-  deckNames: string[] = [];
+  unlocks = $state<Record<string, boolean>>(defaultUnlocks());
+  records = $state<Records>({ assist: {}, pure: {} });
+  decks = $state<(SpellData | null)[][]>([]);
+  deckNames = $state<string[]>([]);
 
-  keyBindings: KeyBinding[] = Storage.defaultKeyBindings();
-  controlBindings: Record<string, KeyBinding> = Storage.defaultControlBindings();
-  keyCaptureTarget: KeyTarget | null = null;
+  keyBindings = $state<KeyBinding[]>(Storage.defaultKeyBindings());
+  controlBindings = $state<Record<string, KeyBinding>>(Storage.defaultControlBindings());
+  keyCaptureTarget = $state<KeyTarget | null>(null);
 
-  language: Language = 'ko';
-  tutorialSeen: boolean = false;
+  language = $state<Language>('ko');
+  tutorialSeen = $state<boolean>(false);
 
-  designer = createDesignerState();
-  battle = createBattleState();
+  designer = $state<DesignerState>(createDesignerState());
+  battle = $state<BattleState>(createBattleState());
 
   // ── Derived ──────────────────────────────────────────────
   get effectiveManaRegen(): number {

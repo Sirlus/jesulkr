@@ -2,10 +2,16 @@
 // Utility helpers
 // ============================================================
 
-/** Deep clone via structuredClone with JSON fallback */
+/** Deep clone via structuredClone with JSON fallback.
+ * structuredClone cannot clone reactive proxies (Svelte `$state`), so we fall
+ * back to a JSON round-trip, which reads proxy values into plain objects. */
 export function clone<T>(obj: T): T {
   if (typeof structuredClone === 'function') {
-    return structuredClone(obj);
+    try {
+      return structuredClone(obj);
+    } catch {
+      // Fall through to JSON clone (handles reactive proxies)
+    }
   }
   return JSON.parse(JSON.stringify(obj));
 }

@@ -46,8 +46,8 @@ export function createComponentFromGridCoord(
   type: string, gx: number, gy: number, nextId: number, rotation: number,
 ): Component {
   const dim = dimensionsFor(type, rotation);
-  const x = Math.round(gx - dim.w / 2);
-  const y = Math.round(gy - dim.h / 2);
+  const x = Math.floor(gx);
+  const y = Math.floor(gy);
   return {
     id: nextId,
     type: type as ComponentType,

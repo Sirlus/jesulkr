@@ -87,12 +87,15 @@ export class GameManager {
   /** 설계판 크기를 변경하고 설계판 밖 부품을 제거합니다 */
   setFrame(w: number, h: number) { this.designer.width = w; this.designer.height = h; this.trimComponents();; }
 
-  /** 마우스 위치에 현재 선택한 도구를 배치합니다. 성공 여부를 반환합니다 */
+/** 마우스 위치에 현재 선택한 도구를 배치합니다. 성공 여부를 반환합니다 */
   placeComponent(e: MouseEvent): boolean {
     if (this.state !== 'design') return false;
     const coord = this.getBoardGridCoordFromPointer(e);
     if (!coord) return false;
-    const comp = createComponentFromGridCoord(this.designer.tool, coord.gx, coord.gy, this.designer.nextId, this.designer.rotation);
+    // Floor to get integer grid coordinates
+    const gx = Math.floor(coord.gx);
+    const gy = Math.floor(coord.gy);
+    const comp = createComponentFromGridCoord(this.designer.tool, gx, gy, this.designer.nextId, this.designer.rotation);
     if (canPlaceComponent(comp, this.designer.components, this.designer.width, this.designer.height)) {
       this.designer.components.push(comp);
       this.designer.nextId++;
@@ -247,9 +250,14 @@ export class GameManager {
     else if (this.state === 'paused') { this.state = 'battle'; showToast(t('ready'), 'good'); }
   }
 
-  /** 설계 화면과 전투 화면을 전환합니다 */
+/** 설계 화면과 전투 화면을 전환합니다 */
   toggleDesigner() {
     if (this.state === 'design') {
+      // Prevent entering battle if no saved spell - show toast and stay in design mode
+      if (!this.hasSavedSpell) {
+        showToast(t('spell.needed'), 'bad');
+        return;
+      }
       const fb: GameState = this.battle.battleStarted ? 'battle' : 'ready';
       this.state = this.store.returnStateAfterDesign && this.store.returnStateAfterDesign !== 'design'
         ? this.store.returnStateAfterDesign : fb;
@@ -482,16 +490,18 @@ export class GameManager {
     Storage.saveAutoManaReserve(this.store.autoManaReserve);
   }
 
-  /** 마우스 포인터 위치를 설계판 그리드 좌표로 변환합니다 */
+/** 마우스 포인터 위치를 설계판 그리드 좌표로 변환합니다 */
   getBoardGridCoordFromPointer(e: { clientX: number; clientY: number }): { gx: number; gy: number } | null {
     const board = document.getElementById('designBoard');
     if (!board) return null;
     const rect = board.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return null;
-    const scaleX = rect.width / this.designer.width;
-    const scaleY = rect.height / this.designer.height;
-    const gx = (e.clientX - rect.left) / scaleX;
-    const gy = (e.clientY - rect.top) / scaleY;
+    // Map using the rendered board size so any CSS scale (mobile) is accounted
+    // for: each cell occupies rect.width / width (and rect.height / height).
+    const cellW = rect.width / this.designer.width;
+    const cellH = rect.height / this.designer.height;
+    const gx = (e.clientX - rect.left) / cellW;
+    const gy = (e.clientY - rect.top) / cellH;
     return { gx, gy };
   }
 
@@ -500,7 +510,7 @@ export class GameManager {
   erasingDrag = false;
   lastDragPlaceKey: string | null = null;
 
-  /** 설계판 마우스 다운: 배치/삭제 및 드래그 상태 시작 */
+/** 설계판 마우스 다운: 배치/삭제 및 드래그 상태 시작 */
   onDesignBoardMouseDown(e: MouseEvent) {
     if (this.state !== 'design') return;
     if (e.button === 2) {
@@ -520,7 +530,9 @@ export class GameManager {
     } else if (this.placingDrag && this.designer.tool !== 'eraser') {
       const coord = this.getBoardGridCoordFromPointer(e);
       if (!coord) return;
-      const comp = createComponentFromGridCoord(this.designer.tool, coord.gx, coord.gy, this.designer.nextId, this.designer.rotation);
+      const gx = Math.floor(coord.gx);
+      const gy = Math.floor(coord.gy);
+      const comp = createComponentFromGridCoord(this.designer.tool, gx, gy, this.designer.nextId, this.designer.rotation);
       const key = `${comp.type}:${comp.x},${comp.y}:${comp.w}x${comp.h}:${comp.rotation}`;
       if (this.lastDragPlaceKey === key) return;
       this.lastDragPlaceKey = key;
