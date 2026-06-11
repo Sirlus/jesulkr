@@ -5,48 +5,57 @@
  * Tests the 7 newly implemented methods.
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
-
-// Set up localStorage mock BEFORE any imports that use it
-const store: Record<string, string> = {};
-vi.stubGlobal('localStorage', {
-  getItem: (key: string) => store[key] ?? null,
-  setItem: (key: string, val: string) => { store[key] = val; },
-  removeItem: (key: string) => { delete store[key]; },
-  clear: () => { Object.keys(store).forEach(k => delete store[k]); },
-  get length() { return Object.keys(store).length; },
-  key: (i: number) => Object.keys(store)[i] ?? null,
-});
-
-// Stub requestAnimationFrame
-vi.stubGlobal('requestAnimationFrame', () => 1);
-
-// Set up minimal DOM
-document.body.innerHTML = `
-<div id="designerPanel" class="panel designerPanel"></div>
-<div id="designBoard" class="designBoard"></div>
-<div id="spellStats" class="statsBox"></div>
-<div id="saveBtn"></div>
-<div id="spellName"></div>
-<div id="slotSelect">
-  <option value="0">1번</option><option value="1">2번</option>
-  <option value="2">3번</option><option value="3">4번</option><option value="4">5번</option>
-</div>
-<div id="frameW"><option value="2">2</option></div>
-<div id="frameH"><option value="2">2</option></div>
-<div id="rotateBtn">회전: 가로</div>
-<div id="slots" class="slots"></div>
-<div id="toast"></div>
-<canvas id="battleCanvas" width="720" height="520"></canvas>
-`;
+import { describe, it, expect, beforeAll, beforeEach, afterEach } from 'vitest';
 
 import type { GameManager } from '../game';
 import { getTotalStars } from '$lib/game/utils/progression';
+
+const store: Record<string, string> = {};
 
 let game: GameManager;
 
 describe('GameManager', () => {
   beforeAll(async () => {
+    // Set up localStorage mock BEFORE importing modules that use it
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: {
+        getItem: (key: string) => store[key] ?? null,
+        setItem: (key: string, val: string) => { store[key] = val; },
+        removeItem: (key: string) => { delete store[key]; },
+        clear: () => { Object.keys(store).forEach(k => delete store[k]); },
+        get length() { return Object.keys(store).length; },
+        key: (i: number) => Object.keys(store)[i] ?? null,
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    // Stub requestAnimationFrame
+    Object.defineProperty(globalThis, 'requestAnimationFrame', {
+      value: () => 1,
+      writable: true,
+      configurable: true,
+    });
+
+    // Set up minimal DOM (must run after happy-dom environment is active)
+    document.body.innerHTML = `
+    <div id="designerPanel" class="panel designerPanel"></div>
+    <div id="designBoard" class="designBoard"></div>
+    <div id="spellStats" class="statsBox"></div>
+    <div id="saveBtn"></div>
+    <div id="spellName"></div>
+    <div id="slotSelect">
+      <option value="0">1번</option><option value="1">2번</option>
+      <option value="2">3번</option><option value="3">4번</option><option value="4">5번</option>
+    </div>
+    <div id="frameW"><option value="2">2</option></div>
+    <div id="frameH"><option value="2">2</option></div>
+    <div id="rotateBtn">회전: 가로</div>
+    <div id="slots" class="slots"></div>
+    <div id="toast"></div>
+    <canvas id="battleCanvas" width="720" height="520"></canvas>
+    `;
+
     // Dynamically import after localStorage mock is set up
     const mod = await import('../game');
     game = mod.game;
@@ -101,10 +110,27 @@ describe('GameManager', () => {
       expect(game.slots[0]!.name).toBe('Fireball');
       expect(game.slots[0]!.damage).toBe(1);
     });
+    it('accepts numeric string slot index by normalizing it', () => {
+      game.designer.components = [
+        { id: 1, type: 'red', x: 0, y: 0, w: 1, h: 1, rotation: 0 },
+        { id: 2, type: 'circle', x: 1, y: 0, w: 1, h: 1, rotation: 0 },
+      ];
+      game.saveSpell('String Slot', '1' as unknown as number);
+      expect(game.slots[1]).toBeTruthy();
+      expect(game.slots[1]!.name).toBe('String Slot');
+    });
     it('rejects invalid spell (no circuits)', () => {
       game.designer.components = [{ id: 1, type: 'red', x: 0, y: 0, w: 1, h: 1, rotation: 0 }];
       game.saveSpell('Bad', 0);
       expect(game.slots[0]).toBeNull();
+    });
+    it('rejects invalid slot index values', () => {
+      game.designer.components = [
+        { id: 1, type: 'red', x: 0, y: 0, w: 1, h: 1, rotation: 0 },
+        { id: 2, type: 'circle', x: 1, y: 0, w: 1, h: 1, rotation: 0 },
+      ];
+      game.saveSpell('NaN Slot', Number.NaN);
+      expect(game.slots.every((slot) => slot === null)).toBe(true);
     });
     it('persists to localStorage', () => {
       game.designer.components = [

@@ -5,6 +5,7 @@ import type { Monster, CastProjectile, VisualEffect, MapDef, SpellData, Records 
 import { TICK_SEC, LANES, MAX_MANA } from '../constants';
 import { getAutoTarget } from './TargetingSystem';
 
+/** 전투 엔진이 외부 상태(슬롯, 해금, 기록 등)를 참조하기 위한 컨텍스트 */
 export interface BattleContext {
   slots: (SpellData | null)[];
   slotAutoModes: boolean[];
@@ -17,6 +18,7 @@ export interface BattleContext {
   map: MapDef;
 }
 
+/** updateBattleTick에 전달되는 현재 전투 상태 */
 export interface BattleTickState {
   score: number; mana: number; baseHp: number; survival: number;
   monsters: Monster[]; casts: CastProjectile[]; effects: VisualEffect[];
@@ -25,6 +27,7 @@ export interface BattleTickState {
   nextBossAt: number; bossInterval: number;
 }
 
+/** updateBattleTick이 반환하는 다음 프레임 상태 */
 export interface TickResult {
   score: number; mana: number; baseHp: number; survival: number;
   monsters: Monster[]; casts: CastProjectile[]; effects: VisualEffect[];
@@ -34,6 +37,7 @@ export interface TickResult {
   isGameOver: boolean; killedAny: boolean; bossSpawned: boolean;
 }
 
+/** 하나의 몬스터를 생성합니다. 보스인 경우 생존 시간에 따른 속도 증가가 적용되지 않습니다. */
 function spawnOneMonster(
   forcedHp: number | null, boss: boolean,
   canvasWidth: number, nextId: number, minHp: number, maxHp: number,

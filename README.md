@@ -23,7 +23,8 @@
 | 스타일 | CSS |
 | 테스트 | Vitest 4 |
 | 포맷터 | Prettier 3 + prettier-plugin-svelte |
-| 패키지 매니저 | npm |
+| 린트 | ESLint 10 + typescript-eslint + eslint-plugin-svelte |
+| 패키지 매니저 | bun |
 | 배포 | 정적 사이트 (`@sveltejs/adapter-static`) |
 
 ---
@@ -152,11 +153,20 @@ bun run check
 # 테스트
 bun run test
 
+# 린트
+bun run lint
+
 # 포맷팅
 bun run format
 ```
 
 ---
+
+## 테스트 현황
+
+- **테스트 프레임워크**: Vitest 4 (happy-dom 환경)
+- **테스트 수**: 87 tests, 8 test files
+- **주요 커버리지 대상**: BattleEngine, StorageSlots, StorageRecords, StatsCalculator, WireNetwork, Components, TargetingSystem, GameManager
 
 ## 문서
 
