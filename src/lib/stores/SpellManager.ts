@@ -32,6 +32,7 @@ export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
     breakdown: stats.breakdown,
   };
   gm.store.slots[normalizedSlotIndex] = spell;
+  gm.store.slots = [...gm.store.slots];
   Storage.saveSlots(gm.slots);
   showToast(t('slot.saved', normalizedSlotIndex + 1), 'good');
 }

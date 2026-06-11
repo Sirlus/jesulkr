@@ -142,6 +142,16 @@ describe('GameManager', () => {
       expect(raw).toBeTruthy();
       expect(JSON.parse(raw)[1].name).toBe('Persistent');
     });
+    it('keeps slot array reactive after client init and save', () => {
+      game.initClient();
+      game.designer.components = [
+        { id: 1, type: 'red', x: 0, y: 0, w: 1, h: 1, rotation: 0 },
+        { id: 2, type: 'circle', x: 1, y: 0, w: 1, h: 1, rotation: 0 },
+      ];
+      game.saveSpell('Reactive Slot', 2);
+      expect(game.hasSavedSpell).toBe(true);
+      expect(game.slots[2]?.name).toBe('Reactive Slot');
+    });
   });
 
   // ── loadSpell ──
@@ -190,6 +200,25 @@ describe('GameManager', () => {
       game.clearDesign();
       expect(game.designer.components.length).toBe(0);
       expect(game.designer.nextId).toBe(1);
+    });
+  });
+
+  describe('designer board pointer mapping', () => {
+    it('maps pointer coordinates using rendered board size', () => {
+      game.state = 'design';
+      game.designer.width = 2;
+      game.designer.height = 2;
+      game.designer.tool = 'red';
+      const board = document.getElementById('designBoard')!;
+      board.getBoundingClientRect = () =>
+        ({ left: 0, top: 0, width: 496, height: 248, right: 496, bottom: 248 } as DOMRect);
+
+      const placed = game.placeComponent(new MouseEvent('mousedown', { button: 0, clientX: 130, clientY: 60 }));
+
+      expect(placed).toBe(true);
+      expect(game.designer.components.length).toBe(1);
+      expect(game.designer.components[0]).toMatchObject({ x: 0, w: 1, h: 1 });
+      expect(Object.is(game.designer.components[0].y, -0) ? 0 : game.designer.components[0].y).toBe(0);
     });
   });
 

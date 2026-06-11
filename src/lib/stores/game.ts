@@ -32,6 +32,10 @@ export class GameManager {
   /** 브라우저 환경에서 localStorage 데이터를 로드하고 언어를 설정합니다 */
   initClient() {
     this.store.loadFromStorage();
+    this.store.slots = [...this.store.slots];
+    this.store.slotAutoModes = [...this.store.slotAutoModes];
+    this.store.decks = [...this.store.decks];
+    this.store.deckNames = [...this.store.deckNames];
     setLanguage(this.store.language);
   }
 
@@ -86,13 +90,9 @@ export class GameManager {
   /** 마우스 위치에 현재 선택한 도구를 배치합니다. 성공 여부를 반환합니다 */
   placeComponent(e: MouseEvent): boolean {
     if (this.state !== 'design') return false;
-    const board = document.getElementById('designBoard'); if (!board) return false;
-    const rect = board.getBoundingClientRect();
-    const bw = this.designer.width * 58 + (this.designer.width - 1) * 4;
-    const bh = this.designer.height * 58 + (this.designer.height - 1) * 4;
-    const gx = (e.clientX - rect.left) / bw * this.designer.width;
-    const gy = (e.clientY - rect.top) / bh * this.designer.height;
-    const comp = createComponentFromGridCoord(this.designer.tool, gx, gy, this.designer.nextId, this.designer.rotation);
+    const coord = this.getBoardGridCoordFromPointer(e);
+    if (!coord) return false;
+    const comp = createComponentFromGridCoord(this.designer.tool, coord.gx, coord.gy, this.designer.nextId, this.designer.rotation);
     if (canPlaceComponent(comp, this.designer.components, this.designer.width, this.designer.height)) {
       this.designer.components.push(comp);
       this.designer.nextId++;
@@ -487,10 +487,11 @@ export class GameManager {
     const board = document.getElementById('designBoard');
     if (!board) return null;
     const rect = board.getBoundingClientRect();
-    const bw = this.designer.width * 58 + (this.designer.width - 1) * 4;
-    const bh = this.designer.height * 58 + (this.designer.height - 1) * 4;
-    const gx = (e.clientX - rect.left) / bw * this.designer.width;
-    const gy = (e.clientY - rect.top) / bh * this.designer.height;
+    if (rect.width <= 0 || rect.height <= 0) return null;
+    const scaleX = rect.width / this.designer.width;
+    const scaleY = rect.height / this.designer.height;
+    const gx = (e.clientX - rect.left) / scaleX;
+    const gy = (e.clientY - rect.top) / scaleY;
     return { gx, gy };
   }
 
