@@ -37,7 +37,6 @@ export function renderDesigner(gm: GameManager) {
   if (fh) fh.value = String(gm.designer.height);
   const rb = document.getElementById('rotateBtn');
   if (rb) rb.textContent = gm.designer.rotation === 0 ? t('rotate.horizontal') : t('rotate.vertical');
-  gm.updateStatsDisplay();
 }
 
 /** 우클릭 또는 지우개 클릭으로 부품을 삭제합니다 */

@@ -17,8 +17,6 @@ import {
 } from '$lib/game/utils/progression';
 import type { GameState } from '$lib/game/types';
 import { showToast } from '$lib/game/ui/Toast';
-import { updateHUD } from '$lib/game/ui/HUD';
-import { renderSlots, updateCooldownBars } from '$lib/game/ui/SlotPanel';
 import { renderDesigner, eraseComponent } from './DesignerRenderer';
 import { saveSpell, loadSpell, clearDesign } from './SpellManager';
 import { startLoop } from './GameLoop';
@@ -45,7 +43,7 @@ export class GameManager {
 
   // ── Getters ──────────────────────────────────────────────
   get state(): GameState { return this.store.state; }
-  set state(s: GameState) { this.store.state = s; this.onStateChange(); }
+  set state(s: GameState) { this.store.state = s; }
   get designer() { return this.store.designer; }
   get battle() { return this.store.battle; }
   get slots() { return this.store.slots; }
@@ -63,11 +61,6 @@ export class GameManager {
   get hasSavedSpell() { return this.store.hasSavedSpell(); }
   get totalStars() { return this.store.totalStars; }
   get effectiveManaRegen() { return this.store.effectiveManaRegen; }
-
-  /** 상태 변경 시 UI 자동 갱신 (gameRx.syncFull에 위임) */
-  onStateChange() {
-    gameRx.syncFull(this);
-  }
 
   /** Canvas를 초기화하고 전투 렌더링 루프를 시작합니다 */
   initCanvas(canvas: HTMLCanvasElement) {
@@ -124,25 +117,6 @@ export class GameManager {
       height: this.designer.height,
       components: this.designer.components,
     });
-  }
-
-  /** 현재 설계의 통계를 계산하여 HUD에 표시합니다 */
-  updateStatsDisplay() {
-    const stats = this.spellStats();
-    const el = document.getElementById('spellStats'); if (!el) return;
-    const aoe = stats.aoeDamage > 0 ? `${t('scatter')} ${stats.aoeDamage}` : t('none');
-    el.innerHTML = `
-      <div class="statGrid">
-        <div class="statCard"><span>${t('cooldown')}</span><b>${stats.castTime}t</b></div>
-        <div class="statCard"><span>${t('mana')}</span><b>${stats.manaCost}</b></div>
-        <div class="statCard"><span>${t('normal.damage')}</span><b>${stats.damage}</b>
-          <div class="small">${stats.valid ? t('can.save') : t('cannot.save')}</div>
-        </div>
-        <div class="statCard"><span>${t('special.damage')}</span><b>${aoe}</b></div>
-      </div>
-      <div class="breakdown">${stats.breakdown.join('\n')}</div>`;
-    const sb = document.getElementById('saveBtn') as HTMLButtonElement;
-    if (sb) sb.disabled = !stats.valid;
   }
 
   /** 우클릭 또는 지우개 클릭으로 부품을 삭제합니다 */
@@ -257,35 +231,6 @@ export class GameManager {
     return m[this.state] || this.state;
   }
 
-  /** 상단 HUD 수치를 갱신합니다 */
-  refreshHUD() {
-    if (!this.canvas) return;
-    updateHUD(this.battle.score, this.battle.mana, this.battle.baseHp, this.battle.survival,
-      this.effectiveManaRegen, this.stateLabel(),
-      this.currentMap?.shortName || '-',
-      this.selectedRunMode === 'pure' ? t('manual.mode') : t('auto.mode'));
-  }
-
-  /** 슬롯 쿨타임 바를 갱신합니다 */
-  refreshCooldowns() { updateCooldownBars(this.slots, this.battle.cooldowns); }
-  /** 전체 UI를 갱신합니다 (설계판, 슬롯, HUD, 시작 버튼) */
-  refreshAll() { this.renderDesigner(); this.refreshSlots(); this.refreshHUD(); this.updateStartBtn(); }
-
-  /** 슬롯 패널 UI를 갱신합니다 */
-  refreshSlots() {
-    renderSlots('slots', this.slots,
-      (i) => (this.keyBindings[i] || Storage.defaultKeyBindings()[i]).label || String(i + 1),
-      this.slotsAuto, this.selectedRunMode === 'pure', false,
-      (i) => { this.slotsAuto[i] = !this.slotsAuto[i]; Storage.saveSlotAutoModes(this.slotsAuto); this.refreshSlots(); },
-      (i) => { if (this.state === 'battle') this.castSlot(i); else this.loadSpell(i); });
-  }
-
-  /** 전투 시작 버튼의 활성화 상태를 갱신합니다 */
-  updateStartBtn() {
-    const btn = document.getElementById('startBattleBtn') as HTMLButtonElement;
-    if (btn) btn.disabled = !this.hasSavedSpell;
-  }
-
   /** 캔버스 클릭 시 몬스터를 수동 타겟팅합니다 */
   onCanvasClick(e: MouseEvent) {
     if (!this.canvas) return;
@@ -326,8 +271,6 @@ export class GameManager {
   /** 전투 속도를 1/2/4/8배로 설정합니다 */
   setBattleSpeed(speed: number) {
     this.battle.battleSpeed = [1, 2, 4, 8].includes(speed) ? speed : 1;
-    document.querySelectorAll('.speedBtn').forEach(btn =>
-      btn.classList.toggle('active', Number((btn as HTMLElement).dataset.speed) === this.battle.battleSpeed));
   }
 
   /** 지정한 슬롯의 키 라벨을 반환합니다 */

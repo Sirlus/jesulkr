@@ -31,7 +31,7 @@
 
   function toggleAuto(e: Event) {
     e.stopPropagation();
-    gameState.slotAutoModes[index] = !gameState.slotAutoModes[index];
+    gameState.slotAutoModes = gameState.slotAutoModes.map((v, i) => i === index ? !v : v);
     Storage.saveSlotAutoModes(gameState.slotAutoModes);
   }
 </script>
