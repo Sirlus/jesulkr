@@ -1,6 +1,70 @@
 # Phase 1: 타입 및 상수 확장
 
 > 목표: v2 신규 부품을 위한 타입 정의와 상수 추가
+>
+> **중요**: 기존 코드 스타일(`id: number`, `ComponentDef` 인터페이스)과 하위 호환성 유지
+
+## 📝 현재 코드베이스 상태
+
+### `src/lib/game/types.ts` (실제)
+
+```typescript
+export type ComponentType =
+  | 'red' | 'blueGen' | 'wire'
+  | 'circle' | 'oval' | 'kernel'
+  | 'mixed2' | 'mixedCore'
+  | 'eraser';
+
+export interface Component {
+  id: number;
+  type: ComponentType;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  rotation: number;
+}
+
+export interface SpellData {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  components: Component[];
+  castTime: number;
+  manaCost: number;
+  damage: number;
+  aoeDamage: number;
+  breakdown: string[];
+}
+
+export interface SpellStats {
+  castTime: number;
+  seconds: number;
+  manaCost: number;
+  redCount: number;
+  activeBlueCount: number;
+  inactiveBlueCount: number;
+  damage: number;
+  aoeDamage: number;
+  breakdown: string[];
+  valid: boolean;
+}
+
+export interface ConnectionGraph {
+  groups: WireGroup[];
+  compGroups: Map<number, Set<number>>;
+}
+```
+
+### `src/lib/game/constants.ts` (실제)
+
+```typescript
+// TOOL_DESCRIPTIONS, TOOL_ORDER는 registry.ts의 ALL_DEFS에서 파생
+// 핵심 상수: TICK_SEC, HIT_DELAY_TICKS, CORE_AOE_TARGET_LIMIT, MAX_MANA, LANES, CELL, ...
+```
+
+---
 
 ## 📝 변경 파일 목록
 
@@ -9,78 +73,83 @@
 #### 변경 사항
 
 ```diff
-+ // v2 신규 부품 타입
-+ export type ComponentType =
-+   | 'red' | 'red3' | 'blueGen'
-+   | 'wire' | 'mediumWire' | 'mediumHub'
+  /** 부품 타입 */
+  export type ComponentType =
+    | 'red' | 'blueGen' | 'wire'
+    | 'circle' | 'oval' | 'kernel'
+    | 'mixed2' | 'mixedCore'
+-   | 'eraser';
++   | 'eraser'
++   // v2 신규 9개
++   | 'red3'
++   | 'mediumWire' | 'mediumHub'
 +   | 'extractor' | 'stabilizer'
-+   | 'circle' | 'oval' | 'kernel' | 'mixed2'
 +   | 'greenMana' | 'green3x2' | 'greenPair2'
-+   | 'mixedCore' | 'ultimateCore'
-+   | 'eraser';
++   | 'ultimateCore';
 
-+ // 추출기 색상 타입
++ /** 추출기 색상 */
 + export type ExtractorColor = 'red' | 'blue' | 'green';
 
+  /** 설계도 위 부품 하나 */
   export interface Component {
-    id: string;
+    id: number;
     type: ComponentType;
     x: number;
     y: number;
     w: number;
     h: number;
-    rotation?: number;
-+   color?: ExtractorColor; // 추출기 색상 (red/blue/green)
+    rotation: number;
++   // v2: 추출기 색상
++   color?: ExtractorColor;
   }
 
-+ // 색상별 도선망 반환 타입
-+ export interface WireGroup {
-+   color: 'red' | 'blue' | 'green';
-+   ids: Set<string>;
-+   cells: Set<string>;
-+   components: Set<string>;
-+ }
-+ 
-+ export interface WireNetworkData {
-+   groupsByColor: {
-+     red: WireGroup[];
-+     blue: WireGroup[];
-+     green: WireGroup[];
-+   };
-+   compGroupsByColor: {
-+     red: Map<string, Set<number>>;
-+     blue: Map<string, Set<number>>;
-+     green: Map<string, Set<number>>;
-+   };
-+ }
+  /** 저장/불러오기용 술식 데이터 */
+  export interface SpellData {
+    id: string;
+    name: string;
+    width: number;
+    height: number;
+    components: Component[];
+    castTime: number;
+    manaCost: number;
+    damage: number;
+    aoeDamage: number;
++   globalDamage: number; // v2: 전체 데미지
+    breakdown: string[];
+  }
 
-+ // 스펠 통계 확장
-+ export interface SpellStats {
-+   castTime: number;
-+   manaCost: number;
-+   redCount: number;
-+   redManaCost: number;
-+   greenCount: number;
-+   greenManaCost: number;
-+   activeBlueCount: number;
-+   inactiveBlueCount: number;
-+   activeStabilizerCount: number;
-+   activeHubCount: number;
-+   maxStability: number;
-+   damage: number;
-+   aoeDamage: number;
-+   globalDamage: number;
-+   breakdown: string;
-+   valid: boolean;
-+ }
+  /** 술식 통계 (편집 시 실시간 계산) */
+  export interface SpellStats {
+    castTime: number;
+    seconds: number;
+    manaCost: number;
+    redCount: number;
++   redManaCost: number;            // v2
++   greenCount: number;             // v2
++   greenManaCost: number;          // v2
+    activeBlueCount: number;
+    inactiveBlueCount: number;
++   activeStabilizerCount: number;  // v2
++   activeHubCount: number;         // v2
++   maxStability: number;           // v2
+    damage: number;
+    aoeDamage: number;
++   globalDamage: number;           // v2
+    breakdown: string[];
+    valid: boolean;
+  }
 
-+ // 계산 컨텍스트 (안정도/활성화 상태)
-+ export interface CalcCtx {
-+   activeBlueIds?: Set<string>;
-+   activeGreenIds?: Set<string>;
-+   activeStabilizerIds?: Set<string>;
-+   activeHubIds?: Set<string>;
-+   hubBootstrap?: boolean;
+  /** 도선 네트워크 그래프 */
+  export interface ConnectionGraph {
+    groups: WireGroup[];
+    compGroups: Map<number, Set<number>>;
+  }
+
++ /** 색상별 도선망 그래프 (v2) */
++ export interface ColorConnectionGraph {
++   red: ConnectionGraph;
++   blue: ConnectionGraph;
++   green: ConnectionGraph;
 + }
 ```
 
@@ -88,68 +157,104 @@
 
 ```diff
 + // === v2 Green/Stability 상수 ===
-+ 
++
++ /** 프로토타입: 모든 도구 강제 해금 */
++ export const PROTOTYPE_UNLOCK_ALL_TOOLS = false;
++
 + /** 녹색 마나 관련 */
 + export const GREEN_MANA = {
-+   /** 2칸 혼합 회로와 접촉 시 필요 마나 비용 */
++   /** greenMana가 mixed2 접촉 시 추가로 소모하는 마나 */
 +   COST_PER_ACTIVE: 2,
-+   /** 활성화 시 제공하는 마나 */
++   /** 활성화 시 제공하는 초록 마나 */
 +   MANA_PROVIDED: 1,
 + } as const;
-+ 
++
 + /** 안정도 관련 */
 + export const STABILITY = {
-+   /** 안정기가 제공하는 안정도 값 */
++   /** 안정기 1개가 제공하는 안정도 */
 +   PER_STABILIZER: 1,
-+   /** 안정기 영향 범위 (쉐비셰프 거리 1 = 주변 8칸) */
++   /** 안정기 영향 범위 (쉐비셰프 거리) */
 +   RANGE: 1,
-+   /** 안정기 활성에 필요한 파란 마나 */
++   /** 안정기 활성에 필요한 파란 마나 연결 수 */
 +   BLUE_REQUIRED: 1,
 + } as const;
-+ 
++
 + /** 중형 허브 관련 */
 + export const MEDIUM_HUB = {
 +   /** 활성에 필요한 안정도 */
 +   STABILITY_REQUIRED: 1,
 + } as const;
-+ 
++
 + /** 중형 도선 관련 */
 + export const MEDIUM_WIRE = {
 +   /** 전달되는 색상 */
 +   COLORS: ['red', 'blue', 'green'] as const,
 + } as const;
-+ 
++
 + /** 소형 도선 관련 */
 + export const SMALL_WIRE = {
 +   /** 전달되는 색상 (초록 제외) */
 +   COLORS: ['red', 'blue'] as const,
 + } as const;
-+ 
++
 + /** 추출기 관련 */
 + export const EXTRACTOR = {
 +   /** 색상 순환 순서 */
 +   COLOR_CYCLE: ['red', 'blue', 'green'] as const,
-+   /** 회전 0 = 우측(0도), 1 = 하단(90도), 2 = 좌측(180도), 3 = 상단(270도) */
++   /** 회전 → 출력 방향 (우/하/좌/상) */
 +   DIRECTION_MAP: [
-+     { dx: 1, dy: 0 },  // 우
-+     { dx: 0, dy: 1 },  // 하
-+     { dx: -1, dy: 0 }, // 좌
-+     { dx: 0, dy: -1 }, // 상
++     { dx: 1, dy: 0 },   // 0: 우
++     { dx: 0, dy: 1 },   // 1: 하
++     { dx: -1, dy: 0 },  // 2: 좌
++     { dx: 0, dy: -1 },  // 3: 상
 +   ] as const,
 + } as const;
 ```
 
+### 3. `src/lib/game/designer/components/def.ts`
+
+`ComponentRole`과 `CalcContext`도 이 단계에서 확장해야 Phase 2 컴포넌트 정의가 컴파일됩니다.
+
+```diff
+  export type ComponentRole =
+    | 'mana'
+    | 'generator'
+    | 'wire'
+    | 'circuit'
+-   | 'tool';
++   | 'tool'
++   | 'extractor'   // v2
++   | 'stabilizer'; // v2
+
+  export interface CalcContext {
+    red: number;
+    blue: number;
++   green: number;                       // v2
++   stability: number;                   // v2
+    component: Component;
+    components: Component[];
+    neighbors: Component[];
+    connectedTo: (target: Component, predicate: (c: Component) => boolean) => number;
+    isActiveBlue: (id: number) => boolean;
++   isActiveStabilizer: (id: number) => boolean; // v2
++   isActiveHub: (id: number) => boolean;         // v2
+  }
+```
+
+---
+
 ## 🧪 테스트 계획
 
-1. TypeScript 컴파일 에러 없는지 확인
-2. `ComponentType`이 18개인지 확인
-3. `ExtractorColor` 순환 로직 단위 테스트
+1. `npm run check` — TypeScript / svelte-check 0 errors
+2. `ComponentType`이 18개인지 타입 레벨 체크
+3. `ExtractorColor` 순환 로직 단위 테스트 (Phase 3에서 추가)
 
 ## ✅ 완료 조건
 
 - [ ] `types.ts`에 모든 신규 타입 정의 추가
 - [ ] `constants.ts`에 v2 상수 추가
-- [ ] `tsc --noEmit` 통과
+- [ ] `def.ts`에 `ComponentRole` 및 `CalcContext` 확장
+- [ ] `npm run check` 통과
 - [ ] 기존 파일에서 타입 참조 에러 없음
 
 ## 예상 소요: 30분

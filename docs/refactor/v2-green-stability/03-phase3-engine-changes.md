@@ -1,106 +1,267 @@
-# Phase 3~7: 핵심 엔진 → UI → i18n → 테스트
+# Phase 3: 핵심 엔진 변경
 
-> Phase 3 핵심 엔진 변경부터 Phase 7 통합 테스트까지
+> **중요**: WireNetwork v3, ExtractorSystem, StabilitySystem 신규, StatsCalculator 다중 패스 계산
+>
+> **현재 상태**: 단일 도선망 (v1 스타일)
 
 ---
 
-## Phase 3: 핵심 엔진 변경 (3시간)
+## 3-1. `WireNetwork.ts` — 색상별 도선망 v3
 
-### 3-1. `WireNetwork.ts` — 색상별 도선망 v3
+### 설계 원칙
 
-**가장 큰 변경. 기존 단일 도선망을 색상별 독립망으로 분할.**
+- 기존 `buildConnectionGraph()`는 **그대로 유지**하여 v1 코드와 테스트를 보호.
+- 새로운 `buildColorConnectionGraph()`를 추가해 색상별 그래프를 반환.
+- 중형 허브는 `activeHubIds`를 받아 활성 여부를 결정 (안정도에 따라 달라짐).
+- 중형 도선은 회전에 따라 가로/세로 방향으로만 연결.
 
-#### 현재 구조
+### API
+
 ```typescript
-buildConnectionGraph(components) → { groups, compGroups }
-// 단일 그룹 배열, 모든 색상 통합
+import type { Component, ConnectionGraph } from '../types';
+
+export interface ColorConnectionGraph {
+  red: ConnectionGraph;
+  blue: ConnectionGraph;
+  green: ConnectionGraph;
+}
+
+/** 색상별 도선망을 구축합니다. activeHubIds에 포함된 mediumHub만 전도체로 사용됩니다. */
+export function buildColorConnectionGraph(
+  components: Component[],
+  activeHubIds: Set<number>,
+): ColorConnectionGraph;
+
+/** 기존 v1 함수 — 하위 호환용 */
+export function buildConnectionGraph(components: Component[]): ConnectionGraph;
+
+/** 특정 컴포넌트가 color 그래프에서 연결된 부품들을 반환 */
+export function getConnectedComponentsByColor(
+  component: Component,
+  components: Component[],
+  graph: ColorConnectionGraph,
+  color: 'red' | 'blue' | 'green',
+  predicate: (c: Component) => boolean,
+): Component[];
 ```
 
-#### v2 구조
-```typescript
-buildConnectionGraph(components, ctx) → { groupsByColor, compGroupsByColor }
-// 색상별 독립 그룹
+### 도선 규칙 v3
 
-interface WireNetworkData {
-  groupsByColor: {
-    red: WireGroup[];
-    blue: WireGroup[];
-    green: WireGroup[];
-  };
-  compGroupsByColor: {
-    red: Map<string, Set<number>>;
-    blue: Map<string, Set<number>>;
-    green: Map<string, Set<number>>;
-  };
+| 도선 | red 그래프 | blue 그래프 | green 그래프 | 방향 |
+|------|-----------|------------|-------------|------|
+| `wire` | ✅ | ✅ | ❌ | 4방향 |
+| `mediumWire` | ✅ | ✅ | ✅ | 회전 방향 직선 |
+| `mediumHub` (active) | ✅ | ✅ | ✅ | 4방향 |
+| `mediumHub` (inactive) | ❌ | ❌ | ❌ | — |
+
+### 구현 가이드
+
+```typescript
+function isWireForColor(type: string, color: 'red' | 'blue' | 'green'): boolean {
+  if (type === 'wire') return color !== 'green';
+  if (type === 'mediumWire') return true;
+  if (type === 'mediumHub') return true; // activeHubIds로 추가 필터링
+  return false;
+}
+
+function getWireNeighbors(
+  comp: Component,
+  color: 'red' | 'blue' | 'green',
+): [number, number][] {
+  if (comp.type === 'mediumWire') {
+    // rotation 0: 가로 (좌/우), 1: 세로 (상/하)
+    const dirs = comp.rotation === 1
+      ? [[0, -1], [0, 1]]
+      : [[1, 0], [-1, 0]];
+    return dirs.map(([dx, dy]) => [comp.x + dx, comp.y + dy]);
+  }
+  // wire, mediumHub
+  return [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([dx, dy]) => [comp.x + dx, comp.y + dy]);
 }
 ```
 
-#### 핵심 변경 함수
-- `buildConnectionGraph()`: 색상이별 BFS로 그래프 구축
-- `carryColorsFor(comp, ctx)`: 컴포넌트가 전달할 수 있는 색상 목록 반환
-- `wirePortsFor(comp, ctx)`: 방향성 도선의 포트 정보
-- `hasWirePort(comp, dir, ctx)`: 특정 방향으로 연결 가능한지
-- `isWireLike(comp, ctx)`: 도선 역할을 하는지
+---
 
-#### 도선 규칙 v3
-| 도선 | 색상 | 방향 | 안정도 |
-|------|------|------|--------|
-| 소형(wire) | 빨강/파랑 | 무방향 | 없음 |
-| 중형(mediumWire) | 빨강/파랑/초록 | 직선(회전) | 없음 |
-| 허브(mediumHub) | 빨강/파랑/초록 | 4방향 | 1 필요 |
+## 3-2. `StabilitySystem.ts` (신규)
 
-### 3-2. `ExtractorSystem.ts` (신규)
+### API
 
 ```typescript
-// ExtractorSystem.ts
-export interface ExtractorSystem {
-  cycleColor: (color: ExtractorColor) => ExtractorColor;
-  extractorOutputsTo: (extractor: Component, target: Component) => boolean;
-  getExtractorInputSources: (
-    extractor: Component, 
-    components: Component[], 
-    graph: WireNetworkData, 
-    color: ExtractorColor
-  ) => Component[];
-}
+import type { Component } from '../types';
+import type { ColorConnectionGraph } from '../designer/WireNetwork';
 
-export function createExtractorSystem(): ExtractorSystem { ... }
+/** 안정기가 작동 중인지 판정 (파란 마나 연결 필요) */
+export function isActiveStabilizer(
+  comp: Component,
+  components: Component[],
+  graph: ColorConnectionGraph,
+  isActiveBlue: (id: number) => boolean,
+): boolean;
+
+/** comp 위치에서 받는 총 안정도 */
+export function stabilityAt(
+  comp: Component,
+  components: Component[],
+  activeStabilizerIds: Set<number>,
+): number;
+
+/** 두 컴포넌트 사이의 쉐비셰프 거리 (대각선 포함 8방향) */
+export function chebyshevDistance(a: Component, b: Component): number;
 ```
 
- 핵심 로직:
-1. 추출기 회전 방향(0~3)으로 출력 방향 결정
-2. 화살표 반대 방향 도선망에서 동일 색상 검색
-3. 해당 색상 마나만 필터링하여 출력
-
-### 3-3. `StabilitySystem.ts` (신규)
+### 구현 가이드
 
 ```typescript
-// StabilitySystem.ts
-export interface StabilitySystem {
-  isActiveStabilizer: (comp: Component, ctx: CalcCtx) => boolean;
-  stabilityFor: (comp: Component, components: Component[], ctx: CalcCtx) => number;
+import { STABILITY } from '../constants';
+import { getConnectedComponentsByColor } from '../designer/WireNetwork';
+
+export function isActiveStabilizer(
+  comp: Component,
+  components: Component[],
+  graph: ColorConnectionGraph,
+  isActiveBlue: (id: number) => boolean,
+): boolean {
+  const blues = getConnectedComponentsByColor(
+    comp, components, graph, 'blue',
+    c => c.type === 'blueGen' && isActiveBlue(c.id),
+  );
+  return blues.length >= STABILITY.BLUE_REQUIRED;
 }
 
-export function createStabilitySystem(): StabilitySystem { ... }
+export function stabilityAt(
+  comp: Component,
+  components: Component[],
+  activeStabilizerIds: Set<number>,
+): number {
+  let sum = 0;
+  for (const other of components) {
+    if (other.type !== 'stabilizer') continue;
+    if (!activeStabilizerIds.has(other.id)) continue;
+    if (chebyshevDistance(comp, other) <= STABILITY.RANGE) {
+      sum += STABILITY.PER_STABILIZER;
+    }
+  }
+  return sum;
+}
 
-// 쉐비셰프 거리 계산 (대각선 포함 8방향)
 export function chebyshevDistance(a: Component, b: Component): number {
-  const dx = Math.max(0, Math.max(b.x - (a.x + a.w - 1), (a.x) - (b.x + b.w - 1)));
-  const dy = Math.max(0, Math.max(b.y - (a.y + a.h - 1), (a.y) - (b.y + b.h - 1)));
+  const aRight = a.x + a.w - 1;
+  const aBottom = a.y + a.h - 1;
+  const bRight = b.x + b.w - 1;
+  const bBottom = b.y + b.h - 1;
+  const dx = Math.max(0, Math.max(b.x - aRight, a.x - bRight));
+  const dy = Math.max(0, Math.max(b.y - aBottom, a.y - bBottom));
   return Math.max(dx, dy);
 }
 ```
 
-### 3-4. `StatsCalculator.ts` — 확장
+---
+
+## 3-3. `ExtractorSystem.ts` (신규)
+
+### API
 
 ```typescript
-// 확장된 반환 타입
-interface SpellStats {
+import type { Component, ExtractorColor } from '../types';
+import type { ColorConnectionGraph } from '../designer/WireNetwork';
+import { EXTRACTOR } from '../constants';
+
+/** 추출기 색상을 순환: red → blue → green → red */
+export function cycleExtractorColor(color: ExtractorColor): ExtractorColor;
+
+/** 추출기의 출력 방향(회전)에 있는 인접 부품 반환 */
+export function extractorOutputTarget(
+  extractor: Component,
+  components: Component[],
+): Component | null;
+
+/** 추출기 입력 측이 특정 색상의 도선망/소스에 연결되어 있는지 확인 */
+export function extractorHasInputOfColor(
+  extractor: Component,
+  components: Component[],
+  graph: ColorConnectionGraph,
+  color: ExtractorColor,
+): boolean;
+```
+
+### 구현 가이드
+
+```typescript
+import { componentAt } from '../designer/Components';
+import { getConnectedComponentsByColor } from '../designer/WireNetwork';
+
+export function cycleExtractorColor(color: ExtractorColor): ExtractorColor {
+  const idx = EXTRACTOR.COLOR_CYCLE.indexOf(color);
+  return EXTRACTOR.COLOR_CYCLE[(idx + 1) % EXTRACTOR.COLOR_CYCLE.length];
+}
+
+export function extractorOutputTarget(
+  extractor: Component,
+  components: Component[],
+): Component | null {
+  const dir = EXTRACTOR.DIRECTION_MAP[extractor.rotation % 4];
+  return componentAt(components, extractor.x + dir.dx, extractor.y + dir.dy);
+}
+
+export function extractorHasInputOfColor(
+  extractor: Component,
+  components: Component[],
+  graph: ColorConnectionGraph,
+  color: ExtractorColor,
+): boolean {
+  const dir = EXTRACTOR.DIRECTION_MAP[extractor.rotation % 4];
+  const inputX = extractor.x - dir.dx;
+  const inputY = extractor.y - dir.dy;
+  const inputComp = componentAt(components, inputX, inputY);
+  if (!inputComp) return false;
+
+  // 직접 소스인 경우
+  if (isSourceOfColor(inputComp, color)) return true;
+
+  // 도선을 통해 연결된 소스가 있는 경우
+  if (isWireForColorAndActive(inputComp, color)) {
+    const sources = getConnectedComponentsByColor(
+      inputComp, components, graph, color,
+      c => isSourceOfColor(c, color),
+    );
+    return sources.length > 0;
+  }
+
+  return false;
+}
+
+function isSourceOfColor(comp: Component, color: ExtractorColor): boolean {
+  if (color === 'red') return comp.type === 'red' || comp.type === 'red3';
+  if (color === 'blue') return comp.type === 'blueGen';
+  if (color === 'green') return comp.type === 'greenMana'; // 활성 여부는 StatsCalculator에서 별도 판정
+  return false;
+}
+
+function isWireForColorAndActive(comp: Component, color: ExtractorColor): boolean {
+  if (comp.type === 'wire') return color !== 'green';
+  if (comp.type === 'mediumWire') return true;
+  if (comp.type === 'mediumHub') return true; // activeHubIds로 추가 필터링 필요
+  return false;
+}
+```
+
+> **주의**: `greenMana`가 활성화된 경우에만 초록 소스로 인정해야 합니다. `isSourceOfColor`는 타입만 확인하고, StatsCalculator에서 활성화 여부를 최종 판단합니다.
+
+---
+
+## 3-4. `StatsCalculator.ts` — 확장 및 다중 패스
+
+### 반환 타입
+
+```typescript
+export interface SpellStats {
+  castTime: number;
+  seconds: number;
   manaCost: number;
-  redCount: number;
-  redManaCost: number;
-  greenCount: number;
-  greenManaCost: number;
+  redCount: number;              // red/red3 부품 수
+  redManaCost: number;           // 빨강 마나 총 비용
+  greenCount: number;            // 활성화된 greenMana 수
+  greenManaCost: number;         // 초록 마나 총 비용
   activeBlueCount: number;
   inactiveBlueCount: number;
   activeStabilizerCount: number;
@@ -109,296 +270,255 @@ interface SpellStats {
   damage: number;
   aoeDamage: number;
   globalDamage: number;
-  castTime: number;
+  breakdown: string[];
   valid: boolean;
 }
 ```
 
-**주요 변경:**
-- `calculateSpellStats()`에 ctx 파라미터 추가
-- 녹색 마나 활성화 계산 (mixed2 접촉 여부 확인)
-- 안정기 활성/전달 안정도 합산
-- 중형 허브 활성 판정
-- ultimateCore globalDamage 산출
-- breakdown 문자열에 안정도/전체데미지 포함
+### 계산 순서 (다중 패스)
 
-### 3-5. `Components.ts` — createComponent 확장
-
-```typescript
-// color 필드 지원 추가
-export function createComponent(
-  type: ComponentType, 
-  x: number, 
-  y: number, 
-  rotation = 0, 
-  color?: ExtractorColor
-): Component {
-  const def = COMPONENT_DEFS.find(d => d.type === type);
-  if (!def) throw new Error(`Unknown component type: ${type}`);
-  
-  const comp: Component = {
-    id: generateId(),
-    type,
-    x, y,
-    w: def.width,
-    h: def.height,
-    rotation,
-    ...(color ? { color } : {}),
-  };
-  return comp;
-}
+```
+1. 초기 그래프 생성 (모든 mediumHub를 활성으로 가정)
+2. activeBlueGenerator 판정 (red source 연결)
+3. activeStabilizer 판정 (active blue 연결)
+4. stabilityAt 계산 → activeHubIds 결정
+5. activeHubIds가 변경되었다면 1로 돌아가 그래프 재생성
+6. 최종 그래프로 greenMana 활성 판정 (mixed2 접촉)
+7. extractor 출력 평가
+8. circuit damage / aoe / globalDamage 계산
+9. manaCost 및 validity 결정
 ```
 
----
+### 핵심 로직 스케치
 
-## Phase 4: 전투 시스템 반영 (1시간)
-
-### 4-1. `BattleEngine.ts`
 ```typescript
-// 스펠 시전 시 globalDamage 처리
-function applySpellDamage(spell: Spell, game: Game) {
-  // 기존 데미지
-  applyNormalDamage(spell.damage);
-  applyAoeDamage(spell.aoeDamage);
-  
-  // v2: 전체 데미지
-  if (spell.globalDamage > 0) {
-    for (const monster of game.monsters) {
-      if (monster.hp > 0) {
-        monster.hp -= spell.globalDamage;
-        game.effects.push({
-          type: 'hit',
-          x: monster.x,
-          y: monster.y,
-          text: `-${spell.globalDamage}`
-        });
+import { buildColorConnectionGraph, getConnectedComponentsByColor } from './WireNetwork';
+import { isActiveStabilizer, stabilityAt } from './StabilitySystem';
+import { getRedPower, getRedCost } from './components/red';
+import { GREEN_MANA, MEDIUM_HUB } from '../constants';
+import { getDef, CIRCUIT_TYPES } from './components/registry';
+
+export function calculateSpellStats(model: SpellModel): SpellStats {
+  const { width, height, components } = model;
+  const breakdown: string[] = [];
+
+  // --- 1~5. 그래프 + 안정도 고정점 반복 ---
+  let activeHubIds = new Set<number>(
+    components.filter(c => c.type === 'mediumHub').map(c => c.id),
+  );
+  let graph = buildColorConnectionGraph(components, activeHubIds);
+  let prevHubIds: string;
+
+  const activeBlueIds = new Set<number>();
+  const activeStabilizerIds = new Set<number>();
+  let stabilityMap = new Map<number, number>();
+
+  for (let iter = 0; iter < 5; iter++) {
+    // active blue
+    activeBlueIds.clear();
+    for (const b of components.filter(c => c.type === 'blueGen')) {
+      const reds = getConnectedComponentsByColor(
+        b, components, graph, 'red',
+        c => getRedPower(c) > 0,
+      );
+      const redPower = reds.reduce((sum, c) => sum + getRedPower(c), 0);
+      if (redPower >= 1) activeBlueIds.add(b.id);
+    }
+
+    // active stabilizer
+    activeStabilizerIds.clear();
+    for (const s of components.filter(c => c.type === 'stabilizer')) {
+      if (isActiveStabilizer(s, components, graph, id => activeBlueIds.has(id))) {
+        activeStabilizerIds.add(s.id);
       }
     }
-  }
-}
-```
 
-### 4-2. `DamageResolver.ts`
-```typescript
-// globalDamage 필드 지원
-export function resolveDamage(spell: Spell, monsters: Monster[]) {
+    // stability map
+    stabilityMap = new Map();
+    for (const c of components) {
+      stabilityMap.set(c.id, stabilityAt(c, components, activeStabilizerIds));
+    }
+
+    // active hub
+    const nextHubIds = new Set<number>();
+    for (const h of components.filter(c => c.type === 'mediumHub')) {
+      if ((stabilityMap.get(h.id) ?? 0) >= MEDIUM_HUB.STABILITY_REQUIRED) {
+        nextHubIds.add(h.id);
+      }
+    }
+
+    const nextKey = [...nextHubIds].sort().join(',');
+    if (nextKey === prevHubIds) {
+      activeHubIds = nextHubIds;
+      break;
+    }
+    prevHubIds = nextKey;
+    activeHubIds = nextHubIds;
+    graph = buildColorConnectionGraph(components, activeHubIds);
+  }
+
+  // --- 6. greenMana 활성화 ---
+  const activeGreenIds = new Set<number>();
+  for (const g of components.filter(c => c.type === 'greenMana')) {
+    const touchingMixed2 = getDirectNeighborComponents(g, components)
+      .some(c => c.type === 'mixed2');
+    if (touchingMixed2) activeGreenIds.add(g.id);
+  }
+
+  // --- 7. extractor 출력 ---
+  const extractorOutputs = new Map<number, { color: ExtractorColor; targetId: number }>();
+  for (const e of components.filter(c => c.type === 'extractor')) {
+    const color = e.color ?? 'red';
+    if (extractorHasInputOfColor(e, components, graph, color)) {
+      const target = extractorOutputTarget(e, components);
+      if (target) extractorOutputs.set(e.id, { color, targetId: target.id });
+    }
+  }
+
+  // --- 8. 회로 데미지 ---
+  let damage = 0;
+  let aoeDamage = 0;
+  let globalDamage = 0;
+  const circuits = components.filter(c => CIRCUIT_TYPES.has(c.type));
+
+  for (const c of circuits) {
+    const ctx = buildCalcContext(
+      c, components, graph, activeBlueIds, activeStabilizerIds,
+      activeHubIds, activeGreenIds, extractorOutputs, stabilityMap,
+    );
+    const def = getDef(c.type);
+    const result = def?.calc?.(ctx) ?? { damage: 0, detail: '' };
+    damage += result.damage ?? 0;
+    aoeDamage += result.aoe ?? 0;
+    globalDamage += result.globalDamage ?? 0;
+    breakdown.push(`${def?.name ?? c.type} ${c.id}: ${result.detail} → 일반 ${result.damage ?? 0}`);
+  }
+
+  // --- 9. 비용 및 유효성 ---
+  const redSources = components.filter(c => c.type === 'red' || c.type === 'red3');
+  const redCount = redSources.length;
+  const redManaCost = redSources.reduce((sum, c) => sum + getRedCost(c), 0);
+  const greenCount = activeGreenIds.size;
+  const greenManaCost = greenCount * GREEN_MANA.COST_PER_ACTIVE;
+  const activeBlueCount = activeBlueIds.size;
+  const inactiveBlueCount = components.filter(c => c.type === 'blueGen').length - activeBlueCount;
+  const activeStabilizerCount = activeStabilizerIds.size;
+  const activeHubCount = activeHubIds.size;
+  const maxStability = Math.max(0, ...components.map(c => stabilityMap.get(c.id) ?? 0));
+  const manaCost = redManaCost + greenManaCost + activeBlueCount * 2;
+  const castTime = width * height;
+
   return {
-    normal: spell.damage,
-    aoe: spell.aoeDamage,
-    global: spell.globalDamage || 0,
-    total: spell.damage + spell.aoeDamage * 3 + (spell.globalDamage || 0) * monsters.length,
+    castTime,
+    seconds: castTime * (1 / 20),
+    manaCost,
+    redCount,
+    redManaCost,
+    greenCount,
+    greenManaCost,
+    activeBlueCount,
+    inactiveBlueCount,
+    activeStabilizerCount,
+    activeHubCount,
+    maxStability,
+    damage,
+    aoeDamage,
+    globalDamage,
+    breakdown,
+    valid: redCount >= 1 && circuits.length >= 1 && damage >= 1,
+  };
+}
+
+function buildCalcContext(
+  component: Component,
+  components: Component[],
+  graph: ColorConnectionGraph,
+  activeBlueIds: Set<number>,
+  activeStabilizerIds: Set<number>,
+  activeHubIds: Set<number>,
+  activeGreenIds: Set<number>,
+  extractorOutputs: Map<number, { color: ExtractorColor; targetId: number }>,
+  stabilityMap: Map<number, number>,
+): CalcContext {
+  const red = countColorPower(
+    component, components, graph, 'red',
+    c => getRedPower(c) > 0,
+    getRedPower,
+  );
+  const blue = countConnected(
+    component, components, graph, 'blue',
+    c => c.type === 'blueGen' && activeBlueIds.has(c.id),
+  );
+  const green = countConnected(
+    component, components, graph, 'green',
+    c => c.type === 'greenMana' && activeGreenIds.has(c.id),
+  );
+
+  // extractor가 이 회로를 대상으로 출력하는 경우 색상 추가
+  let redFromExtractor = 0;
+  let blueFromExtractor = 0;
+  let greenFromExtractor = 0;
+  for (const [_, out] of extractorOutputs) {
+    if (out.targetId === component.id) {
+      if (out.color === 'red') redFromExtractor++;
+      if (out.color === 'blue') blueFromExtractor++;
+      if (out.color === 'green') greenFromExtractor++;
+    }
+  }
+
+  return {
+    red: red + redFromExtractor,
+    blue: blue + blueFromExtractor,
+    green: green + greenFromExtractor,
+    stability: stabilityMap.get(component.id) ?? 0,
+    component,
+    components,
+    neighbors: getDirectNeighborComponents(component, components),
+    connectedTo: (target, predicate) =>
+      getConnectedComponentsByColor(target, components, graph, 'red', predicate).length,
+    isActiveBlue: id => activeBlueIds.has(id),
+    isActiveStabilizer: id => activeStabilizerIds.has(id),
+    isActiveHub: id => activeHubIds.has(id),
   };
 }
 ```
 
-### 4-3. `CastingSystem.ts`
-```typescript
-// 녹색/안정도 요구사항 체크
-export function canCastSpell(spell: Spell, ctx: CalcCtx): { canCast: boolean, reason?: string } {
-  // 기존 마나 체크
-  if (game.currentMana < spell.manaCost) {
-    return { canCast: false, reason: '마나 부족' };
+> `countColorPower`, `countConnected`는 헬퍼 함수로, `getConnectedComponentsByColor`를 사용해 predicate에 맞는 부품을 세고, power 합산 시 가중치를 적용합니다.
+
+---
+
+## 3-5. `Components.ts` — `createComponentFromGridCoord` 확장
+
+```diff
+  export function createComponentFromGridCoord(
+    type: string, gx: number, gy: number, nextId: number, rotation: number,
++   color?: ExtractorColor,
+  ): Component {
+    const dim = dimensionsFor(type, rotation);
+    const x = Math.floor(gx);
+    const y = Math.floor(gy);
+    return {
+      id: nextId,
+      type: type as ComponentType,
+      x, y,
+      w: dim.w,
+      h: dim.h,
+      rotation: dim.rotation,
++     ...(color ? { color } : {}),
+    };
   }
-  
-  // v2: 안정도 체크
-  if (spell.requiresStability && ctx.maxStability < spell.stabilityRequired) {
-    return { canCast: false, reason: '안정도 부족' };
-  }
-  
-  return { canCast: true };
-}
 ```
 
 ---
 
-## Phase 5: UI 반영 (2시간)
+## ✅ Phase 3 완료 조건
 
-### 5-1. `DesignerPanel.svelte` — 도구 버튼 추가
+- [ ] `WireNetwork.ts`에 `buildColorConnectionGraph` 추가 (기존 함수 유지)
+- [ ] `StabilitySystem.ts` 신규 생성
+- [ ] `ExtractorSystem.ts` 신규 생성
+- [ ] `StatsCalculator.ts`가 다중 패스로 green/stability/globalDamage 반영
+- [ ] `Components.ts`에 `color` 매개변수 추가
+- [ ] `npm run check` 통과
+- [ ] 기존 `StatsCalculator`/`WireNetwork` 테스트 통과
 
-```svelte
-<!-- toolbar에 9개 신규 버튼 추가 -->
-<div class="toolBar">
-  <!-- 기존 -->
-  <button class="toolBtn" data-tool="red">빨간 점 마나</button>
-  <button class="toolBtn" data-tool="blueGen">파란 마나 생성기</button>
-  <button class="toolBtn" data-tool="wire">소형 도선</button>
-  <button class="toolBtn" data-tool="circle">1칸 회로</button>
-  <button class="toolBtn" data-tool="oval">2칸 타원</button>
-  <button class="toolBtn" data-tool="kernel">2x2 핵</button>
-  <button class="toolBtn" data-tool="mixed2">2칸 혼합</button>
-  <button class="toolBtn" data-tool="mixedCore">9칸 혼합 핵</button>
-  <button class="toolBtn" data-tool="eraser">지우개</button>
-  
-  <!-- v2 신규 -->
-  <button class="toolBtn" data-tool="red3">3중 빨간 마나</button>
-  <button class="toolBtn" data-tool="mediumWire">중형 도선</button>
-  <button class="toolBtn" data-tool="mediumHub">중형 허브</button>
-  <button class="toolBtn" data-tool="extractor">추출기</button>
-  <button class="toolBtn" data-tool="stabilizer">안정기</button>
-  <button class="toolBtn" data-tool="greenMana">초록 마나</button>
-  <button class="toolBtn" data-tool="green3x2">3x2 순환 회로</button>
-  <button class="toolBtn" data-tool="greenPair2">2x2 녹청 회로</button>
-  <button class="toolBtn" data-tool="ultimateCore">4x4 안정 핵</button>
-</div>
-```
-
-### 5-2. `PlacementGhost.svelte` — 신규 부품 미리보기
-- 신규 부품 CSS 클래스 매핑 추가
-- 중형 도선 회전 미리보기 지원
-
-### 5-3. v2 beta CSS 스타일 복사
-```css
-/* v2 beta에서 복사할 스타일 */
-:root { --green: #70ffc0; --green2: #1ca875; --violet: #b790ff; }
-
-.piece.red3::after { ... }
-.piece.greenMana::after { ... }
-.piece.mediumWire::after { ... }
-.piece.mediumHub::after { ... }
-.piece.extractor::after { ... }
-.piece.stabilizer::after { ... }
-.piece.green3x2::after { ... }
-.piece.greenPair2::after { ... }
-.piece.ultimateCore::after { ... }
-
-.previewPiece.red3::after { ... }
-/* ... previewPiece들도 동일하게 ... */
-
-.prototypeNote { ... }
-```
-
----
-
-## Phase 6: i18n 반영 (30분)
-
-### 6-1. `ko.ts`
-
-```typescript
-export const ko: Record<string, string> = {
-  // 기존...
-  
-  // v2 신규 부품명
-  'red3': '3중 빨간 마나',
-  'mediumWire': '중형 도선',
-  'mediumHub': '중형 허브',
-  'extractor': '추출기',
-  'stabilizer': '안정기',
-  'greenMana': '초록 마나',
-  'green3x2': '3x2 순환 회로',
-  'greenPair2': '2x2 녹청 회로',
-  'ultimateCore': '4x4 안정 핵',
-  
-  // v2 새 용어
-  'Stability': '안정도',
-  'Global': '전체',
-  'Green Mana': '초록마나',
-  'Triple Red Mana': '3중 빨간 마나',
-  'Small Wire': '소형 도선',
-  'Red Extractor': '빨강 추출기',
-  'Blue Extractor': '파랑 추출기',
-  'Green Extractor': '초록 추출기',
-  '3x2 Cycle Circuit': '3x2 순환 회로',
-  '4x4 Stability Core': '4x4 안정 핵',
-};
-```
-
-### 6-2. `en.ts`
-```typescript
-export const en: Record<string, string> = {
-  // 기존 번역...
-  
-  // v2 translations
-  '3중 빨간 마나': 'Triple Red Mana',
-  '소형 도선': 'Small Wire',
-  '중형 도선': 'Medium Wire',
-  '중형 허브': 'Medium Hub',
-  '추출기': 'Extractor',
-  '안정기': 'Stabilizer',
-  '초록 마나': 'Green Mana',
-  '3x2 순환 회로': '3x2 Cycle Circuit',
-  '2x2 녹청 회로': '2x2 Green-Blue Circuit',
-  '4x4 안정 핵': '4x4 Stability Core',
-  '안정도': 'Stability',
-  '전체': 'Global',
-};
-```
-
----
-
-## Phase 7: 테스트 및 정리 (2시간)
-
-### 7-1. 프로토타입 상태 확인
-```typescript
-// constants.ts 또는 gameState.svelte.ts
-export const PROTOTYPE_UNLOCK_ALL_TOOLS = true; // 테스트용
-// 실제 배포 시: false
-```
-
-### 7-2. 테스트 시나리오
-1. **모든 도구 배치 테스트**: 18개 도구 모두 배치 가능 확인
-2. **색상별 도선망 테스트**: 
-   - 소형 도선: 빨강/파랑만 전달, 초록 차단
-   - 중형 도선: 3색 모두 전달
-   - 중형 허브 + 안정기 활성화
-3. **추출기 색상 순환**: 빨강→파랑→초록→빨강 확인
-4. **안정도 계산**: 8방향 쉐비셰프 거리 확인
-5. **녹색 마나 활성화**: mixed2 접촉 시 활성화 확인
-6. **ultimateCore**: 전체 데미지 전 몬스터 적용 확인
-7. **기존 호환성**: v1.x 저장 데이터 로딩 확인
-
-### 7-3. 레거시 호환 처리
-```typescript
-// StorageSlots.ts 또는 StorageDecks.ts
-export function normalizeLegacySpell(raw: any): Spell {
-  // extractRed/extractBlue/extractGreen → extractor + color
-  const comp = raw.components.map(c => {
-    if (c.type === 'extractRed') return { ...c, type: 'extractor', color: 'red' };
-    if (c.type === 'extractBlue') return { ...c, type: 'extractor', color: 'blue' };
-    if (c.type === 'extractGreen') return { ...c, type: 'extractor', color: 'green' };
-    if (c.type === 'mana') return { ...c, type: 'red' };
-    return c;
-  });
-  
-  return { ...raw, components: comp, globalDamage: raw.globalDamage || 0 };
-}
-```
-
----
-
-## ✅ 전체 완료 조건
-
-### Phase 3
-- [ ] WireNetwork.ts 색상별 도선망 v3 구현
-- [ ] ExtractorSystem.ts 신규 생성
-- [ ] StabilitySystem.ts 신규 생성
-- [ ] StatsCalculator.ts 확장
-- [ ] Components.ts color 필드 지원
-
-### Phase 4
-- [ ] BattleEngine.ts globalDamage 처리
-- [ ] DamageResolver.ts 전체 데미지 지원
-- [ ] CastingSystem.ts 녹색/안정도 체크
-
-### Phase 5
-- [ ] DesignerPanel.svelte 9개 신규 도구 버튼
-- [ ] PlacementGhost 신규 부품 CSS 매핑
-- [ ] style.css에 v2 스타일 추가
-
-### Phase 6
-- [ ] ko.ts 9개 부품명 + 용어 추가
-- [ ] en.ts 9개 부품명 번역 추가
-
-### Phase 7
-- [ ] PROTOTYPE_UNLOCK_ALL_TOOLS = true로 테스트
-- [ ] 모든 시나리오 통과 확인
-- [ ] 레거시 호환성 확인
-- [ ] PROTOTYPE_UNLOCK_ALL_TOOLS = false 전환
-
----
-
-## 예상 총 소요: 8.5시간
-- Phase 3: 3시간 (핵심 엔진)
-- Phase 4: 1시간 (전투 시스템)
-- Phase 5: 2시간 (UI)
-- Phase 6: 30분 (i18n)
-- Phase 7: 2시간 (테스트)
+## 예상 소요: 5시간
