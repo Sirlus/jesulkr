@@ -16,11 +16,11 @@
 - [x] 7. `styles/07-modals.css` - 모달 (mapModal, keySettingsModal)
 - [x] 8. `styles/08-animations.css` - @keyframes 만
 - [x] 9. `styles/09-responsive.css` - @media queries only
-- [ ] 10. `style.css` - @import 통합 파일로 변경
+- [x] 10. `style.css` - @import 통합 파일로 변경
 
 ### Phase 2: 검증
 - [ ] 개발 서버 실행 확인
-- [ ] 빌드 확인
+- [x] 빌드 확인
 
 ## 참고
 - 기존 style.css 내용을 책임별로 区画하여 분리
