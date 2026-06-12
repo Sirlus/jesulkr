@@ -352,7 +352,7 @@ describe('getConnectedComponentsByColor — predicate behavior', () => {
     // Act
     const graph = buildColorConnectionGraph(components, new Set());
     const result = getConnectedComponentsByColor(
-      red, components, graph, 'red', x => x.type === ('red3' as Component['type']),
+      red, components, graph, 'red', () => false,
     );
 
     // Assert
