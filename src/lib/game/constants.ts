@@ -23,6 +23,59 @@ export const STORAGE_KEY_UNLOCKS = 'magic_design_game_map_unlocks_star_v2';
 export const STORAGE_KEY_RECORDS_OLD = 'magic_design_game_map_records_v1';
 export const STORAGE_KEY_UNLOCKS_LEGACY = 'magic_design_game_map_unlocks_v1';
 
+// ── v2 Green/Stability Constants ──────────────────────────────
+/** 프로토타입: 모든 도구 강제 해금 */
+export const PROTOTYPE_UNLOCK_ALL_TOOLS = false;
+
+/** 녹색 마나 관련 */
+export const GREEN_MANA = {
+  /** greenMana가 mixed2 접촉 시 추가로 소모하는 마나 */
+  COST_PER_ACTIVE: 2,
+  /** 활성화 시 제공하는 초록 마나 */
+  MANA_PROVIDED: 1,
+} as const;
+
+/** 안정도 관련 */
+export const STABILITY = {
+  /** 안정기 1개가 제공하는 안정도 */
+  PER_STABILIZER: 1,
+  /** 안정기 영향 범위 (쉐비셰프 거리) */
+  RANGE: 1,
+  /** 안정기 활성에 필요한 파란 마나 연결 수 */
+  BLUE_REQUIRED: 1,
+} as const;
+
+/** 중형 허브 관련 */
+export const MEDIUM_HUB = {
+  /** 활성에 필요한 안정도 */
+  STABILITY_REQUIRED: 1,
+} as const;
+
+/** 중형 도선 관련 */
+export const MEDIUM_WIRE = {
+  /** 전달되는 색상 */
+  COLORS: ['red', 'blue', 'green'] as const,
+} as const;
+
+/** 소형 도선 관련 */
+export const SMALL_WIRE = {
+  /** 전달되는 색상 (초록 제외) */
+  COLORS: ['red', 'blue'] as const,
+} as const;
+
+/** 추출기 관련 */
+export const EXTRACTOR = {
+  /** 색상 순환 순서 */
+  COLOR_CYCLE: ['red', 'blue', 'green'] as const,
+  /** 회전 → 출력 방향 (우/하/좌/상) */
+  DIRECTION_MAP: [
+    { dx: 1, dy: 0 }, // 0: 우
+    { dx: 0, dy: 1 }, // 1: 하
+    { dx: -1, dy: 0 }, // 2: 좌
+    { dx: 0, dy: -1 }, // 3: 상
+  ] as const,
+} as const;
+
 // ── Game Balance ──────────────────────────────────────────────
 export const TICK_SEC = 1 / 20;
 export const HIT_DELAY_TICKS = 4;

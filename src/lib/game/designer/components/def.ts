@@ -12,7 +12,9 @@ export type ComponentRole =
   | 'generator' // 마나 생성기 (파란)
   | 'wire' // 도선 (연결만)
   | 'circuit' // 회로 (데미지 발생)
-  | 'tool'; // 도구 (지우개 등, 설계판에 저장되지 않음)
+  | 'tool' // 도구 (지우개 등, 설계판에 저장되지 않음)
+  | 'extractor' // v2: 추출기
+  | 'stabilizer'; // v2: 안정기
 
 /** 회로 데미지 계산에 전달되는 컨텍스트 */
 export interface CalcContext {
@@ -20,6 +22,10 @@ export interface CalcContext {
   red: number;
   /** 이 회로에 연결된 활성 파란 마나 개수 */
   blue: number;
+  /** v2: 이 회로에 연결된 초록 마나 개수 */
+  green: number;
+  /** v2: 이 회로 위치의 안정도 */
+  stability: number;
   /** 계산 대상 부품 */
   component: Component;
   /** 설계판의 전체 부품 목록 */
@@ -30,6 +36,10 @@ export interface CalcContext {
   connectedTo: (target: Component, predicate: (c: Component) => boolean) => number;
   /** 해당 id 의 파란 마나 생성기가 활성 상태인지 */
   isActiveBlue: (id: number) => boolean;
+  /** v2: 해당 id 의 안정기가 활성 상태인지 */
+  isActiveStabilizer: (id: number) => boolean;
+  /** v2: 해당 id 의 중형 허브가 활성 상태인지 */
+  isActiveHub: (id: number) => boolean;
 }
 
 /** 회로 데미지 계산 결과 */
@@ -38,6 +48,8 @@ export interface CalcResult {
   damage: number;
   /** 특수(분산/AOE) 데미지 */
   aoe?: number;
+  /** v2: 전체 데미지 (모든 몬스터 적용) */
+  globalDamage?: number;
   /** breakdown 에 표시할 상세 설명 */
   detail: string;
 }

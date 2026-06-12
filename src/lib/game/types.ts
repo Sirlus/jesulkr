@@ -16,7 +16,16 @@ export type ComponentType =
   | 'red' | 'blueGen' | 'wire'
   | 'circle' | 'oval' | 'kernel'
   | 'mixed2' | 'mixedCore'
-  | 'eraser';
+  | 'eraser'
+  // v2 신규 9개
+  | 'red3'
+  | 'mediumWire' | 'mediumHub'
+  | 'extractor' | 'stabilizer'
+  | 'greenMana' | 'green3x2' | 'greenPair2'
+  | 'ultimateCore';
+
+/** 추출기 색상 (v2) */
+export type ExtractorColor = 'red' | 'blue' | 'green';
 
 /** 설계도 위 부품 하나 */
 export interface Component {
@@ -27,6 +36,7 @@ export interface Component {
   w: number;
   h: number;
   rotation: number;
+  color?: ExtractorColor; // v2: 추출기 색상
 }
 
 /** 맵 정보 */
@@ -55,6 +65,7 @@ export interface SpellData {
   manaCost: number;
   damage: number;
   aoeDamage: number;
+  globalDamage: number; // v2: 전체 데미지
   breakdown: string[];
 }
 
@@ -64,10 +75,17 @@ export interface SpellStats {
   seconds: number;
   manaCost: number;
   redCount: number;
+  redManaCost: number; // v2: 빨강 마나 총 비용
+  greenCount: number; // v2: 활성화된 greenMana 수
+  greenManaCost: number; // v2: 초록 마나 총 비용
   activeBlueCount: number;
   inactiveBlueCount: number;
+  activeStabilizerCount: number; // v2
+  activeHubCount: number; // v2
+  maxStability: number; // v2
   damage: number;
   aoeDamage: number;
+  globalDamage: number; // v2: 전체 데미지
   breakdown: string[];
   valid: boolean;
 }
@@ -172,6 +190,13 @@ export interface WireGroup {
   ids: Set<number>;
   cells: Set<string>;
   components: Set<number>;
+}
+
+/** 색상별 도선망 그래프 (v2) */
+export interface ColorConnectionGraph {
+  red: ConnectionGraph;
+  blue: ConnectionGraph;
+  green: ConnectionGraph;
 }
 
 /** 도구 설명 */
