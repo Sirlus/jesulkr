@@ -1,12 +1,15 @@
 <script lang="ts">
   import { game } from '$lib/stores/game';
   import * as Storage from '$lib/game/core/Storage';
+  import { lang as langState } from '$lib/game/i18n/language.svelte';
 
   let langLoaded = $state(typeof window !== 'undefined' ? Storage.loadLanguage() : null);
 
   function onSelectLang(lang: 'ko' | 'en') {
     langLoaded = lang;
     game.setLanguage(lang);
+    // 튜토리얼 등 후속 UI가 언어 선택 완료를 감지할 수 있도록 플래그를 켭니다
+    langState.selected = true;
   }
 </script>
 

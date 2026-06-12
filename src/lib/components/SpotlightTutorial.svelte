@@ -15,6 +15,7 @@
   import { gameState } from '$lib/stores/gameState.svelte';
   import * as Storage from '$lib/game/core/Storage';
   import { t } from '$lib/game/i18n';
+  import { lang as langState } from '$lib/game/i18n/language.svelte';
 
   // ── 단계 정의 ────────────────────────────────────────────────
   // targetIds: 하이라이트할 요소 id 배열 (복수 지원, 빈 배열 = 오버레이만)
@@ -158,12 +159,17 @@
   }
 
   // ── 생명주기 ─────────────────────────────────────────────────
-  onMount(() => {
-    if (!Storage.loadTutorialSeen()) {
-      active = true;
-      tick().then(() => updateSpotlight());
-    }
+  // 언어 선택이 끝나기 전에는 튜토리얼을 시작하지 않습니다.
+  // (LanguageModal이 langState.selected를 true로 만드는 순간 활성화)
+  $effect(() => {
+    if (active) return;
+    if (Storage.loadTutorialSeen()) return;
+    if (!langState.selected) return;
+    active = true;
+    tick().then(() => updateSpotlight());
+  });
 
+  onMount(() => {
     // step 1: 빨간 마나 버튼 클릭 감지
     function onToolBarClick(e: MouseEvent) {
       if (!active || step !== 0) return;
