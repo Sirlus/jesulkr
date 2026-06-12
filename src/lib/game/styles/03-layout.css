@@ -1,0 +1,88 @@
+/* ================================================
+   Layout - 레이아웃 및 패널
+   ================================================ */
+
+/* 메인 레이아웃 */
+.layout {
+	display: grid;
+	grid-template-columns: minmax(640px, 960px) minmax(360px, 520px);
+	gap: 12px;
+	align-items: start;
+	justify-content: center;
+	max-width: 1510px;
+	margin: 0 auto;
+}
+
+/* 패널 */
+.panel {
+	border: 1px solid #28456f;
+	background: linear-gradient(180deg, rgba(15, 29, 50, 0.96), rgba(6, 13, 25, 0.96));
+	border-radius: 18px;
+	padding: 12px;
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
+}
+
+.panelTitle {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	font-weight: 850;
+	margin-bottom: 10px;
+}
+
+.panelTitle em {
+	font-style: normal;
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 500;
+}
+
+/* HUD */
+.hud {
+	display: none;
+	grid-template-columns: 1.4fr repeat(6, auto);
+	gap: 10px;
+	align-items: center;
+	padding: 12px;
+	border: 1px solid #28456f;
+	border-radius: 18px;
+	background: linear-gradient(180deg, rgba(18, 34, 57, 0.96), rgba(6, 13, 25, 0.96));
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26);
+	margin-bottom: 12px;
+}
+
+.title {
+	font-weight: 900;
+	font-size: 24px;
+	letter-spacing: -0.5px;
+}
+
+.title span {
+	color: var(--blue);
+}
+
+.hudItem {
+	padding: 8px 10px;
+	border: 1px solid #213b60;
+	border-radius: 12px;
+	background: rgba(3, 8, 17, 0.55);
+	white-space: nowrap;
+}
+
+.hudItem b {
+	color: var(--gold);
+}
+
+/* 모드 전환 */
+body.mode-design .layout {
+	display: none;
+}
+
+body.mode-design .designerPanel {
+	display: block;
+}
+
+body.mode-play .designerPanel {
+	display: none;
+}

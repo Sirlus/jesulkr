@@ -1,0 +1,103 @@
+/* ================================================
+   Animations - 키프레임 애니메이션
+   ================================================ */
+
+/* 흔들림 */
+.invalidShake {
+	animation: shake 0.28s;
+}
+
+@keyframes shake {
+	0%,
+	100% {
+		transform: translateX(0);
+	}
+	25% {
+		transform: translateX(-5px);
+	}
+	50% {
+		transform: translateX(5px);
+	}
+	75% {
+		transform: translateX(-3px);
+	}
+}
+
+/* ================================================
+   Tutorial / Spotlight - 튜토리얼特效
+   ================================================ */
+
+/* 전체 어두운 배경 — pointer-events:none 이라 클릭은 spotlight 요소로 통과 */
+.tutSpotlightOverlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(2, 6, 18, 0.72);
+	z-index: 200;
+	pointer-events: none;
+}
+
+/* 하이라이트 대상 요소: 스포트라이트 효과 */
+/* box-shadow 로 요소 주위를 어둡게, 요소 자체는 밝게 + outline으로 강조 */
+.tut-spotlight {
+	position: relative;
+	z-index: 201 !important;
+	box-shadow:
+		0 0 0 6px rgba(112, 255, 192, 0.55),
+		0 0 0 9999px rgba(2, 6, 18, 0.72) !important;
+	border-radius: inherit;
+	pointer-events: auto !important;
+}
+
+/* 말풍선 */
+.tutTooltip {
+	position: fixed;
+	z-index: 202;
+	width: 300px;
+	background: linear-gradient(180deg, rgba(17, 35, 60, 0.99), rgba(5, 10, 22, 0.99));
+	border: 1px solid #3a6aaa;
+	border-radius: 16px;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+	padding: 14px 16px 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	pointer-events: auto;
+}
+
+.tutTooltipBody {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.tutTooltipStep {
+	color: var(--muted);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+}
+
+.tutTooltipMsg {
+	margin: 0;
+	color: #e8f4ff;
+	font-size: 14px;
+	line-height: 1.65;
+}
+
+.tutTooltipFoot {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.tutSkipBtn {
+	padding: 4px 10px;
+	font-size: 12px;
+	color: var(--muted);
+	border-color: #27456e;
+	background: transparent;
+	min-height: auto;
+}
+
+.tutSkipBtn:hover {
+	color: var(--text);
+}

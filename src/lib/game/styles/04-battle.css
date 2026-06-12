@@ -1,0 +1,340 @@
+/* ================================================
+   Battle - 전투 UI
+   ================================================ */
+
+/* 전투 캔버스 */
+#battleCanvas {
+	width: 100%;
+	height: auto;
+	display: block;
+	background: linear-gradient(180deg, rgba(9, 21, 39, 0.94), rgba(3, 8, 16, 0.96));
+	border: 1px solid #31507c;
+	border-radius: 16px;
+}
+
+/* 전투 상단 HUD */
+.battleTopHud {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.battleTopHud div {
+	border: 1px solid #2a4c7a;
+	border-radius: 12px;
+	background: rgba(3, 8, 17, 0.72);
+	padding: 8px 10px;
+	color: var(--muted);
+	font-size: 13px;
+}
+
+.battleTopHud b {
+	display: block;
+	color: var(--gold);
+	font-size: 22px;
+	line-height: 1.15;
+	margin-top: 2px;
+}
+
+/* 전투 버튼 */
+.battleButtons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 10px;
+}
+
+/* 슬롯 */
+.slots {
+	display: grid;
+	gap: 8px;
+}
+
+.slot {
+	position: relative;
+	overflow: hidden;
+	border: 1px solid #2b4f7d;
+	border-radius: 14px;
+	padding: 10px 12px;
+	min-height: 78px;
+	background: linear-gradient(135deg, rgba(17, 35, 60, 0.9), rgba(6, 13, 25, 0.9));
+}
+
+.slot.empty {
+	opacity: 0.75;
+	background: linear-gradient(135deg, rgba(11, 17, 29, 0.9), rgba(4, 7, 13, 0.9));
+	border-style: dashed;
+}
+
+/* 슬롯 헤더 */
+.slotHead {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+/* 키 뱃지 */
+.keyBadge {
+	width: 30px;
+	height: 30px;
+	border-radius: 10px;
+	display: grid;
+	place-items: center;
+	background: #102947;
+	border: 1px solid var(--blue);
+	color: #c7e3ff;
+	font-weight: 900;
+	flex: 0 0 auto;
+	font-size: 12px;
+	text-align: center;
+	line-height: 1;
+}
+
+/* 슬롯 이름 */
+.slotName {
+	font-weight: 850;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	max-width: 100%;
+	font-size: 20px;
+}
+
+/* 슬롯 스탯 */
+.slotStats {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 6px;
+	font-size: 12px;
+	color: var(--muted);
+	margin-bottom: 0;
+}
+
+.slotStats b {
+	display: block;
+	color: var(--text);
+	font-size: 24px;
+	line-height: 1.05;
+}
+
+.slotStats b.specialValue {
+	font-size: 17px;
+	white-space: nowrap;
+}
+
+/* 쿨다운 */
+.cooldown {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	height: 4px;
+	width: 0%;
+	background: linear-gradient(90deg, var(--red), var(--blue));
+	transition: width 0.08s linear;
+}
+
+/* 슬롯 모드 */
+.slotModeRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-top: 8px;
+	color: var(--muted);
+	font-size: 12px;
+}
+
+/* 자동 예약 */
+.autoReserveControl {
+	display: grid;
+	grid-template-columns: auto 132px;
+	gap: 10px;
+	align-items: center;
+	border: 1px solid #25456f;
+	border-radius: 14px;
+	background: rgba(3, 8, 17, 0.42);
+	padding: 10px 12px;
+	margin: 8px 0 10px;
+	color: #c9dcf6;
+	font-size: 13px;
+}
+
+.autoReserveControl b {
+	color: #fff;
+	font-size: 18px;
+	letter-spacing: -0.3px;
+}
+
+.autoReserveControl input {
+	width: 132px;
+	padding: 8px 10px;
+	text-align: center;
+	font-size: 28px;
+	font-weight: 900;
+	line-height: 1.05;
+	appearance: textfield;
+	-moz-appearance: textfield;
+}
+
+.autoReserveControl input::-webkit-outer-spin-button,
+.autoReserveControl input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.autoReserveControl span {
+	grid-column: 1/3;
+	color: var(--muted);
+	line-height: 1.35;
+	font-size: 13px;
+}
+
+/* 자동 스위치 */
+.autoSwitch {
+	position: relative;
+	min-width: 74px;
+	border-radius: 999px;
+	padding: 5px 9px 5px 30px;
+	border-color: #385f91;
+	background: rgba(6, 13, 25, 0.75);
+	font-size: 12px;
+	font-weight: 900;
+	color: #cfe2fb;
+	box-shadow: none;
+}
+
+.autoSwitch::before {
+	content: '';
+	position: absolute;
+	left: 7px;
+	top: 50%;
+	width: 15px;
+	height: 15px;
+	border-radius: 50%;
+	transform: translateY(-50%);
+	background: #6f809d;
+	box-shadow: 0 0 8px rgba(111, 128, 157, 0.35);
+	transition:
+		0.16s left,
+		0.16s background,
+		0.16s box-shadow;
+}
+
+.autoSwitch.on {
+	border-color: #36b77e;
+	background: rgba(112, 255, 192, 0.13);
+	color: #d8ffef;
+	padding-left: 9px;
+	padding-right: 30px;
+}
+
+.autoSwitch.on::before {
+	left: calc(100% - 22px);
+	background: var(--good);
+	box-shadow: 0 0 10px rgba(112, 255, 192, 0.7);
+}
+
+.autoSwitch:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+/* 수동 전용 뱃지 */
+.manualOnlyBadge {
+	border: 1px solid #42577c;
+	border-radius: 999px;
+	padding: 5px 9px;
+	color: #c9dcf6;
+	background: rgba(5, 12, 24, 0.62);
+	font-weight: 800;
+	white-space: nowrap;
+}
+
+/* 속도 조절 */
+.speedControls {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-left: 0;
+	border: 1px solid #27456e;
+	border-radius: 12px;
+	background: rgba(3, 8, 17, 0.45);
+	padding: 5px 6px;
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.speedControls span {
+	padding: 0 4px;
+	white-space: nowrap;
+}
+
+.speedBtn {
+	padding: 6px 9px;
+	border-radius: 9px;
+	font-weight: 850;
+	min-width: 34px;
+	text-align: center;
+}
+
+.speedBtn.active {
+	border-color: var(--gold);
+	background: rgba(255, 215, 109, 0.16);
+	color: var(--gold);
+	box-shadow: 0 0 12px rgba(255, 215, 109, 0.12);
+}
+
+/* 전투 사이드 컨트롤 */
+.sideBattleControls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 0 12px 0;
+	padding: 8px;
+	border: 1px solid #27456e;
+	border-radius: 14px;
+	background: rgba(3, 8, 17, 0.52);
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	backdrop-filter: blur(3px);
+}
+
+.sideBattleControls > button {
+	font-weight: 850;
+	white-space: nowrap;
+}
+
+.sideSpeedControls {
+	margin-left: 0;
+	flex: 1;
+	justify-content: flex-start;
+}
+
+.sideSpeedControls .speedBtn {
+	min-width: 38px;
+	padding: 7px 10px;
+}
+
+/* 매나 보너스 토글 */
+.manaBonusToggle {
+	min-height: 44px;
+	font-weight: 900;
+	border-color: #7b6222;
+	background: rgba(255, 214, 107, 0.1);
+	color: #ffe59a;
+	white-space: nowrap;
+}
+
+.manaBonusToggle.off {
+	border-color: #38506f;
+	background: rgba(5, 12, 24, 0.55);
+	color: #a9bad5;
+}
+
+.slotPanel .sideBattleControls {
+	margin-bottom: 10px;
+}
