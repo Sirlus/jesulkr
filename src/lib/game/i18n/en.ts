@@ -157,7 +157,7 @@ const en: Record<string, string> = {
 
   // ── Tutorial & Hints ────────────────────────────────────
   'hint.empty.board.title': 'Build Your First Spell',
-  'hint.empty.board.body': '① Select Red Mana\n② Click the board\n③ Place a 1-cell Circuit next to it\n④ Click [Save to Slot] on the right',
+  'hint.empty.board.body': '① Select Red Mana → ② Click board → ③ Place 1-cell Circuit next to it → ④ [Save to Slot]',
 
   // ── Tutorial ───────────────────────────────────────────────
   'tut.skip': 'Skip',

@@ -203,17 +203,15 @@ function onBoardMouseDown(e: MouseEvent) {
           {/each}
 
           <PlacementGhost />
-
-          {#if gameState.designer.components.length === 0}
-            <div class="emptyBoardHint" aria-hidden="true">
-              <div class="emptyBoardHintInner">
-                <b>{t('hint.empty.board.title')}</b>
-                {t('hint.empty.board.body')}
-              </div>
-            </div>
-          {/if}
         </div>
       </div>
+
+      {#if !gameState.tutorialSeen && gameState.designer.components.length === 0}
+        <div class="emptyBoardHint" aria-hidden="true">
+          <b>{t('hint.empty.board.title')}</b>
+          {t('hint.empty.board.body')}
+        </div>
+      {/if}
     </div>
 
     <div class="sideControls">

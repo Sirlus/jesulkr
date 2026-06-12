@@ -157,7 +157,7 @@ const ko: Record<string, string> = {
 
   // ── 튜토리얼 & 힌트 ─────────────────────────────────────
   'hint.empty.board.title': '첫 술식 만들기',
-  'hint.empty.board.body': '① 빨간 점 마나 선택\n② 설계판 클릭\n③ 바로 옆에 1칸 회로 배치\n④ 우측 [슬롯에 저장] 클릭',
+  'hint.empty.board.body': '① 빨간 점 마나 선택 → ② 설계판 클릭 → ③ 옆에 1칸 회로 배치 → ④ [슬롯에 저장]',
 
   'tut.skip': '건너뛰기',
   'tut.prev': '이전',
