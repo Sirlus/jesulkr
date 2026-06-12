@@ -1,6 +1,8 @@
 # Phase 4: 전투 시스템 반영
 
-> **현재 상태**: `BattleEngine.ts`에서 직접 데미지 처리, `DamageResolver.ts`는 테스트/미래용, `CastingSystem.ts`는 green/stability 체크 없음
+> **상태**: ✅ **완료** (2026-06-12)
+>
+> **구현**: `BattleEngine.ts`가 `DamageResolver.resolveCast`로 데미지 해결을 위임하고, [`DamageResolver.ts:60`](src/lib/game/battle/DamageResolver.ts:60)에 globalDamage 처리, [`CastingSystem.ts:73`](src/lib/game/battle/CastingSystem.ts:73)에 레거시 호환용 기본값 처리 추가
 
 ## 변경 파일
 
@@ -115,9 +117,9 @@
 
 ## 완료 조건
 
-- [ ] `BattleEngine.ts`: `globalDamage` 처리 추가
-- [ ] `DamageResolver.ts`: `globalDamage` 지원
-- [ ] `CastingSystem.ts`: `globalDamage` 기본값 처리
-- [ ] `npm run test` 통과
+- [x] `BattleEngine.ts`: `globalDamage` 처리 추가 — 데미지 해결을 `DamageResolver.resolveCast`로 위임
+- [x] `DamageResolver.ts`: `globalDamage` 지원 — [`DamageResolver.ts:60`](src/lib/game/battle/DamageResolver.ts:60)
+- [x] `CastingSystem.ts`: `globalDamage` 기본값 처리 — [`CastingSystem.ts:73`](src/lib/game/battle/CastingSystem.ts:73)
+- [x] `npm run test` 통과 — 12 test files / 141 tests ✓
 
 ## 예상 소요: 1시간

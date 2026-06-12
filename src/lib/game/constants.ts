@@ -24,8 +24,8 @@ export const STORAGE_KEY_RECORDS_OLD = 'magic_design_game_map_records_v1';
 export const STORAGE_KEY_UNLOCKS_LEGACY = 'magic_design_game_map_unlocks_v1';
 
 // ── v2 Green/Stability Constants ──────────────────────────────
-/** 프로토타입: 모든 도구 강제 해금 */
-export const PROTOTYPE_UNLOCK_ALL_TOOLS = false;
+// TODO: 프로토타입/개발자 모드용 모든 도구 강제 해금 기능 (아직 미연결)
+// export const PROTOTYPE_UNLOCK_ALL_TOOLS = false;
 
 /** 녹색 마나 관련 */
 export const GREEN_MANA = {
@@ -62,6 +62,27 @@ export const SMALL_WIRE = {
   /** 전달되는 색상 (초록 제외) */
   COLORS: ['red', 'blue'] as const,
 } as const;
+
+/** 와이어 유형인지 확인 (wire/mediumWire/mediumHub) */
+export function isWireType(type: string): boolean {
+  return type === 'wire' || type === 'mediumWire' || type === 'mediumHub';
+}
+
+/**
+ * 주어진 와이어 유형이 전달할 수 있는 색상 배열 반환
+ * - wire: red, blue만 (초록 미포함)
+ * - mediumWire: red, blue, green 모두
+ * - mediumHub: red, blue, green 모두
+ */
+export function getWireColors(type: string): readonly ('red' | 'blue' | 'green')[] {
+  if (type === 'wire') {
+    return SMALL_WIRE.COLORS;
+  }
+  if (type === 'mediumWire' || type === 'mediumHub') {
+    return MEDIUM_WIRE.COLORS;
+  }
+  return [];
+}
 
 /** 추출기 관련 */
 export const EXTRACTOR = {

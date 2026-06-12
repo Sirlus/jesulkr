@@ -1,6 +1,9 @@
 # Phase 5: UI 반영
 
-> **현재 상태**: `TOOL_ORDER`가 `registry.ts`에서 자동 파생되므로 툴 버튼은 자동 생성됨. 추출기 색상 상태 및 v2 스타일은 미구현.
+> **상태**: ✅ **완료** (2026-06-12, [`TODO.md`](TODO.md:57) 갱신분 참조)
+>
+> **구현 요약**: `TOOL_ORDER`가 `registry.ts`에서 자동 파생되어 18개 툴 버튼 생성. 추출기 색상 순환 UX, 색상별 툴 아이콘·피스 스타일링, PlacementGhost 색상 전달, 신규 부품 v2 스타일 모두 적용.
+> **변경점**: v2 부품 스타일은 원래 계획의 `style.css`가 아닌 각 컴포넌트 정의 파일의 `style:` 필드(인라인 CSS)로 이전 — 레지스트리가 수집해 한 번에 주입
 
 ## 변경 파일
 
@@ -175,11 +178,11 @@
 
 ## 완료 조건
 
-- [ ] `Store.svelte.ts`에 `extractorColor` 상태 추가
-- [ ] `game.ts`에 추출기 색상 순환 메서드 추가
-- [ ] `DesignerPanel.svelte`: 추출기 색상 순환 UX, 스탯 패널 확장
-- [ ] `PlacementGhost.svelte`: 추출기 색상 전달
-- [ ] CSS에 v2 부품 스타일 추가
-- [ ] `npm run check` 통과
+- [x] `Store.svelte.ts`에 `extractorColor` 상태 추가 — [`Store.svelte.ts:27`](src/lib/game/core/Store.svelte.ts:27) (default 'red')
+- [x] `game.ts`에 추출기 색상 순환 메서드 추가 — [`game.ts:76`](src/lib/stores/game.ts:76) (위임: `DesignerController.cycleExtractorColor`)
+- [x] `DesignerPanel.svelte`: 추출기 색상 순환 UX, 스탯 패널 확장 — 휠 + 툴 재클릭 모두 지원, `extractor-red/blue/green` 클래스
+- [x] `PlacementGhost.svelte`: 추출기 색상 전달 — [`PlacementGhost.svelte:13`](src/lib/components/PlacementGhost.svelte:13)
+- [x] CSS에 v2 부품 스타일 추가 — **구현 위치 변경**: `style.css` 단일 파일 → 각 컴포넌트 정의의 `style:` 필드 (예: [`extractor.ts:15`](src/lib/game/designer/components/extractor.ts:15), [`red3.ts:15`](src/lib/game/designer/components/red3.ts:15)). 레지스트리에서 수집해 주입
+- [x] `npm run check` 통과 — 0 errors / 0 warnings
 
 ## 예상 소요: 3시간

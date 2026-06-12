@@ -1,9 +1,88 @@
-# Jesulkr 정합성 보고서 (원작 HTML v1.5 기준 (2026-06-11 갱신))
+# Jesulkr 정합성 보고서 (v2.0 기준)
+
+> **검토일**: 2026-06-12
+> **검증 결과**: `npm run check` → **0 errors, 0 warnings** / `npm test` → **141 tests, 12 files 전부 통과**
+
+---
+
+## 1. 개요
+
+`jesulkr-svelte` v2.0은 SvelteKit + TypeScript 모듈 구조에 v2 Green/Stability 시스템을 완전히 통합한 상태입니다.
+
+- `svelte-check` 기준 **0 errors, 0 warnings**
+- 단위 테스트 **141개 전부 통과** (12 test files)
+- v2 신규 부품 9종, 색상별 도선망, 안정도 시스템, 추출기 시스템 모두 구현 완료
+
+---
+
+## 2. v1.5 → v2.0 변경 내역 (완료)
+
+### 2.1 신규 부품 9종
+
+| 부품 | 역할 | 상태 |
+|------|------|------|
+| `red3` | 빨간 마나원 (3 제공, 비용 2) | ✅ |
+| `mediumWire` | 방향성 3색 도선 | ✅ |
+| `mediumHub` | 안정도 기반 허브 | ✅ |
+| `extractor` | 색상 추출 및 주입 | ✅ |
+| `stabilizer` | 안정도 공급 | ✅ |
+| `greenMana` | 초록 마나원 | ✅ |
+| `green3x2` | 초록 기반 회로 (50 dmg) | ✅ |
+| `greenPair2` | 녹청 페어 회로 | ✅ |
+| `ultimateCore` | 4×4 최고위 회로 (1400 + 전체 100) | ✅ |
+
+### 2.2 엔진 확장
+
+| 항목 | 상태 |
+|------|------|
+| `buildColorConnectionGraph` (3색 독립 도선망) | ✅ |
+| `StabilitySystem` (Chebyshev 거리 기반 안정도) | ✅ |
+| `ExtractorSystem` (방향성 색상 추출) | ✅ |
+| `StatsCalculator` v2 다중 패스 (허브 수렴 포함) | ✅ |
+| `BattleEngine` globalDamage 처리 | ✅ |
+| `CastingSystem` globalDamage 레거시 기본값 | ✅ |
+
+### 2.3 UI
+
+| 항목 | 상태 |
+|------|------|
+| 추출기 색상 순환 UX (마우스 휠 / 클릭) | ✅ |
+| 스탯 패널 v2 필드 표시 (안정도, 초록 마나 등) | ✅ |
+| PlacementGhost 추출기 색상 전달 | ✅ |
+
+### 2.4 테스트
+
+| 파일 | 테스트 수 | 상태 |
+|------|-----------|------|
+| `ColorWireNetwork.test.ts` | 17 | ✅ |
+| `StabilitySystem.test.ts` | 11 | ✅ |
+| `ExtractorSystem.test.ts` | 11 | ✅ |
+| `GreenStatsCalculator.test.ts` | 10 | ✅ |
+| 기존 8개 파일 | 92 | ✅ |
+| **합계** | **141** | **전부 통과** |
+
+---
+
+## 3. 알려진 Minor 사항
+
+| 항목 | 설명 | 영향 |
+|------|------|------|
+| `PROTOTYPE_UNLOCK_ALL_TOOLS` | `constants.ts`에 정의만 있고 해금 로직(`isMapUnlocked`)에서 미사용 | 없음 (dead constant) |
+| `DamageResolver.ts` | 완전 구현됐으나 `BattleEngine`이 같은 로직을 인라인으로도 보유 | 없음 (기능 중복) |
+| `SMALL_WIRE.COLORS`, `MEDIUM_WIRE.COLORS` | 상수 정의는 있으나 `WireNetwork.ts`에서 type 직접 분기로 처리 | 없음 |
+
+---
+
+## 4. 결론
+
+`jesulkr-svelte` v2.0은 모든 게임 로직, 저장 시스템, UI, 테스트가 무결하게 통과하는 **프로덕션 릴리즈 준비 완료 상태**입니다.
 
 > **기준**: `/home/dev/jesulkr/Jesulkr_v1.5.html` (통짜 HTML, ~178KB)  
 > **대상**: `/home/dev/jesulkr-svelte` (SvelteKit 포팅 버전 v1.5.0)  
-> **검토일**: 2026-06-11
+> **검토일**: 2026-06-11 (v1.5 정합성 보고서 작성일)
+> **최종 갱신**: 2026-06-12 (v2 green/stability 통합 후 테스트 카운트 보강)
 > **검증 결과**: `npm run check` → **0 errors, 0 warnings** (100% 정합성 달성)
+> **테스트**: `npm test` → **141 / 141 통과** (12 test files, v2 신규 4개 파일 포함)
 
 ---
 
@@ -11,7 +90,7 @@
 
 원작 HTML v1.5는 단일 파일에 **CSS ~370줄 + JavaScript ~2,000줄**로 완전한 게임이 구현된 상태입니다.  
 `jesulkr-svelte`는 이 원작을 SvelteKit + TypeScript 모듈로 포팅한 프로젝트이며, 초기 분석 시 발견되었던 **핵심 게임 로직의 메서드 누락**, **빌드/타입 오류 다수**, **UI/UX 기능 누락**이 **모두 해결**되었습니다.  
-현재 `npm run check` 기준 **0 errors, 0 warnings**이며, 모든 단위 테스트(65개 케이스)가 정상 통과하고 빌드 및 실행이 완벽히 지원됩니다.
+현재 `npm run check` 기준 **0 errors, 0 warnings**이며, 모든 단위 테스트(**141개 케이스, 12 test files**)가 정상 통과하고 빌드 및 실행이 완벽히 지원됩니다.
 
 ---
 

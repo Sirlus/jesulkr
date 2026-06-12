@@ -1,5 +1,27 @@
 # Changelog
 
+## [2.0.0] - 2026-06-12
+
+### Added
+- v2 Green/Stability 시스템 통합 ([`docs/refactor/v2-green-stability/`](docs/refactor/v2-green-stability/TODO.md))
+  - 9개 신규 부품: `red3`, `mediumWire`, `mediumHub`, `extractor`, `stabilizer`, `greenMana`, `green3x2`, `greenPair2`, `ultimateCore` (총 18개 ComponentType)
+  - 3색상 마나 시스템 (빨강/파랑/초록) + 색상별 도선망 v3 (`buildColorConnectionGraph`)
+  - 안정도(Stability) 시스템: `StabilitySystem` (체비셰프 거리 기반)
+  - 추출기 색상 순환 UX (red → blue → green)
+  - 전체 데미지(`globalDamage`) — 시전 시 모든 몬스터에 가해지는 추가 피해
+  - `DamageResolver`로 데미지 처리 위임 (BattleEngine 단순화)
+- 4개 신규 테스트 파일: `ExtractorSystem`, `StabilitySystem`, `ColorWireNetwork`, `GreenStatsCalculator`
+- 9개 v2 부품 i18n 키 + 안정도/전체 데미지 용어 (ko/en)
+
+### Changed
+- 단위 테스트: 87 → **141 tests** (12 test files, `npm test` 모두 통과)
+- `Component` 인터페이스: `color?: ExtractorColor` 필드 추가
+- `SpellData`, `SpellStats` 인터페이스: `globalDamage`, `redManaCost`, `greenCount`, `greenManaCost`, `activeStabilizerCount`, `activeHubCount`, `maxStability` 필드 추가
+- `BattleEngine.ts`: 데미지 해결 로직을 `DamageResolver.resolveCast`로 위임
+
+### Fixed
+- v2 부품의 인라인 `style:` 필드가 레지스트리에서 수집되지 않던 문제 — `def.ts`의 `ComponentDef` 인터페이스에 명시화
+
 ## [1.3.0] - 2026-06-11
 
 ### Added

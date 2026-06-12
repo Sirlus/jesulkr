@@ -1,5 +1,7 @@
 # Phase 2: 컴포넌트 정의 추가 (9개 신규)
 
+> **상태**: ✅ **완료** (2026-06-12)
+>
 > 목표: v2 신규 부품 9개 정의 파일 생성 + `registry.ts` 수정
 >
 > **중요**: 실제 `ComponentDef` 인터페이스(`def.ts`) 형식 준수. `role`, `size`, `requiredMap`, `order`, `calc` 필드 필수.
@@ -355,11 +357,11 @@ export const ALL_DEFS: ComponentDef[] = [
 
 ## ✅ 완료 조건
 
-- [ ] 9개 신규 컴포넌트 정의 파일 생성
-- [ ] `registry.ts`에 9개 등록
-- [ ] `red.ts`에 `getRedPower`/`getRedCost` 헬퍼 추가
-- [ ] `def.ts` `CalcResult`에 `globalDamage` 추가
-- [ ] `npm run check` 통과
-- [ ] 기존 컴포넌트 테스트 실패 없음
+- [x] 9개 신규 컴포넌트 정의 파일 생성 — `red3`, `mediumWire`, `mediumHub`, `extractor`, `stabilizer`, `greenMana`, `green3x2`, `greenPair2`, `ultimateCore`
+- [x] `registry.ts`에 9개 등록 — [`ALL_DEFS`](src/lib/game/designer/components/registry.ts) 18개 항목
+- [x] `red.ts`에 `getRedPower`/`getRedCost` 헬퍼 추가
+- [x] `def.ts` `CalcResult`에 `globalDamage` 추가
+- [x] `npm run check` 통과
+- [x] 기존 컴포넌트 테스트 실패 없음 — `Components.test.ts` 15 tests ✓
 
 ## 예상 소요: 2시간

@@ -3,6 +3,7 @@
 // ============================================================
 import type { Component, ConnectionGraph, WireGroup, ColorConnectionGraph } from '../types';
 import { componentAt } from './Components';
+import { isWireType, getWireColors } from '../constants';
 
 /** Get neighboring cell coordinates (4-dir) */
 export function neighborCells(x: number, y: number): [number, number][] {
@@ -135,15 +136,11 @@ type WireColor = 'red' | 'blue' | 'green';
 
 /**
  * Check if a component type can carry a given color.
- * - wire: red/blue only (not green)
- * - mediumWire: all colors
- * - mediumHub: all colors (active/inactive is checked by the caller)
+ * Uses constants from constants.ts (SMALL_WIRE.COLORS, MEDIUM_WIRE.COLORS)
  */
 function isWireForColor(type: string, color: WireColor): boolean {
-  if (type === 'wire') return color !== 'green';
-  if (type === 'mediumWire') return true;
-  if (type === 'mediumHub') return true;
-  return false;
+  const colors = getWireColors(type);
+  return colors.includes(color);
 }
 
 /**
@@ -200,11 +197,10 @@ export function buildColorConnectionGraph(
 ): ColorConnectionGraph {
   const createGraph = (color: WireColor): ConnectionGraph => {
     const wireMap = new Map<string, Component>();
-    const wireTypes = new Set(['wire', 'mediumWire', 'mediumHub']);
 
     // Store wires at their anchor position only (for neighbor lookup)
     for (const c of components) {
-      if (!wireTypes.has(c.type)) continue;
+      if (!isWireType(c.type)) continue;
       if (!isWireForColor(c.type, color)) continue;
       // For mediumHub, only include active hubs
       if (c.type === 'mediumHub' && !activeHubIds.has(c.id)) continue;
@@ -249,7 +245,7 @@ export function buildColorConnectionGraph(
         const [x, y] = key.split(',').map(Number);
         for (const [nx, ny] of neighborCells(x, y)) {
           const comp = componentAt(components, nx, ny);
-          if (comp && !wireTypes.has(comp.type)) {
+          if (comp && !isWireType(comp.type)) {
             group.components.add(comp.id);
             if (!compGroups.has(comp.id)) compGroups.set(comp.id, new Set());
             compGroups.get(comp.id)!.add(gi);

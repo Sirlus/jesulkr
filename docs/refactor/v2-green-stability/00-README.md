@@ -1,16 +1,18 @@
-# 🌿 V2 Green/Stability 시스템 리팩토링 계획 (업데이트됨)
+# 🌿 V2 Green/Stability 시스템 리팩토링 계획 (구현 완료)
 
 > Jesulkr_v2_beta.html의 Green Mana / Stability 프로토타입을 SvelteKit 아키텍처에 반영
 >
+> **상태**: ✅ **구현 완료** (2026-06-12 기준, [Phase 1~7 모두 완료](TODO.md))
+> **테스트**: `npm test` 141 / 141 통과, `npm run check` 0 errors / 0 warnings
 > **중요**: 기존 코드베이스(v1.5, 9개 부품) 기반, 하위 호환 유지
 
 ## 📋 개요
 
 v2 beta에서 추가된 **녹색 마나 시스템**, **안정도 시스템**, **색상별 도선망**을 기존 Svelte 구조에 통합하는 단계별 계획입니다.
 
-## ⚠️ 현재 코드베이스 상태
+## ⚠️ 초기 상태 (분석 시점 — v1.5, 2026-06-11 이전)
 
-| 파일 | 현재 상태 | 비고 |
+| 파일 | 초기 상태 | 비고 |
 |------|----------|------|
 | `types.ts` | 9개 `ComponentType` | `Component.id: number` |
 | `constants.ts` | v1 상수 | `TOOL_ORDER`, `TOOL_DESCRIPTIONS`가 `registry.ts`에서 파생 |
@@ -23,7 +25,22 @@ v2 beta에서 추가된 **녹색 마나 시스템**, **안정도 시스템**, **
 | `battle/CastingSystem.ts` | 마나/쿨타임/맵해금 체크 | stability 체크 없음 |
 | `i18n/ko.ts`, `i18n/en.ts` | 점 표기법 키 | v2 용어 누락 |
 
-**결론**: v2 기능은 미구현. 단계별 구현 필요.
+## ✅ 최종 상태 (구현 완료, 2026-06-12)
+
+| 파일 | 최종 상태 |
+|------|----------|
+| `types.ts` | 18개 `ComponentType` ([line 14-25](src/lib/game/types.ts:14)) |
+| `constants.ts` | v1 + v2 상수 ([`PROTOTYPE_UNLOCK_ALL_TOOLS`](src/lib/game/constants.ts:27) 주석 처리, [`GREEN_MANA`/`STABILITY`/`MEDIUM_HUB`/`MEDIUM_WIRE`/`SMALL_WIRE`/`EXTRACTOR`](src/lib/game/constants.ts) 정의) |
+| `designer/components/*.ts` | 18개 부품 정의 (9개 v2 신규) |
+| `designer/WireNetwork.ts` | [`buildColorConnectionGraph`](src/lib/game/designer/WireNetwork.ts) 추가, 기존 함수 하위 호환 유지 |
+| `designer/StabilitySystem.ts` | 신규 — [`isActiveStabilizer`/`stabilityAt`/`chebyshevDistance`](src/lib/game/designer/StabilitySystem.ts) |
+| `designer/ExtractorSystem.ts` | 신규 — [`cycleExtractorColor`/`extractorOutputTarget`/`extractorHasInputOfColor`](src/lib/game/designer/ExtractorSystem.ts) |
+| `designer/StatsCalculator.ts` | 다중 패스 계산 (blue → stabilizer → hub → green → extractor → circuit) |
+| `designer/Components.ts` | `createComponentFromGridCoord(tool, gx, gy, id, rotation, color?)` |
+| `battle/BattleEngine.ts` | 데미지 해결을 [`DamageResolver.resolveCast`](src/lib/game/battle/DamageResolver.ts:20) 에 위임 |
+| `battle/DamageResolver.ts` | normal + AOE + **globalDamage** (모든 몬스터) |
+| `battle/CastingSystem.ts` | [`globalDamage` 기본값 0 처리](src/lib/game/battle/CastingSystem.ts:73) (레거시 호환) |
+| `i18n/ko.ts`, `i18n/en.ts` | 9개 v2 부품명 + 안정도/전체 데미지/녹색마나 용어 추가 |
 
 ---
 
@@ -77,9 +94,9 @@ src/lib/game/
 │       └── registry.ts             [변경] 9개 신규 부품 등록
 │
 ├── battle/
-│   ├── BattleEngine.ts             [변경 없음] (globalDamage는 DamageResolver에서 처리)
-│   ├── DamageResolver.ts           [변경] globalDamage 지원
-│   └── CastingSystem.ts            [변경] invalid spell 거부, 안정도/녹색 요구사항 반영
+│   ├── BattleEngine.ts             [변경] 데미지 해결을 DamageResolver.resolveCast로 위임
+│   ├── DamageResolver.ts           [변경] normal + AOE + globalDamage 지원
+│   └── CastingSystem.ts            [변경] invalid spell 거부, globalDamage 기본값 0 (레거시)
 │
 ├── i18n/
 │   ├── ko.ts                       [변경] 9개 부품명 + 안정도/전체 용어
