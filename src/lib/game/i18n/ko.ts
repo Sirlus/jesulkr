@@ -33,8 +33,26 @@ const ko: Record<string, string> = {
   'oval': '2칸 타원',
   'kernel': '2x2 핵',
   'mixed2': '2칸 혼합',
-  'mixed.core': '9칸 혼합 핵',
+'mixed.core': '9칸 혼합핵',
   'eraser': '지우개',
+
+  // v2 신규 부품명
+  'red3': '3중 빨간 마나',
+  'medium.wire': '중형 도선',
+  'medium.hub': '중형 허브',
+  'extractor': '추출기',
+  'stabilizer': '안정기',
+  'green.mana': '초록 마나',
+  'green3x2': '3x2 순환 회로',
+  'green.pair2': '2x2 녹청 회로',
+  'ultimate.core': '4x4 안정 핵',
+
+  // v2 용어
+  'green.mana.term': '초록마나',
+  'stability': '안정도',
+  'global.damage': '전체 데미지',
+  'all.monsters': '모든 몬스터',
+  'small.wire': '소형 도선',
   'spell.name': '술식 이름',
   'unnamed.spell': '이름 없는 술식',
   'save.slot': '저장할 슬롯',

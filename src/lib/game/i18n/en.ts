@@ -33,8 +33,26 @@ const en: Record<string, string> = {
   'oval': '2-cell Oval',
   'kernel': '2x2 Core',
   'mixed2': '2-cell Hybrid',
-  'mixed.core': '9-cell Hybrid Core',
+'mixed.core': '9-cell Hybrid Core',
   'eraser': 'Eraser',
+
+  // v2 new component names
+  'red3': 'Triple Red Mana',
+  'medium.wire': 'Medium Wire',
+  'medium.hub': 'Medium Hub',
+  'extractor': 'Extractor',
+  'stabilizer': 'Stabilizer',
+  'green.mana': 'Green Mana',
+  'green3x2': '3x2 Cycle Circuit',
+  'green.pair2': '2x2 Green-Blue Circuit',
+  'ultimate.core': '4x4 Stability Core',
+
+  // v2 terms
+  'green.mana.term': 'Green Mana',
+  'stability': 'Stability',
+  'global.damage': 'Global Damage',
+  'all.monsters': 'All Monsters',
+  'small.wire': 'Small Wire',
   'spell.name': 'Spell Name',
   'unnamed.spell': 'Unnamed Spell',
   'save.slot': 'Save Slot',
