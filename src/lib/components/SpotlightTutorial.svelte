@@ -16,54 +16,57 @@
   import * as Storage from '$lib/game/core/Storage';
   import { t } from '$lib/game/i18n';
   import { lang as langState } from '$lib/game/i18n/language.svelte';
+  import { isMobileLayout } from '$lib/game/utils/mobile';
 
-  // ── 단계 정의 ────────────────────────────────────────────────
+// ── 단계 정의 ────────────────────────────────────────────────
   // targetIds: 하이라이트할 요소 id 배열 (복수 지원, 빈 배열 = 오버레이만)
   // msgKey: i18n 키
   // condition: 이 단계가 '완료'됐다고 판단하는 함수 (자동 진행)
   // noOverlay: true면 어두운 배경 없이 말풍선만 표시 (게임오버 단계)
-  const STEPS = [
+const STEPS = [
     {
-      targetIds: ['toolBar'],
+      // step 1: 빨간 점 마나 툴만 정확히 강조 (toolBar 전체 → 빨간 점 마나 셀렉터)
+      targetIds: ['.toolBtn[data-tool="red"]'],
       msgKey: 'tut2.step1',
       condition: () => redToolClicked,
     },
     {
-      targetIds: ['designBoard'],
+      targetIds: ['#designBoard'],
       msgKey: 'tut2.step2',
       condition: () => gameState.designer.components.length >= 1,
     },
     {
-      targetIds: ['toolBar', 'designBoard'],
+      // step 3: 1칸 회로 툴과 마나 배치 위치를 동시에 강조
+      targetIds: ['.toolBtn[data-tool="circle"]', '#designBoard'],
       msgKey: 'tut2.step3',
       condition: () => game.spellStats().damage >= 1,
     },
     {
-      targetIds: ['saveBtn'],
+      targetIds: ['#saveBtn'],
       msgKey: 'tut2.step4',
       condition: () => gameState.hasSavedSpell(),
     },
     {
-      targetIds: ['startBattleBtn'],
+      targetIds: ['#startBattleBtn'],
       msgKey: 'tut2.step5',
       condition: () => gameState.state === 'battle',
     },
     {
-      targetIds: ['slots'],
+      targetIds: ['#slots'],
       msgKey: 'tut2.step6',
       condition: () => hasCastOnce,
     },
-    {
-      targetIds: ['speedControls'],
+{
+      targetIds: ['#speedControls'],
       msgKey: 'tut2.step7',
-      // 배속이 1배 초과로 바뀌면 진행
+      // 배속 버튼 클릭 OR 키보드 Z/X/C/V OR skip 버튼으로 진행 가능
       condition: () => speedChanged,
     },
     {
       targetIds: [],
       msgKey: 'tut2.step8',
       noOverlay: true,
-      // 게임오버 = 이 단계는 자동 완료 없음 — 버튼으로만 닫힘
+      // 게임오버 단계 — skip으로 바로 종료 가능 (모바일에서 게임오버까지 기다리지 않도록)
       condition: () => false,
     },
   ] as const;
@@ -96,14 +99,16 @@
 
   async function jumpToGameOver() {
     prevTargets.forEach(el => el.classList.remove('tut-spotlight'));
+    prevContainers.forEach(el => el.classList.remove('tut-spotlight-container'));
     prevTargets = [];
+    prevContainers = [];
     step = STEPS.length - 1; // step 8
     await tick();
     // 게임오버 단계는 화면 중앙 고정
     tooltipStyle = 'left:50%;top:50%;transform:translate(-50%,-50%)';
   }
 
-  // ── 단계 자동 진행 ───────────────────────────────────────────
+// ── 단계 자동 진행 ───────────────────────────────────────────
   $effect(() => {
     if (!active || step >= STEPS.length) return;
     if (STEPS[step].condition()) {
@@ -111,50 +116,87 @@
     }
   });
 
-  async function advance() {
+async function advance() {
     if (step >= STEPS.length - 1) {
       await tick();
       finish();
       return;
     }
-    step++;
+    const newStep = step + 1;
+    step = newStep;
     await tick();
-    updateSpotlight();
+    // Pass the new step value to ensure correct targetIds is used
+    updateSpotlight(newStep);
   }
 
   // ── 스포트라이트 DOM 조작 ────────────────────────────────────
   let prevTargets: Element[] = [];
+  let prevContainers: Element[] = [];
 
-  async function updateSpotlight() {
+async function updateSpotlight(targetStep?: number) {
     prevTargets.forEach(el => el.classList.remove('tut-spotlight'));
+    prevContainers.forEach(el => el.classList.remove('tut-spotlight-container'));
     prevTargets = [];
+    prevContainers = [];
 
     await tick();
-    const ids = STEPS[step]?.targetIds;
-    if (!ids || ids.length === 0) return;
+    // Use passed targetStep if provided, otherwise use current step value
+    const currentStep = targetStep ?? step;
+    const selectors = STEPS[currentStep]?.targetIds;
+    if (!selectors || selectors.length === 0) return;
 
-    const els = ids.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    // id(#xxx)도 셀렉터(.toolBtn[data-tool="red"] 등)도 받을 수 있게 querySelector로 통일.
+    // 단순 id 형태는 성능을 위해 getElementById 사용.
+    const els = selectors
+      .map(sel => {
+        if (sel.startsWith('#') && /^[#A-Za-z][\w-]*$/.test(sel)) {
+          return document.getElementById(sel.slice(1));
+        }
+        return document.querySelector(sel);
+      })
+      .filter(Boolean) as HTMLElement[];
     if (els.length === 0) return;
 
     els.forEach(el => el.classList.add('tut-spotlight'));
     prevTargets = els;
+
+    // 모바일에서 fixed 부모 컨테이너(slotPanel 등)가 있으면 z-index를 올려줌
+    // → 그렇지 않으면 부모의 stacking context 때문에 spotlight가 오버레이 아래로 묻힘
+    const containers = new Set<Element>();
+    els.forEach(el => {
+      const panel = el.closest('.slotPanel');
+      if (panel) containers.add(panel);
+    });
+    containers.forEach(el => el.classList.add('tut-spotlight-container'));
+    prevContainers = [...containers];
+
     positionTooltip(els[0]);
   }
 
   function positionTooltip(el: Element) {
-    const rect = el.getBoundingClientRect();
     const viewH = window.innerHeight;
     const viewW = window.innerWidth;
 
-    const spaceBelow = viewH - rect.bottom;
-    const top = spaceBelow > 120
-      ? rect.bottom + 12
-      : rect.top - 12;
+    // 복수 요소 하이라이트 시 — 모든 하이라이트 요소를 감싸는 통합 bounding box 사용
+    let minTop = Infinity, maxBottom = -Infinity, minLeft = Infinity, maxRight = -Infinity;
+    const targets = prevTargets.length > 0 ? prevTargets : [el];
+    for (const target of targets) {
+      const r = target.getBoundingClientRect();
+      minTop = Math.min(minTop, r.top);
+      maxBottom = Math.max(maxBottom, r.bottom);
+      minLeft = Math.min(minLeft, r.left);
+      maxRight = Math.max(maxRight, r.right);
+    }
+    const combinedWidth = maxRight - minLeft;
 
-    const centerX = rect.left + rect.width / 2;
-    const left = Math.max(16, Math.min(viewW - 316, centerX - 150));
+    const tooltipW = Math.min(300, viewW - 32);
+    const spaceBelow = viewH - maxBottom;
+    const above = spaceBelow < 140;
 
-    const above = spaceBelow <= 120;
+    const top = above ? minTop - 12 : maxBottom + 12;
+    const centerX = minLeft + combinedWidth / 2;
+    const left = Math.max(16, Math.min(viewW - tooltipW - 16, centerX - tooltipW / 2));
+
     tooltipStyle = `left:${left}px;top:${top}px;${above ? 'transform:translateY(-100%) translateY(-12px)' : ''}`;
   }
 
@@ -169,29 +211,41 @@
     tick().then(() => updateSpotlight());
   });
 
-  onMount(() => {
+onMount(() => {
     // step 1: 빨간 마나 버튼 클릭 감지
     function onToolBarClick(e: MouseEvent) {
       if (!active || step !== 0) return;
       if ((e.target as Element).closest('.toolBtn[data-tool="red"]')) redToolClicked = true;
     }
-    // step 7: 배속 버튼 클릭 감지
+    // step 7: 배속 버튼 클릭 또는 키보드 Z/X/C/V 감지
     function onSpeedClick(e: MouseEvent) {
       if (!active || step !== 6) return;
       if ((e.target as Element).closest('.speedBtn')) speedChanged = true;
     }
+    // 키보드 Z/X/C/V로 배속 변경 시에도 progression
+    function onKeyDown(e: KeyboardEvent) {
+      if (!active || step !== 6) return;
+      // Z=배속1, X=배속2, C=배속4, V=배속8 (이미 battleSpeed 변경됨)
+      if (['KeyZ', 'KeyX', 'KeyC', 'KeyV'].includes(e.code)) {
+        speedChanged = true;
+      }
+    }
 
     document.addEventListener('click', onToolBarClick, true);
     document.addEventListener('click', onSpeedClick, true);
+    document.addEventListener('keydown', onKeyDown, true);
     return () => {
       document.removeEventListener('click', onToolBarClick, true);
       document.removeEventListener('click', onSpeedClick, true);
+      document.removeEventListener('keydown', onKeyDown, true);
     };
   });
 
   function finish() {
     prevTargets.forEach(el => el.classList.remove('tut-spotlight'));
+    prevContainers.forEach(el => el.classList.remove('tut-spotlight-container'));
     prevTargets = [];
+    prevContainers = [];
     active = false;
     game.saveTutorialSeen();
   }
@@ -210,6 +264,17 @@
 
   // 현재 단계가 게임오버 단계인지
   const isGameOverStep = $derived(active && step === STEPS.length - 1 && !!(STEPS[step] as { noOverlay?: boolean }).noOverlay);
+
+  // 현재 단계의 i18n 메시지 — 모바일이면 .mobile 키 우선 사용
+  function stepMsg(msgKey: string): string {
+    if (isMobileLayout()) {
+      const mobileKey = msgKey + '.mobile';
+      const mobileText = t(mobileKey);
+      // i18n이 키 자체를 그대로 반환하면 fallback 없는 것으로 간주
+      if (mobileText !== mobileKey) return mobileText;
+    }
+    return t(msgKey);
+  }
 </script>
 
 <svelte:window onresize={onResize} />
@@ -233,7 +298,7 @@
       {#if !isGameOverStep}
         <span class="tutTooltipStep">{step + 1} / {STEPS.length}</span>
       {/if}
-      <p class="tutTooltipMsg">{t(STEPS[step].msgKey)}</p>
+      <p class="tutTooltipMsg">{stepMsg(STEPS[step].msgKey)}</p>
     </div>
     <div class="tutTooltipFoot">
       {#if isGameOverStep}
