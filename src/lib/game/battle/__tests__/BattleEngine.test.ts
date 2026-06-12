@@ -70,4 +70,33 @@ describe('updateBattleTick', () => {
     const result = updateBattleTick(state, 6, makeCtx());
     expect(result.isGameOver).toBe(true);
   });
+
+  it('globalDamage hits all monsters on cast resolution', () => {
+    const monsters: Monster[] = [
+      { id: 1, lane: 0, x: 100, y: 100, hp: 30, maxHp: 30, speed: 10, boss: false },
+      { id: 2, lane: 1, x: 200, y: 150, hp: 40, maxHp: 40, speed: 10, boss: false },
+      { id: 3, lane: 2, x: 300, y: 200, hp: 10, maxHp: 10, speed: 10, boss: false },
+    ];
+    const state = makeState({
+      monsters,
+      casts: [{
+        id: 1,
+        spell: {
+          id: 'global', name: 'Global', width: 2, height: 2,
+          components: [], castTime: 4, manaCost: 1,
+          damage: 5, aoeDamage: 0, globalDamage: 7,
+          breakdown: [],
+        },
+        targetId: 1,
+        slotIndex: 0,
+        remainingTicks: 1,
+        totalTicks: 4,
+      }],
+    });
+    const result = updateBattleTick(state, 6, makeCtx());
+    expect(result.casts).toHaveLength(0);
+    expect(result.monsters[0].hp).toBe(30 - 5 - 7); // normal + global
+    expect(result.monsters[1].hp).toBe(40 - 7); // global only
+    expect(result.monsters[2].hp).toBe(10 - 7); // global only
+  });
 });
