@@ -9,7 +9,8 @@
           gameState.designer.previewX,
           gameState.designer.previewY,
           gameState.designer.nextId,
-          gameState.designer.rotation
+          gameState.designer.rotation,
+          gameState.designer.tool === 'extractor' ? gameState.designer.extractorColor : undefined,
         )
       : null
   );
@@ -38,8 +39,11 @@
   {/each}
 
   <div
-    class="piece placementGhost"
+    class="piece placementGhost {preview.type}"
     class:invalid={!isValid}
+    class:extractor-red={preview.type === 'extractor' && preview.color === 'red'}
+    class:extractor-blue={preview.type === 'extractor' && preview.color === 'blue'}
+    class:extractor-green={preview.type === 'extractor' && preview.color === 'green'}
     style:left="{preview.x * 62}px"
     style:top="{preview.y * 62}px"
     style:width="{preview.w * 58 + (preview.w - 1) * 4}px"

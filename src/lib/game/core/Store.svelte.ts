@@ -4,6 +4,7 @@
 import type {
   GameState, Language, Monster, CastProjectile, VisualEffect,
   SpellData, KeyBinding, Records, MapDef, Component, KeyTarget,
+  ExtractorColor,
 } from '../types';
 import { MAPS, MAX_MANA, BASE_MANA_REGEN, STAR_MANA_REGEN, MANA_BONUS_STAR_COUNT, SPAWN_TIMER_DEFAULT } from '../constants';
 import * as Storage from './Storage';
@@ -23,6 +24,7 @@ export interface DesignerState {
   previewX: number | null;
   previewY: number | null;
   spellName: string;
+  extractorColor: ExtractorColor;
 }
 
 function createDesignerState(): DesignerState {
@@ -36,6 +38,7 @@ function createDesignerState(): DesignerState {
     previewX: null,
     previewY: null,
     spellName: '',
+    extractorColor: 'red',
   };
 }
 

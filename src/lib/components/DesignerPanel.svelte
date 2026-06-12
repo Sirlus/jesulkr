@@ -44,8 +44,21 @@ function onBoardMouseDown(e: MouseEvent) {
   }
 
   function onBoardWheel(e: WheelEvent) {
-    e.preventDefault();
-    game.rotateTool();
+    if (gameState.designer.tool === 'extractor') {
+      game.cycleExtractorColor();
+      e.preventDefault();
+    } else {
+      game.rotateTool();
+      e.preventDefault();
+    }
+  }
+
+  function onToolClick(tool: string) {
+    if (tool === 'extractor' && gameState.designer.tool === 'extractor') {
+      game.cycleExtractorColor();
+    } else {
+      game.setTool(tool);
+    }
   }
 
   function onBoardTouchStart(e: TouchEvent) {
@@ -121,9 +134,14 @@ function onBoardMouseDown(e: MouseEvent) {
             disabled={!unlocked}
             title={unlocked ? info.name : `${info.name} - ${t('locked.tool')}`}
             aria-label={info.name}
-            onclick={() => { game.setTool(tool); }}
+            onclick={() => onToolClick(tool)}
           >
-            <span class="toolIconSvg"><span class="toolIcon {tool}"></span></span>
+            <span class="toolIconSvg"><span
+                class="toolIcon {tool}"
+                class:extractor-red={tool === 'extractor' && gameState.designer.extractorColor === 'red'}
+                class:extractor-blue={tool === 'extractor' && gameState.designer.extractorColor === 'blue'}
+                class:extractor-green={tool === 'extractor' && gameState.designer.extractorColor === 'green'}
+              ></span></span>
           </button>
         {/each}
       </div>
@@ -173,10 +191,14 @@ function onBoardMouseDown(e: MouseEvent) {
             <div
               class="piece {c.type}"
               class:vertical={c.h > c.w}
+              class:extractor-red={c.type === 'extractor' && c.color === 'red'}
+              class:extractor-blue={c.type === 'extractor' && c.color === 'blue'}
+              class:extractor-green={c.type === 'extractor' && c.color === 'green'}
               style:left="{c.x * (CELL + GAP)}px"
               style:top="{c.y * (CELL + GAP)}px"
               style:width="{c.w * CELL + (c.w - 1) * GAP}px"
               style:height="{c.h * CELL + (c.h - 1) * GAP}px"
+              style:transform={c.type === 'extractor' ? `rotate(${c.rotation * 90}deg)` : undefined}
             ></div>
           {/each}
 
@@ -193,9 +215,19 @@ function onBoardMouseDown(e: MouseEvent) {
       <div id="spellStats" class="statsBox">
         <div class="statGrid">
           <StatCard label={t('cooldown')} value={stats.castTime} detail={`발사 0.20초 / 쿨 ${(stats.castTime * 0.05).toFixed(2)}초`} />
-          <StatCard label={t('mana')} value={stats.manaCost} detail={`빨강 ${stats.redCount} + 파랑추가 ${stats.activeBlueCount * 2}`} />
+          <StatCard label={t('mana')} value={stats.manaCost} detail={`빨강 ${stats.redManaCost} + 초록 ${stats.greenManaCost} + 파랑 ${stats.activeBlueCount * 2}`} />
           <StatCard label={t('normal.damage')} value={stats.damage} detail={stats.valid ? t('can.save') : t('cannot.save')} />
           <StatCard label={t('special.damage')} value={stats.aoeDamage > 0 ? `${t('scatter')} ${stats.aoeDamage}` : t('none')} />
+          {#if stats.globalDamage > 0}
+            <StatCard label={t('global.damage')} value={stats.globalDamage} />
+          {/if}
+          {#if stats.maxStability > 0}
+            <StatCard
+              label={t('stability')}
+              value={stats.maxStability}
+              detail={`${t('stabilizer')} ${stats.activeStabilizerCount} + ${t('medium.hub')} ${stats.activeHubCount}`}
+            />
+          {/if}
         </div>
         <div class="breakdown">
           {#each stats.breakdown as line}

@@ -72,6 +72,8 @@ export class GameManager {
   }
   /** 회전 가능한 도구(oval, mixed2)의 방향을 토글합니다 */
   rotateTool() { DesignerController.rotateTool(this); }
+  /** 추출기 색상을 red → blue → green 순으로 순환시킵니다 (v2) */
+  cycleExtractorColor() { DesignerController.cycleExtractorColor(this); }
   /** 설계판 크기를 변경하고 설계판 밖 부품을 제거합니다 */
   setFrame(w: number, h: number) { DesignerController.setFrame(this, w, h); }
 

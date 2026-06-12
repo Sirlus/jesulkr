@@ -392,3 +392,39 @@ body.map-modal-open .mainMenuWrap{display:none !important}
   body.mobile-layout .manaBonusToggle{width:100%;min-height:40px}
 }
 
+/* ── v2: Green / Stability (Phase 5 UI) ─────────────────────── */
+:root {
+  --green: #70ffc0;
+  --green2: #1ca875;
+  --violet: #b790ff;
+}
+
+/* ── Placed piece styles ── */
+.piece.red3::after         { content: '3R'; background: #ff4444; color: #fff; }
+.piece.greenMana::after    { content: 'GM'; background: var(--green); color: #000; }
+.piece.mediumWire::after   { content: '↔'; }
+.piece.mediumWire.vertical::after { content: '↕'; }
+.piece.mediumHub::after    { content: '◇'; color: var(--green); }
+.piece.extractor::after    { content: '▶'; }
+.piece.stabilizer::after   { content: '◎'; color: #51a8ff; }
+.piece.green3x2::after     { content: 'G3'; color: var(--green); }
+.piece.greenPair2::after   { content: 'GB'; color: var(--green); }
+.piece.ultimateCore::after { content: 'U'; background: var(--violet); color: #fff; }
+
+.piece.extractor.extractor-red::after   { color: #ff4444; text-shadow: 0 0 8px #ff4444; }
+.piece.extractor.extractor-blue::after  { color: #4444ff; text-shadow: 0 0 8px #4444ff; }
+.piece.extractor.extractor-green::after { color: var(--green); text-shadow: 0 0 8px var(--green); }
+
+/* ── Tool icon styles ── */
+.toolIcon.red3::after         { content: '3R'; background: #ff4444; color: #fff; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; }
+.toolIcon.mediumWire::after   { content: '↔'; color: var(--green); font-size: 20px; }
+.toolIcon.mediumHub::after    { content: '◇'; color: var(--green); font-size: 22px; }
+.toolIcon.extractor::after    { content: '▶'; color: #ff4444; font-size: 18px; }
+.toolIcon.extractor.extractor-blue::after  { color: #4444ff; }
+.toolIcon.extractor.extractor-green::after { color: var(--green); }
+.toolIcon.stabilizer::after   { content: '◎'; color: #51a8ff; font-size: 22px; }
+.toolIcon.greenMana::after    { content: 'GM'; background: var(--green); color: #000; border-radius: 4px; font-size: 11px; }
+.toolIcon.green3x2::after     { content: 'G3'; color: var(--green); font-size: 16px; }
+.toolIcon.greenPair2::after   { content: 'GB'; color: var(--green); font-size: 14px; }
+.toolIcon.ultimateCore::after { content: 'U'; background: var(--violet); color: #fff; border-radius: 50%; width: 24px; height: 24px; font-size: 13px; }
+
