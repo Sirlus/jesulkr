@@ -18,7 +18,7 @@
   </div>
 
   <div class="sideBattleControls">
-    <div class="speedControls">
+    <div class="speedControls" id="speedControls">
       <span>{t('speed')}</span>
       {#each [1, 2, 4, 8] as speed}
         <SpeedButton {speed} />
