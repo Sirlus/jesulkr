@@ -83,8 +83,9 @@ export function calculateSpellStats(model: SpellModel): SpellStats {
   const greenManas = components.filter(c => c.type === 'greenMana');
   const extractors = components.filter(c => c.type === 'extractor');
 
-  // ── 1~5. Fixed-point iteration for active hubs ─────────────────
-  let activeHubIds = new Set<number>(hubs.map(c => c.id));
+// ── 1~5. Fixed-point iteration for active hubs ─────────────────
+  // Start with empty hub set - only activate hubs when stability >= 1 is detected
+  let activeHubIds = new Set<number>();
   let graph = buildColorConnectionGraph(components, activeHubIds);
   let activeBlueIds = new Set<number>();
   let activeStabilizerIds = new Set<number>();

@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "svelte": {
+      "type": "stdio",
+      "command": "npx",
+      "env": {},
+      "args": [
+        "-y",
+        "@sveltejs/mcp"
+      ],
+      "alwaysAllow": [
+        "svelte-autofixer"
+      ]
+    },
+    "shell-workaround": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "/home/dev/.kiro/mcp-servers/shell-workaround/index.js"
+      ],
+      "env": {},
+      "alwaysAllow": [
+        "exec_with_output",
+        "exec_check_success",
+        "exec_to_file"
+      ],
+      "autoApprove": [
+        "exec_with_output"
+      ]
+    }
+  }
+}

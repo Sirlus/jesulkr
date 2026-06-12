@@ -1,0 +1,14 @@
+{
+  "version": "1.29.0",
+  "exports": [
+    ".",
+    "./client",
+    "./server",
+    "./validation",
+    "./validation/ajv",
+    "./validation/cfworker",
+    "./experimental",
+    "./experimental/tasks",
+    "./*"
+  ]
+}

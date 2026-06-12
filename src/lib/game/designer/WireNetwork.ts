@@ -163,6 +163,34 @@ function getWireNeighborCells(comp: Component): [number, number][] {
 }
 
 /**
+ * Get all cells occupied by a component (considers rotation for mediumWire).
+ */
+function getComponentCells(comp: Component): [number, number][] {
+  const cells: [number, number][] = [];
+  // Handle mediumWire rotation
+  if (comp.type === 'mediumWire') {
+    const isHorizontal = comp.rotation === 0 || comp.rotation === 2;
+    if (isHorizontal) {
+      // Horizontal: cells at (x, y) and (x+1, y) for 2-cell wire
+      cells.push([comp.x, comp.y]);
+      cells.push([comp.x + 1, comp.y]);
+    } else {
+      // Vertical: cells at (x, y) and (x, y+1)
+      cells.push([comp.x, comp.y]);
+      cells.push([comp.x, comp.y + 1]);
+    }
+    return cells;
+  }
+  // For other components, return all cells in their bounding box
+  for (let dy = 0; dy < comp.h; dy++) {
+    for (let dx = 0; dx < comp.w; dx++) {
+      cells.push([comp.x + dx, comp.y + dy]);
+    }
+  }
+  return cells;
+}
+
+/**
  * Build color-specific wire connection graphs.
  * Groups connected wires by color into networks.
  */
@@ -174,6 +202,7 @@ export function buildColorConnectionGraph(
     const wireMap = new Map<string, Component>();
     const wireTypes = new Set(['wire', 'mediumWire', 'mediumHub']);
 
+    // Store wires at their anchor position only (for neighbor lookup)
     for (const c of components) {
       if (!wireTypes.has(c.type)) continue;
       if (!isWireForColor(c.type, color)) continue;
@@ -186,6 +215,7 @@ export function buildColorConnectionGraph(
     const groups: WireGroup[] = [];
     const compGroups = new Map<number, Set<number>>();
 
+    // Start BFS from all wires in the map
     for (const wire of components.filter(c => wireMap.has(`${c.x},${c.y}`))) {
       if (visited.has(wire.id)) continue;
 
@@ -196,6 +226,7 @@ export function buildColorConnectionGraph(
 
       while (q.length) {
         const w = q.shift()!;
+        // Use directional neighbor lookup based on rotation
         for (const [nx, ny] of getWireNeighborCells(w)) {
           const key = `${nx},${ny}`;
           const other = wireMap.get(key);
@@ -211,6 +242,7 @@ export function buildColorConnectionGraph(
       groups.push({ ids, cells, components: new Set() });
     }
 
+    // Add non-wire components connected to the wire network
     for (let gi = 0; gi < groups.length; gi++) {
       const group = groups[gi];
       for (const key of group.cells) {
