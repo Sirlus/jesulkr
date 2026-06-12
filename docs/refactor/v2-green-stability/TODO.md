@@ -55,11 +55,11 @@
 - [x] `npm run check` 통과
 
 ### Phase 5: UI (3h)
-- [ ] `stores/game.ts`: 추출기 색상 순환 메서드 추가
-- [ ] `components/DesignerPanel.svelte`: 추출기 색상 순환 UX, 스탯 패널 확장
-- [ ] `components/PlacementGhost.svelte`: 추출기 색상 전달
-- [ ] `game/style.css`: v2 부품 스타일 추가
-- [ ] `npm run check` 통과
+- [x] `stores/game.ts`: 추출기 색상 순환 메서드 추가 — [`cycleExtractorColor()`](src/lib/stores/game.ts:75) 위임 구현
+- [x] `components/DesignerPanel.svelte`: 추출기 색상 순환 UX, 스탯 패널 확장 — 키보드/클릭 모두 지원, 툴 아이콘·피스에 색상 클래스 적용
+- [x] `components/PlacementGhost.svelte`: 추출기 색상 전달 — [`createComponentFromGridCoord()`](src/lib/components/PlacementGhost.svelte:13) 인자로 `extractorColor` 전달
+- [x] v2 부품 스타일 — `style.css` 단일 파일 대신 각 컴포넌트 정의 파일의 `style:` 필드로 인라인(예: [`red3.ts`](src/lib/game/designer/components/red3.ts:15), [`extractor.ts`](src/lib/game/designer/components/extractor.ts:15)). 레지스트리가 수집해 한 번에 주입
+- [x] `npm run check` 통과 — 0 errors / 0 warnings
 
 ### Phase 6: i18n (30min)
 - [x] `i18n/ko.ts`: 9개 부품명 + v2 용어 추가
@@ -67,14 +67,16 @@
 - [x] `npm run check` 통과
 
 ### Phase 7: Testing (4h)
-- [ ] `PROTOTYPE_UNLOCK_ALL_TOOLS = true` 설정
-- [ ] `ExtractorSystem.test.ts`
-- [ ] `StabilitySystem.test.ts`
-- [ ] `ColorWireNetwork.test.ts`
-- [ ] `GreenStatsCalculator.test.ts`
-- [ ] `BattleEngine.test.ts`에 globalDamage 시나리오 추가
-- [ ] 레거시 저장 데이터 호환 테스트
-- [ ] 모든 테스트 통과 후 `PROTOTYPE_UNLOCK_ALL_TOOLS = false` 전환
+- [~] `PROTOTYPE_UNLOCK_ALL_TOOLS = true` 설정 — **불필요**. 해금은 [`isMapUnlocked()`](src/lib/game/core/StorageUnlocks.ts:29) 기반 별 진행도로 동작. 개발자 숏컷은 [`constants.ts:27-28`](src/lib/game/constants.ts:27)에 주석으로만 남음
+- [x] `ExtractorSystem.test.ts` — 11 tests ✓
+- [x] `StabilitySystem.test.ts` — 11 tests ✓
+- [x] `ColorWireNetwork.test.ts` — 17 tests ✓
+- [x] `GreenStatsCalculator.test.ts` — 10 tests ✓
+- [x] `BattleEngine.test.ts`에 globalDamage 시나리오 추가 — [`globalDamage hits all monsters on cast resolution`](src/lib/game/battle/__tests__/BattleEngine.test.ts:74) ✓
+- [x] 레거시 저장 데이터 호환 테스트 — [`migrates legacy "mana" type to "red"`](src/lib/game/core/__tests__/StorageSlots.test.ts:43) ✓ + `CastingSystem.ts:73-78` `globalDamage` 기본값 처리
+- [~] `PROTOTYPE_UNLOCK_ALL_TOOLS = false` 전환 — **불필요** (위 사유 동일). 12 파일 / 141 테스트 모두 통과
+
+**전체 테스트 결과**: `npm test` → Test Files 12 passed, Tests 141 passed ✓
 
 ---
 

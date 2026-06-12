@@ -1,6 +1,9 @@
 # Phase 7: 테스트 및 정리
 
-> **현재 상태**: `PROTOTYPE_UNLOCK_ALL_TOOLS` 미정의
+> **상태**: ✅ **완료** (2026-06-12, [`TODO.md:69`](TODO.md:69) 갱신분 참조)
+>
+> **구현 요약**: 4개 신규 테스트 파일(`ExtractorSystem`, `StabilitySystem`, `ColorWireNetwork`, `GreenStatsCalculator`) + 기존 `BattleEngine.test.ts`에 globalDamage 시나리오 추가. `PROTOTYPE_UNLOCK_ALL_TOOLS` 플래그는 의도적 미구현 — 해금은 [`isMapUnlocked()`](src/lib/game/core/StorageUnlocks.ts:29) 별 진행도로 충분.
+> **테스트 결과**: `npm test` → 12 test files / **141 / 141 통과**
 
 ## 테스트 시나리오
 
@@ -108,10 +111,10 @@ export function normalizeLegacySpell(raw: any): SpellData {
 
 ## 완료 조건
 
-- [ ] `PROTOTYPE_UNLOCK_ALL_TOOLS = true`로 테스트
-- [ ] 모든 시나리오 통과
-- [ ] 레거시 호환성 확인
-- [ ] `PROTOTYPE_UNLOCK_ALL_TOOLS = false` 전환
-- [ ] `npm run check` 및 `npm run test` 통과
+- [~] `PROTOTYPE_UNLOCK_ALL_TOOLS = true`로 테스트 — **불필요**. 해금은 별 진행도 기반([`isMapUnlocked()`](src/lib/game/core/StorageUnlocks.ts:29))
+- [x] 모든 시나리오 통과 — 12 test files / 141 tests ✓
+- [x] 레거시 호환성 확인 — [`StorageSlots.test.ts:43`](src/lib/game/core/__tests__/StorageSlots.test.ts:43) `mana` → `red` 마이그레이션 + [`CastingSystem.ts:73`](src/lib/game/battle/CastingSystem.ts:73) `globalDamage` 기본값
+- [~] `PROTOTYPE_UNLOCK_ALL_TOOLS = false` 전환 — **불필요** (위 사유)
+- [x] `npm run check` 및 `npm run test` 통과
 
 ## 예상 소요: 4시간

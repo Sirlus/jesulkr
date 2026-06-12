@@ -4,6 +4,7 @@
 import type { Monster, CastProjectile, VisualEffect, MapDef, SpellData, Records } from '../types';
 import { TICK_SEC, LANES, MAX_MANA } from '../constants';
 import { getAutoTarget } from './TargetingSystem';
+import { resolveCast } from './DamageResolver';
 
 /** 전투 엔진이 외부 상태(슬롯, 해금, 기록 등)를 참조하기 위한 컨텍스트 */
 export interface BattleContext {
@@ -138,42 +139,18 @@ export function updateBattleTick(
   }
   m = m.filter(x => !x.reached && x.hp > 0);
 
-  // 7. Resolve projectiles
+// 7. Resolve projectiles
   const newCasts: CastProjectile[] = [];
   for (const c of casts2) {
     c.remainingTicks--;
     if (c.remainingTicks <= 0) {
-      let target = m.find(x => x.id === c.targetId && x.hp > 0) ?? null;
-      if (!target) target = getAutoTarget(m);
-      if (target) {
-        target.hp -= c.spell.damage;
-        e.push({ type: 'hit' as const, x: target.x, y: target.y, t: 0, life: 0.5, text: `-${c.spell.damage}` });
-const aoe = c.spell.aoeDamage || 0;
-        if (aoe > 0) {
-          const aoeT = m.filter(x => x.hp > 0).sort((a, b) => b.y - a.y).slice(0, 3);
-          for (const at of aoeT) { at.hp -= aoe; e.push({ type: 'hit' as const, x: at.x, y: at.y, t: 0, life: 0.42, text: `-${aoe}` }); }
-          e.push({ type: 'aoe' as const, x: ctx.canvasWidth / 2, y: ctx.canvasHeight / 2, t: 0, life: 0.55, text: `분산 ${aoe}` });
-        }
-
-        // v2: global damage (all monsters)
-        const global = Number(c.spell.globalDamage) || 0;
-        if (global > 0) {
-          for (const mon of m) {
-            if (mon.hp > 0) {
-              mon.hp -= global;
-              e.push({ type: 'hit' as const, x: mon.x, y: mon.y, t: 0, life: 0.35, text: `-${global}` });
-            }
-          }
-          e.push({ type: 'aoe' as const, x: ctx.canvasWidth / 2, y: ctx.canvasHeight / 2, t: 0, life: 0.6, text: `전체 ${global}` });
-        }
-        for (const mon of m) {
-          if (mon.hp <= 0) {
-            killedAny = true;
-            nextScore += mon.maxHp * 10;
-            e.push({ type: 'kill' as const, x: mon.x, y: mon.y, t: 0, life: 0.7, text: `+${mon.maxHp * 10}` });
-            if (sid === mon.id) sid = null;
-          }
-        }
+      // Use resolveCast from DamageResolver to avoid duplicate logic
+      const result = resolveCast(c, m, ctx.canvasWidth, ctx.canvasHeight);
+      m = result.monsters;
+      e = e.concat(result.effects).concat(result.aoeEffects);
+      if (result.killedAny) {
+        killedAny = true;
+        nextScore += result.scoreDelta;
       }
     } else {
       newCasts.push(c);

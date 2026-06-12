@@ -1,7 +1,7 @@
 # 이슈 리포트 — 술식 설계 클릭/드래그 불가 (해결됨)
 
 > **상태: ✅ 해결 완료** — 브라우저 실측 디버깅으로 근본 원인을 규명하고 수정했습니다.
-> **작성일**: 2026-06-11 · **환경**: 로컬 개발 서버 (Vite dev, `http://localhost:5173/`) · **검증**: 브라우저 자동화 + `bun run test`(91 통과) + `bun run check`(0 에러)
+> **작성일**: 2026-06-11 · **환경**: 로컬 개발 서버 (Vite dev, `http://localhost:5173/`) · **검증 (해결 시점)**: 브라우저 자동화 + `bun run test`(91 통과) + `bun run check`(0 에러) · **현재 검증**: `npm test` 141 / 141 통과 (12 test files, 2026-06-12 v2 통합 후)
 
 ---
 
@@ -141,7 +141,7 @@ const gy = (e.clientY - rect.top) / cellH;
 
 ### 자동화
 
-- `bun run test` → **91 / 91 통과** (이전 실패 테스트 `maps pointer coordinates using rendered board size` 포함)
+- `bun run test` → **91 / 91 통과** (이전 실패 테스트 `maps pointer coordinates using rendered board size` 포함) — *해결 시점 기준. v2 green/stability 통합 후 2026-06-12 기준 141 / 141 통과 (12 test files)*
 - `bun run check` → **0 에러 / 0 경고** (`binding_property_non_reactive` 경고 해소)
 
 ---

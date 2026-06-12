@@ -1,6 +1,6 @@
 # Phase 6: i18n 반영
 
-> **현재 상태**: 9개 부품명만 번역됨. v2 용어 및 신규 부품명 누락.
+> **상태**: ✅ **완료** (2026-06-12)
 >
 > **규칙**: 기존과 동일하게 점 표기법 키 사용. `ko.ts`와 `en.ts` 모두 동일한 키셋 유지.
 
@@ -80,9 +80,9 @@
 
 ## 완료 조건
 
-- [ ] `ko.ts`: 9개 부품명 + v2 용어 추가
-- [ ] `en.ts`: 9개 부품명 번역 + v2 용어 추가
-- [ ] `npm run check` 통과
-- [ ] 누락된 번역 키가 없는지 `t()` 호출부 검색 확인
+- [x] `ko.ts`: 9개 부품명 + v2 용어 추가 — [`ko.ts:39-55`](src/lib/game/i18n/ko.ts:39) (red3, medium.wire, medium.hub, extractor, stabilizer, green.mana, green3x2, green.pair2, ultimate.core, green.mana.term, stability, global.damage, all.monsters, small.wire)
+- [x] `en.ts`: 9개 부품명 번역 + v2 용어 추가 — [`en.ts:39-55`](src/lib/game/i18n/en.ts:39)
+- [x] `npm run check` 통과 — 0 errors / 0 warnings
+- [x] 누락된 번역 키가 없는지 `t()` 호출부 검색 확인 — `t(component)` 패턴에서 `getDef`가 18개 모두 키 매핑
 
 ## 예상 소요: 30분

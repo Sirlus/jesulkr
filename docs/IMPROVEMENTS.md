@@ -164,28 +164,36 @@ export function updateBattleTick(
 
 ### 6.1 누락된 테스트 영역
 
-| 대상 | 현재 | 필요성 |
+| 대상 | 현재 (2026-06-12) | 필요성 |
 |------|------|--------|
-| `BattleEngine.ts` | 없음 | 핵심 게임 로직. 회귀 방지 필수 |
-| `BattleRenderer.ts` | 없음 | Canvas API mocking으로 시각적 출력 검증 가능 |
-| `Storage*.ts` | 없음 | localStorage mocking으로 마이그레이션 로직 검증 |
-| `HUD.ts` / `SlotPanel.ts` / `Toast.ts` | 없음 | DOM 조작 로직의 단위 테스트 |
-| `game.ts` (GameManager) | 없음 | 통합 테스트 수준에서 핵심 시나리오 검증 필요 |
+| `BattleEngine.ts` | ✅ [`BattleEngine.test.ts`](src/lib/game/battle/__tests__/BattleEngine.test.ts) (6 tests) | 핵심 게임 로직 + globalDamage |
+| `BattleRenderer.ts` | ❌ 없음 | Canvas API mocking으로 시각적 출력 검증 가능 (여전히 미작성) |
+| `Storage*.ts` | ✅ [`StorageSlots.test.ts`](src/lib/game/core/__tests__/StorageSlots.test.ts) (8 tests), [`StorageRecords.test.ts`](src/lib/game/core/__tests__/StorageRecords.test.ts) (9 tests) | localStorage mocking + 마이그레이션 검증 |
+| `HUD.ts` / `SlotPanel.ts` / `Toast.ts` | ❌ 없음 (Svelte 컴포넌트로 대체되어 dead DOM 모듈 — CHANGELOG 1.3.0 Removed) | DOM 조작 로직 단위 테스트 불필요 |
+| `game.ts` (GameManager) | ✅ [`GameManager.test.ts`](src/lib/stores/__tests__/GameManager.test.ts) (31 tests) | 통합 테스트 수준 검증 |
+| `ExtractorSystem.ts` | ✅ [`ExtractorSystem.test.ts`](src/lib/game/designer/__tests__/ExtractorSystem.test.ts) (11 tests) | v2 신규 |
+| `StabilitySystem.ts` | ✅ [`StabilitySystem.test.ts`](src/lib/game/designer/__tests__/StabilitySystem.test.ts) (11 tests) | v2 신규 |
+| `ColorWireNetwork` | ✅ [`ColorWireNetwork.test.ts`](src/lib/game/designer/__tests__/ColorWireNetwork.test.ts) (17 tests) | v2 신규 |
+| `GreenStatsCalculator` | ✅ [`GreenStatsCalculator.test.ts`](src/lib/game/designer/__tests__/GreenStatsCalculator.test.ts) (10 tests) | v2 신규 |
 
-### 6.2 테스트 커버리지 현황
+### 6.2 테스트 커버리지 현황 (2026-06-12 기준, 141 / 141 통과)
 
 ```
-현재 테스트 커버리지:
-✅ StatsCalculator.test.ts    (통계 계산)
-✅ WireNetwork.test.ts         (도선 연결)
-✅ Components.test.ts          (부품 배치)
-✅ TargetingSystem.test.ts     (타겟팅)
+총 12 test files / 141 tests
+✅ BattleEngine.test.ts         (6)
+✅ TargetingSystem.test.ts      (9)
+✅ ColorWireNetwork.test.ts     (17)  — v2
+✅ StabilitySystem.test.ts      (11)  — v2
+✅ GreenStatsCalculator.test.ts (10)  — v2
+✅ ExtractorSystem.test.ts      (11)  — v2
+✅ StorageRecords.test.ts       (9)
+✅ WireNetwork.test.ts          (6)
+✅ StatsCalculator.test.ts      (8)
+✅ Components.test.ts           (15)
+✅ StorageSlots.test.ts         (8)
+✅ GameManager.test.ts          (31)
 
-❌ BattleEngine.test.ts        (누락)
-❌ BattleRenderer.test.ts      (누락)
-❌ StorageSlots.test.ts        (누락)
-❌ StorageRecords.test.ts      (누락)
-❌ GameManager.test.ts         (누락)
+❌ BattleRenderer.test.ts       (Canvas API 미작성 — 우선순위 낮음)
 ```
 
 ---

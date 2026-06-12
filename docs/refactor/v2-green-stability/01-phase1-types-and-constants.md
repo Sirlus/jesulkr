@@ -1,5 +1,7 @@
 # Phase 1: 타입 및 상수 확장
 
+> **상태**: ✅ **완료** (2026-06-12)
+>
 > 목표: v2 신규 부품을 위한 타입 정의와 상수 추가
 >
 > **중요**: 기존 코드 스타일(`id: number`, `ComponentDef` 인터페이스)과 하위 호환성 유지
@@ -251,10 +253,10 @@ export interface ConnectionGraph {
 
 ## ✅ 완료 조건
 
-- [ ] `types.ts`에 모든 신규 타입 정의 추가
-- [ ] `constants.ts`에 v2 상수 추가
-- [ ] `def.ts`에 `ComponentRole` 및 `CalcContext` 확장
-- [ ] `npm run check` 통과
-- [ ] 기존 파일에서 타입 참조 에러 없음
+- [x] `types.ts`에 모든 신규 타입 정의 추가 — 18개 `ComponentType` (line 14-25), `ExtractorColor`, `Component.color?`, `SpellData.globalDamage`, `SpellStats` v2 필드, `ColorConnectionGraph`
+- [x] `constants.ts`에 v2 상수 추가 — `GREEN_MANA`, `STABILITY`, `MEDIUM_HUB`, `MEDIUM_WIRE`, `SMALL_WIRE`, `EXTRACTOR` (PROTOTYPE_UNLOCK_ALL_TOOLS는 의도적 미구현 — 주석)
+- [x] `def.ts`에 `ComponentRole` 및 `CalcContext` 확장 — `'extractor'`/`'stabilizer'` role, `green`/`stability`/`isActiveStabilizer`/`isActiveHub` 컨텍스트
+- [x] `npm run check` 통과 — 0 errors / 0 warnings
+- [x] 기존 파일에서 타입 참조 에러 없음
 
 ## 예상 소요: 30분

@@ -1,8 +1,10 @@
 # Phase 3: 핵심 엔진 변경
 
+> **상태**: ✅ **완료** (2026-06-12)
+>
 > **중요**: WireNetwork v3, ExtractorSystem, StabilitySystem 신규, StatsCalculator 다중 패스 계산
 >
-> **현재 상태**: 단일 도선망 (v1 스타일)
+> **구현 완료**: 색상별 도선망 v3, 다중 패스 안정도 계산, 추출기 색상 시스템
 
 ---
 
@@ -513,12 +515,12 @@ function buildCalcContext(
 
 ## ✅ Phase 3 완료 조건
 
-- [ ] `WireNetwork.ts`에 `buildColorConnectionGraph` 추가 (기존 함수 유지)
-- [ ] `StabilitySystem.ts` 신규 생성
-- [ ] `ExtractorSystem.ts` 신규 생성
-- [ ] `StatsCalculator.ts`가 다중 패스로 green/stability/globalDamage 반영
-- [ ] `Components.ts`에 `color` 매개변수 추가
-- [ ] `npm run check` 통과
-- [ ] 기존 `StatsCalculator`/`WireNetwork` 테스트 통과
+- [x] `WireNetwork.ts`에 `buildColorConnectionGraph` 추가 (기존 함수 유지) — [`ColorWireNetwork.test.ts`](src/lib/game/designer/__tests__/ColorWireNetwork.test.ts) 17 tests ✓
+- [x] `StabilitySystem.ts` 신규 생성 — [`StabilitySystem.test.ts`](src/lib/game/designer/__tests__/StabilitySystem.test.ts) 11 tests ✓
+- [x] `ExtractorSystem.ts` 신규 생성 — [`ExtractorSystem.test.ts`](src/lib/game/designer/__tests__/ExtractorSystem.test.ts) 11 tests ✓
+- [x] `StatsCalculator.ts`가 다중 패스로 green/stability/globalDamage 반영 — [`GreenStatsCalculator.test.ts`](src/lib/game/designer/__tests__/GreenStatsCalculator.test.ts) 10 tests ✓ + [`StatsCalculator.test.ts`](src/lib/game/designer/__tests__/StatsCalculator.test.ts) 8 tests ✓
+- [x] `Components.ts`에 `color` 매개변수 추가 — [`Components.ts:54`](src/lib/game/designer/Components.ts:54)
+- [x] `npm run check` 통과
+- [x] 기존 `StatsCalculator`/`WireNetwork` 테스트 통과 — [`WireNetwork.test.ts`](src/lib/game/designer/__tests__/WireNetwork.test.ts) 6 tests ✓
 
 ## 예상 소요: 5시간

@@ -1,12 +1,10 @@
-# Jesulkr v1.5 아키텍처 문서
+# Jesulkr v2.0 아키텍처 문서
 
 ## 1. 개요
 
-Jesulkr v1.5는 **싱글톤 GameManager** 중심의 상태 관리 아키텍처를 사용합니다. SvelteKit의 반응형 시스템과 별도로, 게임 상태는 순수 TypeScript 클래스로 관리되며 DOM 조작은 명시적 메서드 호출로 이루어집니다.
+Jesulkr v2.0은 **싱글톤 GameManager** 중심의 상태 관리 아키텍처를 사용합니다. SvelteKit의 반응형 시스템과 별도로, 게임 상태는 순수 TypeScript 클래스로 관리되며 DOM 조작은 명시적 메서드 호출로 이루어집니다.
 
-이 문서는 원작 HTML v1.5의 기능을 SvelteKit으로 포팅한 구조를 설명합니다.
-
-> **2026-06-11 현황**: Phase 0~5 리팩터링 완료. `svelte-check` 0 errors, 65 tests 통과. v1.5 기능(도구 해금, 마나 보너스 토글, 덱 관리, 키 설정 모달, 설계 미리보기, 모바일 감지 등)과 15개 Svelte 컴포넌트가 모두 통합되었습니다.
+> **2026-06-12 현황**: v2 Green/Stability 리팩터링 완료. `svelte-check` 0 errors, 141 tests 통과.
 
 v1.5의 핵심 기능:
 - **덱(Deck) 저장**: 5개 슬롯 묶음을 10개 세트로 저장/불러오기 (`StorageDecks`) ✅ 구현
@@ -113,41 +111,50 @@ Canvas 2D를 사용한 즉시 모드 렌더링:
 
 ### 4.1 부품 배치 (`src/lib/game/designer/Components.ts`)
 
-- **크기 정의**: `red`(1x1), `oval`(2x1/1x2), `kernel`(2x2), `mixedCore`(3x3)
+- **크기 정의**: `red`(1x1), `red3`(2x1), `oval`(2x1/1x2), `kernel`(2x2), `mixedCore`(3x3), `ultimateCore`(4x4) 등 18종
 - **충돌 검사**: AABB(축 정렬 경계 상자) 기반 오버랩 체크
 - **그리드 스냅**: 클릭 위치를 설계판 크기로 정규화 후 반올림
+- **추출기 색상**: `createComponentFromGridCoord`에 `color` 파라미터로 전달
 
-### 4.2 도선 네트워크 (`src/lib/game/designer/WireNetwork.ts`)
+### 4.2 색상별 도선망 (`src/lib/game/designer/WireNetwork.ts`)
 
-도선(`wire`)을 인접(4방향) 배치하면 하나의 네트워크로 연결됩니다.
+v2에서 도선망이 **색상별로 독립**됩니다.
 
 ```
-빨강 - wire - wire - 회로
+빨강 - wire - wire - 회로       (wire: 적/청 전달)
+초록 마나 - mediumWire - 회로   (mediumWire: 적/청/녹 전달)
 ```
 
-위 경우 회로는 빨간 마나와 연결된 것으로 간주됩니다.
+`buildColorConnectionGraph()`: red / blue / green 3개 `ConnectionGraph`를 독립적으로 생성.  
+`getConnectedComponentsByColor()`: 직접 인접 + 색상별 wire 그룹으로 연결된 컴포넌트 반환.
 
-`buildConnectionGraph()`:
-1. 모든 wire를 BFS로 그룹화
-2. 각 그룹의 인접 셀에 있는 비-wire 부품을 `components`에 등록
-3. 부품→그룹, 그룹→부품 양방향 매핑 생성
+기존 `buildConnectionGraph()` / `getConnectedComponents()`는 레거시 호환으로 유지.
 
-`getConnectedComponents()`:
-- 직접 인접한 부품 + 같은 wire 그룹에 연결된 모든 부품 반환
+### 4.3 안정도 시스템 (`src/lib/game/designer/StabilitySystem.ts`)
 
-### 4.3 통계 계산 (`src/lib/game/designer/StatsCalculator.ts`)
+- `isActiveStabilizer()`: 활성 blueGen과 blue 네트워크로 연결된 경우 활성화
+- `stabilityAt()`: 활성 stabilizer들 중 Chebyshev 거리 ≤ 1인 것들의 합산
+- `chebyshevDistance()`: 두 컴포넌트 바운딩박스 기준 Chebyshev 거리
 
-`calculateSpellStats(model)`는 설계된 술식의 전체 통계를 계산합니다.
+### 4.4 추출기 시스템 (`src/lib/game/designer/ExtractorSystem.ts`)
 
-**계산 순서**:
-1. 파란 마나 생성기 활성화 여부 판정 (연결된 빨간 마나 ≥ 1)
-2. 각 회로별 데미지 계산:
-   - `circle`: 연결 빨강 × 1
-   - `oval`: floor(빨강 / 2) × 5
-   - `kernel`: floor(빨강 / 3) × 12
-   - `mixed2`: min(빨강, 파랑) × 8
-   - `mixedCore`: min(빨강, floor(파랑/2), 인접 활성 circle 수) × (60 + 분산 3)
-3. 총합 및 유효성 판정
+- `extractorOutputTarget()`: 회전 방향에 따라 출력 대상 컴포넌트 결정
+- `extractorHasInputOfColor()`: 지정 색상이 추출기 입력 측에 연결됐는지 확인
+- `cycleExtractorColor()`: red → blue → green → red 색상 순환
+
+### 4.5 통계 계산 (`src/lib/game/designer/StatsCalculator.ts`)
+
+`calculateSpellStats(model)`는 v2 다중 패스로 전체 통계를 계산합니다.
+
+**계산 순서 (8단계)**:
+1. blueGen 활성화 (연결 빨강 ≥ 1)
+2. stabilizer 활성화 (활성 blueGen 연결)
+3. 안정도 맵 계산 (Chebyshev 거리 기반)
+4. mediumHub 활성화 (안정도 ≥ 1)
+5. 1~4 고정점 수렴까지 반복 (최대 5회)
+6. greenMana 활성화 (mixed2 직접 인접)
+7. 추출기 출력 결정
+8. 회로별 CalcContext 구성 → `def.calc()` 호출 → 데미지 합산
 
 **저장 가능 조건**:
 - 빨간 마나 ≥ 1
@@ -189,14 +196,22 @@ t('score');           // "점수"
 
 ## 7. 테스트
 
-Vitest를 사용한 단위 테스트:
+Vitest를 사용한 단위 테스트 (총 141 tests, 12 files):
 
 | 테스트 파일 | 대상 |
 |-------------|------|
-| `TargetingSystem.test.ts` | 타겟팅 우선순위, 클릭 선택 |
-| `Components.test.ts` | 부품 충돌, 크기, 배치 |
-| `StatsCalculator.test.ts` | 통계 계산, mixedCore 복합 조건 |
 | `WireNetwork.test.ts` | 도선 네트워크 BFS, 연결성 |
+| `ColorWireNetwork.test.ts` | 색상별 도선망 v2 |
+| `Components.test.ts` | 부품 충돌, 크기, 배치 |
+| `StabilitySystem.test.ts` | 안정도 계산, Chebyshev 거리 |
+| `ExtractorSystem.test.ts` | 추출기 방향, 색상 입력 |
+| `StatsCalculator.test.ts` | 통계 계산, mixedCore 복합 조건 |
+| `GreenStatsCalculator.test.ts` | 초록/안정도/ultimateCore 시나리오 |
+| `TargetingSystem.test.ts` | 타겟팅 우선순위, 클릭 선택 |
+| `BattleEngine.test.ts` | 전투 엔진, globalDamage |
+| `StorageSlots.test.ts` | 슬롯 저장/마이그레이션 |
+| `StorageRecords.test.ts` | 기록 저장/별 계산 |
+| `GameManager.test.ts` | 통합 상태 관리 |
 
 ```sh
 bun run test        # 한 번 실행
@@ -215,8 +230,8 @@ npm run build
 # build/ 디렉토리 업로드
 ```
 
-### 현재 빌드 상태 (2026-06-11)
+### 현재 빌드 상태 (2026-06-12)
 
 - `npm run check` 기준 **0 errors, 0 warnings**
-- `npm run test` 기준 **65 tests 통과** (5 files)
+- `npm run test` 기준 **141 tests 통과** (12 files)
 - `npm run build` **정상 성공**
