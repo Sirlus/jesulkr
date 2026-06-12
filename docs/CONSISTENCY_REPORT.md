@@ -67,9 +67,9 @@
 
 | 항목 | 설명 | 영향 |
 |------|------|------|
-| `PROTOTYPE_UNLOCK_ALL_TOOLS` | `constants.ts`에 정의만 있고 해금 로직(`isMapUnlocked`)에서 미사용 | 없음 (dead constant) |
-| `DamageResolver.ts` | 완전 구현됐으나 `BattleEngine`이 같은 로직을 인라인으로도 보유 | 없음 (기능 중복) |
-| `SMALL_WIRE.COLORS`, `MEDIUM_WIRE.COLORS` | 상수 정의는 있으나 `WireNetwork.ts`에서 type 직접 분기로 처리 | 없음 |
+| `PROTOTYPE_UNLOCK_ALL_TOOLS` | `constants.ts`에 개발자 메모로 주석만 남아 있으며 해금 로직(`isMapUnlocked`)에서 미사용 | 없음 |
+| `DamageResolver.ts` | `BattleEngine`가 `resolveCast()`로 위임하여 중복 로직 없음 | 없음 |
+| `SMALL_WIRE.COLORS`, `MEDIUM_WIRE.COLORS` | `WireNetwork.ts`가 `getWireColors()` 헬퍼를 통해 사용 | 없음 |
 
 ---
 
