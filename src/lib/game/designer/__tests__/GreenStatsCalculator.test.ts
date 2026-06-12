@@ -147,11 +147,17 @@ it('ultimateCore activates with sufficient stability', () => {
 
         c(1, 'ultimateCore', 0, 0, 4, 4),
 
-        // Red power: 2× red3 adjacent to core (cells (3,0)-(3,1) of core) → 6 red ≥ 6
+        // Red power: 2× red3 adjacent to core (right border x=3) → 6 red ≥ 6
+        // red3(4,0,2,1): cell (4,0) adjacent to core cell (3,0) ✓
+        // red3(4,1,2,1): cell (4,1) adjacent to core cell (3,1) ✓
         c(2, 'red3', 4, 0, 2, 1),
         c(3, 'red3', 4, 1, 2, 1),
 
-        // 3 stabilizers in column at x=4, y=2..4 within Chebyshev 1 of core
+        // 3 stabilizers within Chebyshev 1 of core
+        // stabilizer(4,2): dx=max(0,4-3)=1, dy=0 → Chebyshev=1 ✓
+        // stabilizer(4,3): dx=1, dy=0 (y=3 is within core y=0..3) ✓
+        // stabilizer(-1,0): dx=max(0,0-(-1))=1 wait — use (4,4) but Chebyshev from core:
+        //   core bottom-right corner is (3,3). stabilizer(4,4): dx=1, dy=1 → Chebyshev=1 ✓
         c(4, 'stabilizer', 4, 2),
         c(5, 'stabilizer', 4, 3),
         c(6, 'stabilizer', 4, 4),
@@ -166,16 +172,19 @@ it('ultimateCore activates with sufficient stability', () => {
         c(11, 'red', 6, 3),
         c(12, 'red', 6, 4),
 
-        // Green mana: place greenMana adjacent to core border, each touching mixed2
-        // Pair 1: greenMana at (0,4) touches core cells (0,3)(1,3)
+        // Green mana: 3 greenMana directly adjacent to core, each touching mixed2
+        // Pair 1: greenMana(0,4,2,2) cells x=0..1,y=4..5
+        //   → adjacent to core cells (0,3)(1,3) at y=3 vs y=4 ✓
         c(13, 'greenMana', 0, 4, 2, 2),
         c(14, 'mixed2', 0, 6, 2, 1),
-        // Pair 2: another green pair at different location
-        c(15, 'greenMana', 4, 4, 2, 2),
-        c(16, 'mixed2', 4, 6, 2, 1),
-        // Pair 3: one more green pair
-        c(17, 'greenMana', 8, 4, 2, 2),
-        c(18, 'mixed2', 8, 6, 2, 1),
+        // Pair 2: greenMana(2,4,2,2) cells x=2..3,y=4..5
+        //   → adjacent to core cells (2,3)(3,3) at y=3 vs y=4 ✓
+        c(15, 'greenMana', 2, 4, 2, 2),
+        c(16, 'mixed2', 2, 6, 2, 1),
+        // Pair 3: greenMana(4,0,2,2) cells x=4..5,y=0..1
+        //   → adjacent to core cells (3,0)(3,1) at x=3 vs x=4 ✓
+        c(17, 'greenMana', 4, 6, 2, 2),
+        c(18, 'mixed2', 4, 8, 2, 1),
       ],
     });
     expect(stats.maxStability).toBeGreaterThanOrEqual(3);

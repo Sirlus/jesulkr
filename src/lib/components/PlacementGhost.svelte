@@ -41,6 +41,7 @@
   <div
     class="piece placementGhost {preview.type}"
     class:invalid={!isValid}
+    class:vertical={preview.h > preview.w}
     class:extractor-red={preview.type === 'extractor' && preview.color === 'red'}
     class:extractor-blue={preview.type === 'extractor' && preview.color === 'blue'}
     class:extractor-green={preview.type === 'extractor' && preview.color === 'green'}
@@ -48,5 +49,6 @@
     style:top="{preview.y * 62}px"
     style:width="{preview.w * 58 + (preview.w - 1) * 4}px"
     style:height="{preview.h * 58 + (preview.h - 1) * 4}px"
+    style:transform={preview.type === 'extractor' ? `rotate(${preview.rotation * 90}deg)` : undefined}
   ></div>
 {/if}
