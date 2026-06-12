@@ -69,3 +69,10 @@ export const CIRCUIT_TYPES: Set<string> = new Set(
 export const STORABLE_TYPES: Set<string> = new Set(
   ALL_DEFS.filter(d => d.role !== 'tool').map(d => d.type),
 );
+
+/** 모든 부품 정의의 style을 합친 CSS 문자열 (전역 주입용) */
+export function getComponentStyles(): string {
+  return ALL_DEFS.map(d => d.style ?? '')
+    .filter(Boolean)
+    .join('\n');
+}

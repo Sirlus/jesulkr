@@ -24,4 +24,11 @@ export const mixedCore: ComponentDef = {
     if (inactiveCircleCount > 0) detail += ` / 비활성 1칸 회로 ${inactiveCircleCount}개 제외`;
     return { damage, aoe, detail };
   },
+  style: `
+.piece.mixedCore::after{width:78%;height:78%;border:5px solid var(--blue);border-radius:50%;box-shadow:0 0 24px rgba(81,168,255,.35),inset 0 0 20px rgba(255,70,92,.16);background:radial-gradient(circle,rgba(255,70,92,.3) 0 12%,transparent 13% 100%)}
+.piece.mixedCore::before{width:86%;height:28%;border:4px solid var(--blue);border-radius:50%;transform:rotate(-28deg);box-shadow:0 0 14px rgba(81,168,255,.35)}
+.previewPiece.mixedCore::after{content:"";position:absolute;display:block;left:8%;right:8%;top:8%;bottom:8%;border:2px solid var(--blue);border-radius:50%;background:radial-gradient(circle,rgba(255,70,92,.35) 0 14%,transparent 15%)}
+.toolIcon.mixedCore::after{left:3px;right:3px;top:3px;bottom:3px;border:4px solid var(--blue);border-radius:50%;background:radial-gradient(circle,rgba(255,70,92,.35) 0 18%,transparent 19%);box-shadow:0 0 12px rgba(81,168,255,.4)}
+.toolIcon.mixedCore::before{left:1px;right:1px;top:13px;height:12px;border:3px solid var(--blue);border-radius:50%;transform:rotate(-28deg)}
+`,
 };

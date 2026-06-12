@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { calculateSpellStats } from '../StatsCalculator';
-import type { Component } from '../../types';
-
-function c(id: number, type: string, x: number, y: number, w = 1, h = 1): Component {
-  return { id, type: type as any, x, y, w, h, rotation: 0 };
-}
+import { c } from './helpers';
 
 describe('calculateSpellStats', () => {
   it('invalid: empty design', () => {
@@ -75,7 +71,9 @@ describe('calculateSpellStats', () => {
     expect(s.manaCost).toBe(3);
   });
 
-  it('mixed2: red + active blueGen both adjacent', () => {
+  it('mixed2: red adjacent but blueGen not connected to mixed2', () => {
+    // blueGen(0,1) activates (adjacent to red(0,0)) but is NOT adjacent to mixed2(1,0..2,0)
+    // → blue=0 for mixed2 → min(1,0)×8=0 → no damage, invalid (no circuit damage)
     const s = calculateSpellStats({
       width: 3, height: 2,
       components: [
@@ -84,10 +82,9 @@ describe('calculateSpellStats', () => {
         c(3, 'mixed2', 1, 0, 2, 1),
       ],
     });
-    // mixed2(1,0)~(2,0). red(0,0) adj to mixed2 ✓
-    // blueGen(0,1) adj to red(0,0) → active! And adj to mixed2(1,0)? No, (0,1) right is (1,1) not in mixed2.
-    // So blueGen activates but doesn't connect to mixed2 → blue=0 for mixed2
-    // min(1,0)×8=0 → invalid
+    expect(s.damage).toBe(0);
+    expect(s.activeBlueCount).toBe(1);
+    expect(s.valid).toBe(false);
   });
 
   it('mixed2: blueGen adjacent to both red and mixed2', () => {

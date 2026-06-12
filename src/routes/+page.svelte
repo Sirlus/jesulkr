@@ -4,6 +4,9 @@
   import { gameState } from '$lib/stores/gameState.svelte';
   import { updateMobileLayout } from '$lib/game/utils/mobile';
   import '$lib/game/style.css';
+  import { getComponentStyles } from '$lib/game/designer/components/registry';
+
+  const componentStyles = getComponentStyles();
 
   import LanguageModal from '$lib/components/LanguageModal.svelte';
   import MainMenu from '$lib/components/MainMenu.svelte';
@@ -49,6 +52,8 @@
 
 <svelte:head>
   <title>Jesulkr</title>
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  {@html `<style>${componentStyles}</style>`}
 </svelte:head>
 
 <svelte:window

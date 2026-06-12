@@ -1,18 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { isActiveStabilizer, stabilityAt, chebyshevDistance } from '../StabilitySystem';
 import { buildColorConnectionGraph } from '../WireNetwork';
-import type { Component } from '../../types';
-
-function c(
-  id: number,
-  type: string,
-  x: number,
-  y: number,
-  w = 1,
-  h = 1,
-): Component {
-  return { id, type: type as any, x, y, w, h, rotation: 0 };
-}
+import { c } from './helpers';
 
 describe('chebyshevDistance', () => {
   it('returns 1 for orthogonal neighbors', () => {

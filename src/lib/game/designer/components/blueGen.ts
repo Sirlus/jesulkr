@@ -9,4 +9,11 @@ export const blueGen: ComponentDef = {
   size: { w: 1, h: 1 },
   requiredMap: 2,
   order: 1,
+  style: `
+.piece.blueGen::after{width:15px;height:15px;border-radius:50%;background:var(--blue);box-shadow:0 0 16px var(--blue),0 0 4px #fff inset}
+.piece.blueGen::before{width:26px;height:26px;border:2px solid rgba(255,70,92,.7);border-radius:50%;box-shadow:0 0 10px rgba(255,70,92,.22)}
+.previewPiece.blueGen::after{content:"";position:absolute;display:block;left:50%;top:50%;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);background:var(--blue);box-shadow:0 0 6px var(--blue)}
+.toolIcon.blueGen::after{left:50%;top:50%;width:15px;height:15px;border-radius:50%;transform:translate(-50%,-50%);background:var(--blue);box-shadow:0 0 12px var(--blue),0 0 4px #fff inset}
+.toolIcon.blueGen::before{left:50%;top:50%;width:28px;height:28px;border:2px solid var(--red);border-radius:50%;transform:translate(-50%,-50%);opacity:.75}
+`,
 };

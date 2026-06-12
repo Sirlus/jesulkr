@@ -1,20 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { cycleExtractorColor, extractorOutputTarget, extractorHasInputOfColor } from '../ExtractorSystem';
 import { buildColorConnectionGraph } from '../WireNetwork';
-import type { Component, ExtractorColor } from '../../types';
-
-function c(
-  id: number,
-  type: string,
-  x: number,
-  y: number,
-  w = 1,
-  h = 1,
-  rotation = 0,
-  color?: ExtractorColor,
-): Component {
-  return { id, type: type as any, x, y, w, h, rotation, color };
-}
+import { c } from './helpers';
 
 describe('cycleExtractorColor', () => {
   it('cycles red → blue → green → red', () => {

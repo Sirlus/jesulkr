@@ -9,4 +9,7 @@ export const eraser: ComponentDef = {
   size: { w: 1, h: 1 },
   requiredMap: 1,
   order: 8,
+  style: `
+.toolIcon.eraser::after{left:7px;top:9px;width:22px;height:14px;border-radius:4px;background:linear-gradient(135deg,#ff7380 0 50%,#cfe2fb 51%);transform:rotate(-18deg);box-shadow:0 0 8px rgba(255,115,128,.35)}
+`,
 };

@@ -74,4 +74,10 @@ export interface ComponentDef {
   order: number;
   /** 회로 데미지 계산 (role === 'circuit' 인 경우에만) */
   calc?: (ctx: CalcContext) => CalcResult;
+  /**
+   * 이 부품의 전역 CSS. 설계판 피스(.piece.타입)와 미리보기(.previewPiece.타입)
+   * 스타일을 여기에 둡니다. 레지스트리가 모든 def 의 style 을 모아 한 번에 주입합니다.
+   * 색 변수(--red 등)와 .piece/.previewPiece 베이스 규칙은 style.css 에 있습니다.
+   */
+  style?: string;
 }

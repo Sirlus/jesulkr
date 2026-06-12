@@ -6,12 +6,14 @@
 
 ---
 
-## 빠른 요약 (3곳만 건드리면 됩니다)
+## 빠른 요약 (한 파일 + 두 줄)
 
-1. `src/lib/game/designer/components/` 에 **새 파일 1개** 생성 (예: `fireburst.ts`)
+1. `src/lib/game/designer/components/` 에 **새 파일 1개** 생성 (예: `fireburst.ts`) — **비주얼 CSS도 이 파일 안에** 넣습니다
 2. `src/lib/game/designer/components/registry.ts` 에 **import 1줄 + 배열 1줄** 추가
 3. `src/lib/game/types.ts` 의 `ComponentType` 에 **타입 이름 1줄** 추가
-4. (선택) `src/lib/game/style.css` 에 비주얼 추가 — 안 하면 기존 모양 재사용 가능
+
+> 비주얼(piece/미리보기/팔레트 아이콘)은 def 파일의 `style` 필드에 CSS 문자열로 함께 넣습니다.
+> 더 이상 `style.css` 를 따로 건드릴 필요가 없습니다.
 
 ---
 
@@ -41,6 +43,14 @@ export const fireburst: ComponentDef = {
       detail: `min(빨강 ${red}, 파랑 ${blue}) = ${pairs}쌍 × 10`,
     };
   },
+
+  // 비주얼 CSS — 설계판 piece / 미리보기 / 팔레트 아이콘.
+  // 부품 클래스가 raw DOM 으로 붙으므로 전역 CSS 로 주입됩니다(스코프 X).
+  style: `
+.piece.fireburst::after{width:78%;height:78%;border:5px solid var(--red);border-radius:50%}
+.previewPiece.fireburst::after{content:"";position:absolute;display:block;left:8%;right:8%;top:8%;bottom:8%;border:2px solid var(--red);border-radius:50%}
+.toolIcon.fireburst::after{left:4px;right:4px;top:4px;bottom:4px;border:4px solid var(--red);border-radius:50%}
+`,
 };
 ```
 
@@ -50,6 +60,8 @@ export const fireburst: ComponentDef = {
 |------|------|
 | `red` | 이 회로에 연결된 빨간 마나 개수 |
 | `blue` | 이 회로에 연결된 활성 파란 마나 개수 |
+| `green` | 이 회로에 연결된 초록 마나 개수 |
+| `stability` | 이 회로에 적용된 안정도 |
 | `neighbors` | 이 부품과 직접 인접한 부품 배열 |
 | `connectedTo(부품, 조건)` | 특정 부품에 연결된 부품 중 조건에 맞는 개수 |
 | `component`, `components` | 이 부품 / 전체 부품 목록 |
@@ -59,9 +71,10 @@ export const fireburst: ComponentDef = {
 
 ```ts
 return {
-  damage: 일반_데미지,     // 필수
-  aoe: 분산_데미지,        // 선택 (없으면 0)
-  detail: '계산 설명 문구', // 필수 (통계창 breakdown 에 표시)
+  damage: 일반_데미지,       // 필수
+  aoe: 분산_데미지,          // 선택 (없으면 0)
+  globalDamage: 전체_데미지, // 선택 (모든 적에게 주는 피해)
+  detail: '계산 설명 문구',   // 필수 (통계창 breakdown 에 표시)
 };
 ```
 
@@ -112,11 +125,22 @@ export type ComponentType =
 
 ---
 
-## 4. (선택) 비주얼 추가
+## 4. 비주얼 CSS (def 의 `style` 필드)
 
-비주얼을 새로 만들지 않으면 설계판에서 부품이 빈 칸처럼 보일 수 있습니다.
-`src/lib/game/style.css` 에서 `.piece.기존타입::after` 규칙을 복사해
-`.piece.fireburst::after` 로 이름만 바꿔 재사용하는 것이 가장 쉽습니다.
+부품의 모양은 **같은 def 파일의 `style` 필드**에 CSS 문자열로 넣습니다.
+부품은 설계판에 raw DOM(`<div class="piece 타입">`)으로 그려지므로 **전역 CSS** 가 필요하며,
+registry 가 모든 def 의 `style` 을 모아 `+page.svelte` 에서 한 번에 주입합니다.
+
+세 가지 셀렉터를 채웁니다(가장 쉬운 방법은 기존 부품 CSS 를 복사해 타입 이름만 바꾸기):
+
+| 셀렉터 | 용도 |
+|--------|------|
+| `.piece.타입::after` / `::before` | 설계판에 배치된 모양 |
+| `.previewPiece.타입::after` / `::before` | 패널 미리보기 모양 (※ `content:"";position:absolute;display:block` 포함) |
+| `.toolIcon.타입::after` / `::before` | 팔레트 버튼 아이콘 |
+
+색상 변수: `var(--red)` `var(--blue)` `var(--green)` 등을 사용합니다.
+회전 가능 부품은 `.piece.타입.vertical::after` 규칙도 추가합니다.
 
 ---
 
@@ -144,9 +168,15 @@ export type ComponentType =
 >     const pairs = Math.min(red, blue);
 >     return { damage: pairs * 10, detail: `설명 ${pairs}` };
 >   },
+>   style: `
+> .piece.영문식별자::after{width:78%;height:78%;border:5px solid var(--red);border-radius:50%}
+> .previewPiece.영문식별자::after{content:"";position:absolute;display:block;left:8%;right:8%;top:8%;bottom:8%;border:2px solid var(--red);border-radius:50%}
+> .toolIcon.영문식별자::after{left:4px;right:4px;top:4px;bottom:4px;border:4px solid var(--red);border-radius:50%}
+> `,
 > };
 > ```
 >
+> 비주얼 CSS 는 위 `style` 필드 안에 함께 넣어줘(전역 CSS, 스코프 없음).
 > 그리고 registry.ts 에 추가할 import 줄과 배열 줄, types.ts 의 ComponentType 에 추가할 줄도 알려줘.
 
 ---

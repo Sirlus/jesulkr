@@ -9,4 +9,11 @@ export const wire: ComponentDef = {
   size: { w: 1, h: 1 },
   requiredMap: 2,
   order: 2,
+  style: `
+.piece.wire::after{left:12%;right:12%;top:43%;height:14%;border-radius:999px;background:var(--blue);box-shadow:0 0 10px var(--blue)}
+.piece.wire::before{top:12%;bottom:12%;left:43%;width:14%;border-radius:999px;background:var(--blue);box-shadow:0 0 10px var(--blue)}
+.previewPiece.wire::after{content:"";position:absolute;display:block;left:12%;right:12%;top:43%;height:14%;background:var(--blue);border-radius:999px;box-shadow:0 0 4px var(--blue)}
+.toolIcon.wire::after{left:5px;right:5px;top:15px;height:5px;background:var(--blue);border-radius:999px;box-shadow:0 0 8px var(--blue)}
+.toolIcon.wire::before{top:5px;bottom:5px;left:15px;width:5px;background:var(--blue);border-radius:999px;box-shadow:0 0 8px var(--blue)}
+`,
 };

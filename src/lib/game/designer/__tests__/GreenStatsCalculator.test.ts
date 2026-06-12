@@ -1,19 +1,10 @@
+/**
+ * Stats calculator tests for green-mana-based and stability-based circuits:
+ * greenMana, green3x2, greenPair2, ultimateCore, mediumHub.
+ */
 import { describe, it, expect } from 'vitest';
 import { calculateSpellStats } from '../StatsCalculator';
-import type { Component, ExtractorColor } from '../../types';
-
-function c(
-  id: number,
-  type: string,
-  x: number,
-  y: number,
-  w = 1,
-  h = 1,
-  rotation = 0,
-  color?: ExtractorColor,
-): Component {
-  return { id, type: type as any, x, y, w, h, rotation, color };
-}
+import { c } from './helpers';
 
 describe('v2 StatsCalculator', () => {
   it('red3 provides 3 red power and costs 2 mana', () => {
@@ -53,21 +44,22 @@ describe('v2 StatsCalculator', () => {
   });
 
   it('green3x2 deals 50 damage with green + blue and no red', () => {
+    // Layout (x→, y↓):
+    //   [greenMana 2×2][green3x2 3×2][blueGen]
+    //   [mixed2   2×1]               [red   ]
+    //
+    // greenMana(0,0,2,2) touches mixed2(0,2,2,1) → green active ✓
+    // green3x2(2,1,3,2) adjacent to greenMana cell (1,1) ✓
+    // green3x2(2,1,3,2) adjacent to blueGen cell (5,1) ✓
+    // blueGen(5,1) activated by red(5,0) ✓
+    // red(5,0) NOT adjacent to green3x2 (closest cell is (4,1)) ✓
     const stats = calculateSpellStats({
       width: 7, height: 3,
       components: [
-        // greenMana(0,0,2,2) touches mixed2(0,2,2,1) → green active ✓
         c(1, 'greenMana', 0, 0, 2, 2),
         c(2, 'mixed2', 0, 2, 2, 1),
-        // green3x2(2,1,3,2) adjacent to greenMana cell (1,1) ✓
-        // green3x2(2,1,3,2) adjacent to blueGen cell (5,1) ✓
         c(3, 'green3x2', 2, 1, 3, 2),
-        // blueGen(5,1) adjacent to green3x2 cell (4,1) ✓
-        // blueGen activated by red(5,0) adjacent ✓
         c(4, 'blueGen', 5, 1),
-        // red(5,0) adjacent to blueGen(5,1) → activates blueGen ✓
-        // red(5,0) is NOT adjacent to green3x2 (cells span x=2..4,y=1..2;
-        // closest cell(4,1) neighbors are (5,1)[blueGen],(3,1),(4,2),(4,0))
         c(5, 'red', 5, 0),
       ],
     });
@@ -119,7 +111,9 @@ describe('v2 StatsCalculator', () => {
     expect(stats.valid).toBe(true);
   });
 
-  it('ultimateCore requires stability', () => {
+  it('ultimateCore requires stability — inactive without stabilizers', () => {
+    // blueGen×2 adjacent to core → blue=2, red3×2 → red=6, greenMana → green=1
+    // but no stabilizers → stability=0 → core stays inactive
     const stats = calculateSpellStats({
       width: 8, height: 5,
       components: [
@@ -139,60 +133,93 @@ describe('v2 StatsCalculator', () => {
     expect(stats.damage).toBe(0);
   });
 
-it('ultimateCore activates with sufficient stability', () => {
+  it('ultimateCore activates with sufficient stability', () => {
+    // Grid (x→ y↓), core = (2,2,4,4) occupies x=2..5, y=2..5
+    //
+    //  x: 0  1  2  3  4  5  6  7
+    // y0: [gM2x2][gM2x2]  [m2  ]                     ← green#1 (top)
+    // y1: [gM2x2][gM2x2]  [m2  ]
+    // y2: [gM2x2][ core  ][r3 ][bG]
+    // y3: [gM2x2][ core  ][r3 ][bG]
+    // y4: [gM2x2][ core  ][bG][rd]
+    // y5: [gM2x2][ core  ][bG][rd]
+    // y6: [m2  ][s ][s ]      [s ]                    ← stabs (cheb=1 from core)
+    // y7:        [bG][bG]      [bG]
+    // y8:        [rd][rd]      [rd]
+    //
+    // Red (≥6): red3(6,2) + red3(6,3) → 3+3=6 ✓
+    //   both adjacent to core right border (x=5)
+    //
+    // Blue (≥2): blueGen(6,4) + red(7,4) ✓
+    //            blueGen(6,5) + red(7,5) ✓
+    //   both adjacent to core, both activated
+    //
+    // Stabilizer (×3, cheb ≤ 1 from core y=2..5):
+    //   stab(2,6): cheb = max(0, 6-5)=1 ✓  → blueGen(2,7)+red(2,8)
+    //   stab(3,6): cheb = max(0, 1)=1 ✓    → blueGen(3,7)+red(3,8)
+    //   stab(5,6): cheb = max(0, 1)=1 ✓    → blueGen(5,7)+red(5,8)
+    //
+    // Green (≥3): three greenMana adjacent to core
+    //   greenMana(2,0,2,2): x=2..3,y=0..1, adjacent to core(2,2) via (2,1)-(2,2) ✓
+    //     mixed2(4,0,2,1) at x=4..5,y=0 → adjacent to greenMana#1 cell(3,0) ✓
+    //   greenMana(0,2,2,2): x=0..1,y=2..3, adjacent to core(2,2) via (1,2)-(2,2) ✓
+    //     mixed2(0,1,2,1) at x=0..1,y=1 → adjacent to greenMana#2 cell(0,2) ✓
+    //   greenMana(0,4,2,2): x=0..1,y=4..5, adjacent to core(2,4) via (1,4)-(2,4) ✓
+    //     mixed2(0,6,2,1) at x=0..1,y=6 → adjacent to greenMana#3 cell(0,5) ✓
+    //
+    // All conditions met → damage=1400, globalDamage=100
+
     const stats = calculateSpellStats({
-      width: 12, height: 10,
+      width: 10, height: 10,
       components: [
-        // ultimateCore(0,0,4,4) spans x=0..3, y=0..3
+        // core: x=2..5, y=2..5
+        c(1, 'ultimateCore', 2, 2, 4, 4),
 
-        c(1, 'ultimateCore', 0, 0, 4, 4),
+        // Red (≥6): two red3 adjacent to core right border (x=5)
+        c(2, 'red3', 6, 2, 2, 1),   // (6,2)(7,2) → adjacent to core(5,2) ✓
+        c(3, 'red3', 6, 3, 2, 1),   // (6,3)(7,3) → adjacent to core(5,3) ✓
 
-        // Red power: 2× red3 adjacent to core (right border x=3) → 6 red ≥ 6
-        // red3(4,0,2,1): cell (4,0) adjacent to core cell (3,0) ✓
-        // red3(4,1,2,1): cell (4,1) adjacent to core cell (3,1) ✓
-        c(2, 'red3', 4, 0, 2, 1),
-        c(3, 'red3', 4, 1, 2, 1),
+        // Blue (≥2): two blueGens adjacent to core right border, each with own red
+        c(4, 'blueGen', 6, 4),       // adjacent to core(5,4) ✓
+        c(5, 'red',     7, 4),       // activates blueGen(6,4)
+        c(6, 'blueGen', 6, 5),       // adjacent to core(5,5) ✓
+        c(7, 'red',     7, 5),       // activates blueGen(6,5)
 
-        // 3 stabilizers within Chebyshev 1 of core
-        // stabilizer(4,2): dx=max(0,4-3)=1, dy=0 → Chebyshev=1 ✓
-        // stabilizer(4,3): dx=1, dy=0 (y=3 is within core y=0..3) ✓
-        // stabilizer(-1,0): dx=max(0,0-(-1))=1 wait — use (4,4) but Chebyshev from core:
-        //   core bottom-right corner is (3,3). stabilizer(4,4): dx=1, dy=1 → Chebyshev=1 ✓
-        c(4, 'stabilizer', 4, 2),
-        c(5, 'stabilizer', 4, 3),
-        c(6, 'stabilizer', 4, 4),
+        // Stabilizers (Chebyshev ≤ 1 from core), each with its own blueGen+red
+        c(8,  'stabilizer', 2, 6),   // cheb=max(0, 6-5)=1 ✓
+        c(9,  'blueGen',    2, 7),
+        c(10, 'red',        2, 8),
 
-        // BlueGens adjacent to each stabilizer
-        c(7, 'blueGen', 5, 2),
-        c(8, 'blueGen', 5, 3),
-        c(9, 'blueGen', 5, 4),
+        c(11, 'stabilizer', 3, 6),   // cheb=max(0, 1)=1 ✓
+        c(12, 'blueGen',    3, 7),
+        c(13, 'red',        3, 8),
 
-        // Reds adjacent to each blueGen (activates blueGen)
-        c(10, 'red', 6, 2),
-        c(11, 'red', 6, 3),
-        c(12, 'red', 6, 4),
+        c(14, 'stabilizer', 5, 6),   // cheb=max(0, 1)=1 ✓
+        c(15, 'blueGen',    5, 7),
+        c(16, 'red',        5, 8),
 
-        // Green mana: 3 greenMana directly adjacent to core, each touching mixed2
-        // Pair 1: greenMana(0,4,2,2) cells x=0..1,y=4..5
-        //   → adjacent to core cells (0,3)(1,3) at y=3 vs y=4 ✓
-        c(13, 'greenMana', 0, 4, 2, 2),
-        c(14, 'mixed2', 0, 6, 2, 1),
-        // Pair 2: greenMana(2,4,2,2) cells x=2..3,y=4..5
-        //   → adjacent to core cells (2,3)(3,3) at y=3 vs y=4 ✓
-        c(15, 'greenMana', 2, 4, 2, 2),
-        c(16, 'mixed2', 2, 6, 2, 1),
-        // Pair 3: greenMana(4,0,2,2) cells x=4..5,y=0..1
-        //   → adjacent to core cells (3,0)(3,1) at x=3 vs x=4 ✓
-        c(17, 'greenMana', 4, 6, 2, 2),
-        c(18, 'mixed2', 4, 8, 2, 1),
+        // Green (≥3): three greenMana adjacent to core
+        c(17, 'greenMana', 2, 0, 2, 2),  // (2,0)(3,0)(2,1)(3,1) — adjacent to core(2,2) ✓
+        c(18, 'mixed2',    4, 0, 2, 1),  // (4,0)(5,0) — adjacent to greenMana#1 (3,0) ✓
+
+        c(19, 'greenMana', 0, 2, 2, 2),  // (0,2)(1,2)(0,3)(1,3) — adjacent to core(2,2) ✓
+        c(20, 'mixed2',    0, 1, 2, 1),  // (0,1)(1,1) — adjacent to greenMana#2 (0,2) ✓
+
+        c(21, 'greenMana', 0, 4, 2, 2),  // (0,4)(1,4)(0,5)(1,5) — adjacent to core(2,4) ✓
+        c(22, 'mixed2',    0, 6, 2, 1),  // (0,6)(1,6) — adjacent to greenMana#3 (0,5) ✓
       ],
     });
+
+    expect(stats.activeBlueCount).toBeGreaterThanOrEqual(2);
+    expect(stats.activeStabilizerCount).toBeGreaterThanOrEqual(3);
     expect(stats.maxStability).toBeGreaterThanOrEqual(3);
+    expect(stats.greenCount).toBeGreaterThanOrEqual(3);
     expect(stats.damage).toBe(1400);
     expect(stats.globalDamage).toBe(100);
   });
 
   it('mediumHub enables network only when active', () => {
+    // Without stability — hub inactive → circle gets no red
     const statsWithoutStability = calculateSpellStats({
       width: 5, height: 2,
       components: [
@@ -203,9 +230,12 @@ it('ultimateCore activates with sufficient stability', () => {
         c(5, 'circle', 4, 0),
       ],
     });
-    // hub inactive without stability → circle gets no red
     expect(statsWithoutStability.damage).toBe(0);
 
+    // With stability — hub active → circle gets 1 red
+    // stabilizer(3,1): Chebyshev from hub(2,0) = max(1,1) = 1 ✓
+    // blueGen(2,1) adjacent to stabilizer ✓, activated by red(2,2) ✓
+    // red(2,2) is NOT adjacent to any wire in the mediumWire network
     const statsWithStability = calculateSpellStats({
       width: 6, height: 4,
       components: [
@@ -214,16 +244,11 @@ it('ultimateCore activates with sufficient stability', () => {
         c(3, 'mediumHub', 2, 0),
         c(4, 'mediumWire', 3, 0),
         c(5, 'circle', 4, 0),
-        // Stabilizer at (3,1) within Chebyshev 1 of hub(2,0): dx=1,dy=1 → 1 ✓
         c(6, 'stabilizer', 3, 1),
-        // blueGen at (2,1) adjacent to stabilizer(3,1) ✓ (blue graph direct neighbor)
         c(7, 'blueGen', 2, 1),
-        // red(2,2) adjacent to blueGen(2,1) ✓ — activates blueGen
-        // red(2,2) is NOT adjacent to mediumWire(1,0) or (3,0) — no extra red in wire network
         c(8, 'red', 2, 2),
       ],
     });
-    // stabilizer active, hub active, circle gets exactly 1 red from red(0,0) only
     expect(statsWithStability.damage).toBe(1);
   });
 });
