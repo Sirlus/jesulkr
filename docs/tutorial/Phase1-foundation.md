@@ -1,118 +1,84 @@
-# Phase 1: 기반 구축 (Foundation)
+# Phase 1 — 기반 구축 ✅ 완료 (2026-06-12)
 
-> 예상 시간: 2시간
-> 선행 조건: 없음
+> 원래 계획과 달리 Toast 기반 맥락 힌트 대신 슬라이드 모달 방식으로 구현.  
+> `TutorialHints.ts` 유틸리티는 불필요해져 생략.
 
-## 작업 목록
+---
 
-### 1.1 튜토리얼 Seen 플래그 함수 추가
-**파일**: `src/lib/game/core/StorageMisc.ts` (신규)
+## 구현 내용
+
+### 1-A. 스토리지 연결
+
+`StorageMisc.ts`에 `loadTutorialSeen()` / `saveTutorialSeen()`이 이미 존재했음.  
+`game.ts`에 `saveTutorialSeen()` 퍼블릭 메서드를 추가해 컴포넌트에서 호출 가능하게 연결.
 
 ```typescript
-// ============================================================
-// Storage — Miscellaneous (튜토리얼 Seen 등)
-// ============================================================
-import { STORAGE_KEY_TUTORIAL_SEEN } from '../constants';
-
-export function loadTutorialSeen(): boolean {
-  return localStorage.getItem(STORAGE_KEY_TUTORIAL_SEEN) === 'true';
-}
-
-export function saveTutorialSeen(seen: boolean): void {
-  localStorage.setItem(STORAGE_KEY_TUTORIAL_SEEN, String(seen));
+// src/lib/stores/game.ts
+saveTutorialSeen() {
+  this.store.tutorialSeen = true;
+  Storage.saveTutorialSeen(true);
 }
 ```
 
-**기존 파일에 통합する場合**:
-- `src/lib/game/core/StorageBase.ts` 또는
-- `src/lib/game/controllers/StorageController.ts`
+### 1-B. 온보딩 모달 (`TutorialModal.svelte`)
 
-### 1.2 i18n에 힌트 메시지 추가
-**파일**: `src/lib/game/i18n/ko.ts`, `src/lib/game/i18n/en.ts`
+언어 선택 직후 첫 실행에만 표시. 완료/건너뛰기 시 `tutorialSeen = 'seen'` 저장 → 이후 영구 숨김.
 
-```typescript
-// ko.ts에 추가
-'hint.open.designer': '설계 화면에서 D를 눌러 술식을 설계하세요',
-'hint.place.components': '빨간 마나와 회로를 배치하세요',
-'hint.save.slot': '저장 버튼을 눌러 슬롯에 저장하세요',
-'hint.start.battle': '전투 시작 버튼을 눌러 전투를 시작하세요',
-'hint.cast.spells': '키 1~5로 술식을 발사하세요',
-'hint.select.tool': '도구를 선택하고 설계판을 클릭하세요.',
-'hint.congratulations': '첫 술식을 저장했습니다! 전투를 시작해 보세요.',
-'help': '도움말',
+**슬라이드 5장**
 
-// en.ts에 추가
-'hint.open.designer': 'Press D to open the spell designer',
-'hint.place.components': 'Place red mana and a circuit',
-'hint.save.slot': 'Click Save to save to a slot',
-'hint.start.battle': 'Click Start Battle to begin',
-'hint.cast.spells': 'Press 1~5 to cast spells',
-'hint.select.tool': 'Select a tool and click the design board.',
-'hint.congratulations': 'Spell saved! Start the battle.',
-'help': 'Help',
+| # | 키 | 내용 |
+|---|-----|------|
+| 1 | `tut.s1.*` | 게임 루프 요약 |
+| 2 | `tut.s2.*` | 빨간 마나 + 3가지 회로 + 쿨타임 원리 |
+| 3 | `tut.s3.*` | 도선 + 파란 마나 + 혼합 회로 |
+| 4 | `tut.s4.*` | 슬롯 발사 + 자동/수동 + autoManaReserve |
+| 5 | `tut.s5.*` | 맵 해금 + 별 + 마나 보너스 |
+
+**UX**
+- 점 인디케이터 클릭으로 임의 슬라이드 이동
+- 키보드: `→` / `Enter` 다음, `←` 이전, `Esc` 건너뛰기
+- 건너뛰기 버튼 우상단 상시 노출
+
+### 1-C. 빈 보드 힌트 (`DesignerPanel.svelte`)
+
+```svelte
+{#if gameState.designer.components.length === 0}
+  <div class="emptyBoardHint" aria-hidden="true">
+    <div class="emptyBoardHintInner">
+      <b>{t('hint.empty.board.title')}</b>
+      {t('hint.empty.board.body')}
+    </div>
+  </div>
+{/if}
 ```
 
-### 1.3 TutorialHints 유틸리티 함수 작성
-**파일**: `src/lib/game/ui/TutorialHints.ts` (신규)
+부품을 하나라도 놓으면 즉시 사라짐.
 
-```typescript
-// ============================================================
-// Tutorial Hints — 온보딩 힌트 표시 유틸리티
-// ============================================================
-import { showToast } from './Toast';
-import { loadTutorialSeen, saveTutorialSeen } from '../core/StorageMisc';
-import { t } from '../i18n';
+### 1-D. i18n 추가 키
 
-export type HintType =
-  | 'open-designer'
-  | 'place-components'
-  | 'save-slot'
-  | 'start-battle'
-  | 'cast-spells'
-  | 'congratulations';
+| 키 패턴 | 용도 |
+|---------|------|
+| `tut.skip`, `tut.prev`, `tut.next`, `tut.start` | 슬라이드 UI 버튼 |
+| `tut.s1~5.title`, `tut.s1~5.body` | 슬라이드 본문 |
+| `hint.empty.board.title`, `hint.empty.board.body` | 빈 보드 힌트 |
 
-/** 힌트 표시 여부 확인 */
-export function shouldShowHint(type: HintType): boolean {
-  return loadTutorialSeen();
-}
+ko/en 모두 완료.
 
-/** 특정 힌트 표시 (중복 방지) */
-export function showHint(type: HintType): void {
-  const messages: Record<HintType, string> = {
-    'open-designer': t('hint.open.designer'),
-    'place-components': t('hint.place.components'),
-    'save-slot': t('hint.save.slot'),
-    'start-battle': t('hint.start.battle'),
-    'cast-spells': t('hint.cast.spells'),
-    'congratulations': t('hint.congratulations'),
-  };
-  
-  showToast(messages[type] || '', 'info');
-}
+---
 
-/** 튜토리얼 완료 처리 */
-export function completeTutorial(): void {
-  saveTutorialSeen(true);
-}
+## 관련 파일
+
+```
+src/lib/components/TutorialModal.svelte   ← 신규
+src/lib/components/DesignerPanel.svelte   ← 빈 보드 힌트 추가
+src/lib/game/i18n/ko.ts / en.ts          ← tut.*, hint.empty.board.* 추가
+src/lib/game/style.css                    ← .tutorialOverlay, .emptyBoardHint CSS
+src/lib/stores/game.ts                    ← saveTutorialSeen() 추가
+src/routes/+page.svelte                   ← <TutorialModal /> 삽입
 ```
 
 ---
 
-## 완료 체크리스트
+## 다음 단계
 
-- [ ] 1.1 StorageMisc.ts 파일 생성 또는 기존 Storage에 통합
-- [ ] 1.2 i18n/ko.ts에 힌트 메시지 8개 추가
-- [ ] 1.3 i18n/en.ts에 힌트 메시지 8개 추가
-- [ ] 1.4 TutorialHints.ts 파일 생성
-- [ ] 1.5 bun run check 통과 확인
-
----
-
-## 예상 산출물
-
-| 파일 | 상태 |
-|-----|------|
-| `src/lib/game/core/StorageMisc.ts` | 신규 또는 통합 |
-| `src/lib/game/ui/TutorialHints.ts` | 신규 |
-| `i18n/ko.ts` | 수정 |
-| `i18n/en.ts` | 수정 |
+→ [Phase 2](./Phase2-toolinfo-and-help-button.md)
