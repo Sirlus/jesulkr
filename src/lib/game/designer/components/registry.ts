@@ -8,25 +8,43 @@
 // 그러면 팔레트/설명/크기/해금/데미지 계산에 자동 반영됩니다.
 import type { ComponentDef } from './def';
 import { red } from './red';
+import { red3 } from './red3';
 import { blueGen } from './blueGen';
 import { wire } from './wire';
+import { mediumWire } from './mediumWire';
+import { mediumHub } from './mediumHub';
+import { extractor } from './extractor';
+import { stabilizer } from './stabilizer';
 import { circle } from './circle';
 import { oval } from './oval';
 import { kernel } from './kernel';
 import { mixed2 } from './mixed2';
+import { greenMana } from './greenMana';
+import { green3x2 } from './green3x2';
+import { greenPair2 } from './greenPair2';
 import { mixedCore } from './mixedCore';
+import { ultimateCore } from './ultimateCore';
 import { eraser } from './eraser';
 
 /** 등록된 모든 부품 정의 */
 export const ALL_DEFS: ComponentDef[] = [
   red,
+  red3,
   blueGen,
   wire,
+  mediumWire,
+  mediumHub,
+  extractor,
+  stabilizer,
   circle,
   oval,
   kernel,
   mixed2,
+  greenMana,
+  green3x2,
+  greenPair2,
   mixedCore,
+  ultimateCore,
   eraser,
 ];
 
