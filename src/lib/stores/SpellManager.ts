@@ -16,7 +16,7 @@ export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
     showToast(t('invalid.slot'), 'bad');
     return;
   }
-  const stats = gm.spellStats();
+const stats = gm.spellStats();
   if (!stats.valid) { showToast(t('invalid.spell'), 'bad'); return; }
   const n = (name || '').trim() || (t('unnamed.spell') || '이름 없는 술식');
   const spell: SpellData = {
@@ -29,6 +29,7 @@ export function saveSpell(gm: GameManager, name: string, slotIndex: number) {
     manaCost: stats.manaCost,
     damage: stats.damage,
     aoeDamage: stats.aoeDamage,
+    globalDamage: stats.globalDamage ?? 0, // v2
     breakdown: stats.breakdown,
   };
   gm.store.slots[normalizedSlotIndex] = spell;

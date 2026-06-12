@@ -1,6 +1,7 @@
 import { TOOL_ORDER } from '$lib/game/constants';
 import { createComponentFromGridCoord, canPlaceComponent } from '$lib/game/designer/Components';
 import { calculateSpellStats } from '$lib/game/designer/StatsCalculator';
+import { cycleExtractorColor as cycleExtractorColorPure } from '$lib/game/designer/ExtractorSystem';
 import { t } from '$lib/game/i18n';
 import { showToast } from '$lib/game/ui/Toast';
 import { isToolUnlocked } from '$lib/game/utils/progression';
@@ -20,6 +21,10 @@ export function setTool(gm: GameManager, tool: string) {
 
 export function rotateTool(gm: GameManager) {
   gm.designer.rotation = gm.designer.rotation === 0 ? 1 : 0;
+}
+
+export function cycleExtractorColor(gm: GameManager) {
+  gm.designer.extractorColor = cycleExtractorColorPure(gm.designer.extractorColor);
 }
 
 export function setFrame(gm: GameManager, width: number, height: number) {

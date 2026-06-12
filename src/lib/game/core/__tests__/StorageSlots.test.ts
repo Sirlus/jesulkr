@@ -70,12 +70,12 @@ describe('loadSlots / saveSlots', () => {
     expect(slots.length).toBe(5);
   });
 
-  it('round-trips a slot with a valid spell', () => {
+it('round-trips a slot with a valid spell', () => {
     saveSlots([
       { id: 's1', name: 'Fire', width: 2, height: 2, components: [
         { id: 1, type: 'circle', x: 0, y: 0, w: 1, h: 1, rotation: 0 },
         { id: 2, type: 'red', x: 1, y: 0, w: 1, h: 1, rotation: 0 },
-      ], castTime: 4, manaCost: 1, damage: 1, aoeDamage: 0, breakdown: [] },
+      ], castTime: 4, manaCost: 1, damage: 1, aoeDamage: 0, globalDamage: 0, breakdown: [] },
       null, null, null, null,
     ]);
     const loaded = loadSlots();

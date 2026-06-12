@@ -39,7 +39,7 @@ export function normalizeSpell(raw: unknown): SpellData | null {
       components.push(comp);
     }
   }
-  const stats = calculateSpellStats({ width, height, components });
+const stats = calculateSpellStats({ width, height, components });
   if (!stats.valid) return null;
   return {
     id: r.id || `loaded_${Date.now()}`,
@@ -49,6 +49,7 @@ export function normalizeSpell(raw: unknown): SpellData | null {
     manaCost: stats.manaCost,
     damage: stats.damage,
     aoeDamage: stats.aoeDamage,
+    globalDamage: stats.globalDamage ?? 0, // v2
     breakdown: stats.breakdown,
   };
 }
