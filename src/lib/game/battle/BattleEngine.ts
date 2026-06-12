@@ -148,11 +148,23 @@ export function updateBattleTick(
       if (target) {
         target.hp -= c.spell.damage;
         e.push({ type: 'hit' as const, x: target.x, y: target.y, t: 0, life: 0.5, text: `-${c.spell.damage}` });
-        const aoe = c.spell.aoeDamage || 0;
+const aoe = c.spell.aoeDamage || 0;
         if (aoe > 0) {
           const aoeT = m.filter(x => x.hp > 0).sort((a, b) => b.y - a.y).slice(0, 3);
           for (const at of aoeT) { at.hp -= aoe; e.push({ type: 'hit' as const, x: at.x, y: at.y, t: 0, life: 0.42, text: `-${aoe}` }); }
           e.push({ type: 'aoe' as const, x: ctx.canvasWidth / 2, y: ctx.canvasHeight / 2, t: 0, life: 0.55, text: `분산 ${aoe}` });
+        }
+
+        // v2: global damage (all monsters)
+        const global = Number(c.spell.globalDamage) || 0;
+        if (global > 0) {
+          for (const mon of m) {
+            if (mon.hp > 0) {
+              mon.hp -= global;
+              e.push({ type: 'hit' as const, x: mon.x, y: mon.y, t: 0, life: 0.35, text: `-${global}` });
+            }
+          }
+          e.push({ type: 'aoe' as const, x: ctx.canvasWidth / 2, y: ctx.canvasHeight / 2, t: 0, life: 0.6, text: `전체 ${global}` });
         }
         for (const mon of m) {
           if (mon.hp <= 0) {

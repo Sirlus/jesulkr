@@ -65,15 +65,21 @@ export function tryCastSlot(
     return { result: { success: false } };
   }
 
-  const target = getCurrentTarget(monsters, selectedTargetId);
+const target = getCurrentTarget(monsters, selectedTargetId);
   if (!target) {
     return { result: { success: false, message: '대상 없음' } };
   }
 
+  // v2: Ensure globalDamage has default value for legacy spell data
+  const safeSpell = {
+    ...spell,
+    globalDamage: Number(spell.globalDamage) || 0,
+  };
+
   const newMana = mana - spell.manaCost;
   const projectile: CastProjectile = {
     id: Date.now() + Math.random(), // unique enough
-    spell: clone(spell),
+    spell: clone(safeSpell),
     targetId: target.id,
     slotIndex: index,
     remainingTicks: HIT_DELAY_TICKS,

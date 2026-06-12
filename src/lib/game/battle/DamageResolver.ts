@@ -56,6 +56,22 @@ export function resolveCast(
     });
   }
 
+  // v2: Global damage (all monsters)
+  const global = Number(cast.spell.globalDamage) || 0;
+  if (global > 0) {
+    for (const m of monsters) {
+      if (m.hp > 0) {
+        m.hp -= global;
+        effects.push({
+          type: 'hit', x: m.x, y: m.y, t: 0, life: 0.35, text: `-${global}`,
+        });
+      }
+    }
+    aoeEffects.push({
+      type: 'aoe', x: canvasWidth / 2, y: canvasHeight / 2, t: 0, life: 0.6, text: `전체 ${global}`,
+    });
+  }
+
   // Score and kill effects
   let scoreDelta = 0;
   let killedAny = false;
