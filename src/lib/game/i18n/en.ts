@@ -168,6 +168,9 @@ const en: Record<string, string> = {
   'tut2.step4': 'Damage is live! Click [Save to Slot] on the right.',
   'tut2.step5': 'Spell saved! Click [Start Battle] to begin.',
   'tut2.step6': 'Press key 1 or click a slot to cast your spell!',
+  'tut2.step7': 'Too slow? Use the speed buttons to fast-forward.\nYou can also press Z / X / C / V. Give it a try.',
+  'tut2.step8': 'Your base fell.\nNow you have a feel for what works.\nHead back to the designer and build a stronger spell!',
+  'tut2.step8.cta': 'Back to Designer',
 };
 
 export default en;

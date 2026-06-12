@@ -203,7 +203,7 @@
   }
 
   // 현재 단계가 게임오버 단계인지
-  const isGameOverStep = $derived(active && step === STEPS.length - 1 && STEPS[step].noOverlay);
+  const isGameOverStep = $derived(active && step === STEPS.length - 1 && !!(STEPS[step] as { noOverlay?: boolean }).noOverlay);
 </script>
 
 <svelte:window onresize={onResize} />
