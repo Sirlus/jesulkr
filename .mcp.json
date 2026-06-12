@@ -13,6 +13,13 @@
       "args": ["/home/dev/.kiro/mcp-servers/shell-workaround/index.js"],
       "env": {},
       "alwaysAllow": ["exec_with_output", "exec_check_success", "exec_to_file"]
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {},
+      "alwaysAllow": []
     }
   }
 }

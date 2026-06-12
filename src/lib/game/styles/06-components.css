@@ -1,0 +1,356 @@
+/* ================================================
+   Components - 재사용 컴포넌트
+   ================================================ */
+
+/* 덱 컨트롤 */
+.deckControls {
+	border: 1px solid #25456f;
+	border-radius: 14px;
+	background: rgba(3, 8, 17, 0.42);
+	padding: 10px;
+	margin: 10px 0;
+	display: grid;
+	gap: 8px;
+}
+
+.deckHead {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	align-items: center;
+}
+
+.deckHead b {
+	font-size: 17px;
+}
+
+.deckHead span {
+	font-size: 12px;
+	color: var(--muted);
+}
+
+.deckRow {
+	display: grid;
+	grid-template-columns: minmax(120px, 1fr) 1.2fr 1fr;
+	gap: 6px;
+	align-items: center;
+}
+
+.deckNameRow {
+	grid-template-columns: minmax(120px, 1fr) minmax(140px, 1.4fr) auto;
+}
+
+.deckControls button,
+.deckControls select,
+.deckControls input {
+	padding: 7px 8px;
+	font-size: 13px;
+}
+
+.deckStatus {
+	color: #c9dcf6;
+}
+
+/* 키바인드 컨트롤 */
+.keybindControls {
+	border: 1px solid #27456e;
+	border-radius: 14px;
+	background: rgba(3, 8, 16, 0.42);
+	padding: 10px;
+	display: grid;
+	gap: 8px;
+}
+
+.keybindHead {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	align-items: center;
+	color: #cfe2fb;
+	font-size: 13px;
+}
+
+.keybindHead b {
+	color: #fff;
+}
+
+.keybindHead span {
+	color: var(--muted);
+	font-size: 12px;
+}
+
+.keybindGrid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 6px;
+}
+
+.keyBindBtn {
+	padding: 8px 4px;
+	font-size: 12px;
+	min-height: 46px;
+}
+
+.keyBindBtn b {
+	display: block;
+	color: var(--gold);
+	font-size: 15px;
+	margin-bottom: 2px;
+}
+
+.keyBindBtn.capturing {
+	border-color: var(--gold);
+	background: rgba(255, 215, 109, 0.13);
+	box-shadow: 0 0 14px rgba(255, 215, 109, 0.18);
+}
+
+.keybindReset {
+	font-size: 12px;
+	padding: 7px 8px;
+}
+
+/* 사이드 컨트롤 */
+.sideControls {
+	display: grid;
+	gap: 8px;
+}
+
+/* 로드 버튼 */
+.loadButtons {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 6px;
+}
+
+.loadButtons button {
+	padding: 8px 4px;
+	font-size: 12px;
+}
+
+/* 상태 유틸리티 */
+.danger {
+	border-color: #713240;
+	background: rgba(255, 70, 92, 0.08);
+}
+
+.good {
+	border-color: #297555;
+	background: rgba(112, 255, 192, 0.08);
+}
+
+/* 언락 코드 */
+.unlockCodeRow {
+	display: grid;
+	grid-template-columns: auto minmax(140px, 220px) auto;
+	gap: 8px;
+	align-items: center;
+	border: 1px solid #223b5f;
+	border-radius: 14px;
+	background: rgba(3, 8, 16, 0.42);
+	padding: 10px;
+	margin: 0 0 12px 0;
+	color: #c9dcf6;
+}
+
+.unlockCodeRow input {
+	width: 100%;
+	padding: 7px 10px;
+}
+
+/* 실행 모드 */
+.runModeRow {
+	display: grid;
+	grid-template-columns: auto 1fr 1fr;
+	gap: 8px;
+	align-items: center;
+	border: 1px solid #223b5f;
+	border-radius: 14px;
+	background: rgba(3, 8, 16, 0.42);
+	padding: 10px;
+	margin: 0 0 12px 0;
+	color: #c9dcf6;
+}
+
+.runModeRow > span {
+	font-weight: 850;
+}
+
+.runModeBtn {
+	min-height: 42px;
+	font-weight: 900;
+}
+
+.runModeBtn.active {
+	border-color: var(--gold);
+	background: rgba(255, 215, 109, 0.13);
+	color: #ffe59a;
+	box-shadow: 0 0 12px rgba(255, 215, 109, 0.13);
+}
+
+.modeNote {
+	font-size: 12px;
+	color: var(--muted);
+	grid-column: 2/4;
+	line-height: 1.4;
+}
+
+/* 프리뷰 */
+.preview {
+	position: relative;
+	width: max-content;
+	max-width: 180px;
+	margin-top: 4px;
+}
+
+.previewCell {
+	position: absolute;
+	border: 1px solid rgba(81, 168, 255, 0.28);
+	border-radius: 3px;
+	background: rgba(3, 8, 16, 0.45);
+}
+
+.previewPiece {
+	position: absolute;
+	pointer-events: none;
+	border-radius: 3px;
+}
+
+/* 토스트 */
+#toast {
+	position: fixed;
+	left: 50%;
+	bottom: 22px;
+	transform: translateX(-50%) translateY(20px);
+	opacity: 0;
+	pointer-events: none;
+	padding: 10px 14px;
+	border: 1px solid #345b8d;
+	border-radius: 14px;
+	background: rgba(7, 14, 26, 0.95);
+	color: var(--text);
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+	transition:
+		0.18s opacity,
+		0.18s transform;
+	z-index: 90;
+}
+
+#toast.show {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
+
+#toast.bad {
+	border-color: var(--bad);
+	color: #ffd8dd;
+}
+
+#toast.good {
+	border-color: var(--good);
+	color: #d8ffef;
+}
+
+/* ================================================
+   Spotlight Tutorial - 스포트라이트 튜토리얼 하이라이트
+   ================================================ */
+
+/* 튜토리얼 하이라이트된 요소 */
+.tut-spotlight {
+	position: relative;
+	z-index: 50;
+	box-shadow:
+		0 0 0 3px rgba(255, 214, 107, 0.7),
+		0 0 20px rgba(255, 214, 107, 0.45),
+		0 0 40px rgba(255, 214, 107, 0.25);
+	border-radius: 8px;
+	animation: tutSpotlightPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes tutSpotlightPulse {
+	0%, 100% {
+		box-shadow:
+			0 0 0 3px rgba(255, 214, 107, 0.7),
+			0 0 20px rgba(255, 214, 107, 0.45),
+			0 0 40px rgba(255, 214, 107, 0.25);
+	}
+	50% {
+		box-shadow:
+			0 0 0 4px rgba(255, 214, 107, 0.9),
+			0 0 28px rgba(255, 214, 107, 0.6),
+			0 0 50px rgba(255, 214, 107, 0.35);
+	}
+}
+
+/* 튜토리얼 오버레이 */
+.tutSpotlightOverlay {
+	position: fixed;
+	inset: 0;
+	z-index: 45;
+	background: rgba(2, 6, 14, 0.68);
+	backdrop-filter: blur(2px);
+	pointer-events: none;
+}
+
+/* 튜토리얼 말풍선 */
+.tutTooltip {
+	position: fixed;
+	z-index: 55;
+	width: 300px;
+	max-width: calc(100vw - 32px);
+	padding: 16px;
+	background: linear-gradient(180deg, rgba(17, 35, 60, 0.98), rgba(5, 10, 20, 0.98));
+	border: 1px solid #345b8d;
+	border-radius: 16px;
+	box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5);
+}
+
+.tutTooltipGameOver {
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	text-align: center;
+}
+
+.tutTooltipBody {
+	margin-bottom: 14px;
+}
+
+.tutTooltipStep {
+	display: block;
+	font-size: 12px;
+	color: var(--gold);
+	font-weight: 900;
+	margin-bottom: 6px;
+	letter-spacing: 0.05em;
+}
+
+.tutTooltipMsg {
+	margin: 0;
+	line-height: 1.55;
+	color: #c9dcf6;
+	font-size: 14px;
+}
+
+.tutTooltipFoot {
+	display: flex;
+	gap: 8px;
+	justify-content: flex-end;
+}
+
+.tutSkipBtn,
+.tutConfirmBtn {
+	padding: 8px 14px;
+	font-size: 13px;
+	font-weight: 850;
+	min-width: 80px;
+}
+
+.tutConfirmBtn.good {
+	background: rgba(112, 255, 192, 0.12);
+	border-color: var(--good);
+}
+
+.tutConfirmBtn.good:hover:not(:disabled) {
+	background: rgba(112, 255, 192, 0.22);
+	box-shadow: 0 0 14px rgba(112, 255, 192, 0.25);
+}

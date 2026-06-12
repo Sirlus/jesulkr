@@ -1,5 +1,6 @@
 import * as Storage from '$lib/game/core/Storage';
 import { setLanguage as applyLanguage, t } from '$lib/game/i18n';
+import { lang } from '$lib/game/i18n/language.svelte';
 import type { Language } from '$lib/game/types';
 import { showToast } from '$lib/game/ui/Toast';
 import type { GameManager } from '$lib/stores/game';
@@ -11,6 +12,9 @@ export function initClient(gm: GameManager) {
   gm.store.decks = [...gm.store.decks];
   gm.store.deckNames = [...gm.store.deckNames];
   applyLanguage(gm.store.language);
+  // 사용자가 이전에 언어를 선택했으면 selected 플래그를 활성화
+  // (튜토리얼 등 후속 UI가 언어 선택을 기다릴 수 있도록)
+  lang.selected = !!Storage.loadLanguage();
 }
 
 export function setLanguage(gm: GameManager, lang: Language) {

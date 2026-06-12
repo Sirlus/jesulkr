@@ -5,4 +5,4 @@
 // without reassigning the export itself — only its property.
 // This ensures Svelte's reactive proxy tracks all reads/writes.
 
-export const lang = $state({ current: 'ko' as 'ko' | 'en' });
+export const lang = $state({ current: 'ko' as 'ko' | 'en', selected: false });

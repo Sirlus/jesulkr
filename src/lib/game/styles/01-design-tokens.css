@@ -1,0 +1,40 @@
+/* ================================================
+   Design Tokens - CSS 변수 (CSS Custom Properties)
+   ================================================ */
+
+:root {
+	/* 색상 (Colors) */
+	--bg: #07101d;
+	--panel: #101b2e;
+	--panel2: #0b1424;
+	--line: #284a78;
+
+	--blue: #51a8ff;
+	--blue2: #1f6fde;
+
+	--red: #ff465c;
+	--red2: #ff99a5;
+
+	--text: #eef6ff;
+	--muted: #9fb2cf;
+
+	--gold: #ffd76d;
+	--good: #70ffc0;
+	--bad: #ff7380;
+
+	/* 크기 (Sizing) */
+	--cell: 58px;
+	--gap: 4px;
+
+	/* 액션 버튼 위치 (Action Buttons Position) */
+	--topActionRight: 18px;
+	--topActionTop: 18px;
+	--topActionWidth: 132px;
+	--topActionHeight: 44px;
+	--topActionGap: 14px;
+
+	/* v2: Green / Stability (Phase 5 UI) */
+	--green: #70ffc0;
+	--green2: #1ca875;
+	--violet: #b790ff;
+}
