@@ -16,44 +16,44 @@
   import { t } from '$lib/game/i18n';
 
   // ── 단계 정의 ────────────────────────────────────────────────
-  // targetId: document.getElementById()로 찾을 요소의 id
+  // targetIds: 하이라이트할 요소 id 배열 (복수 지원)
   // msgKey: i18n 키
   // condition: 이 단계가 '완료'됐다고 판단하는 함수 (자동 진행)
   const STEPS = [
     {
-      targetId: 'toolBar',
+      targetIds: ['toolBar'],
       msgKey: 'tut2.step1',
       // 빨간 마나 버튼을 실제로 클릭했을 때만 진행
       condition: () => redToolClicked,
     },
     {
-      targetId: 'designBoard',
+      targetIds: ['designBoard'],
       msgKey: 'tut2.step2',
       // 보드에 부품이 하나라도 배치되면 진행
       condition: () => gameState.designer.components.length >= 1,
     },
     {
-      targetId: 'toolBar',
+      targetIds: ['toolBar', 'designBoard'],
       msgKey: 'tut2.step3',
       // 데미지가 1 이상이면 진행 (회로가 연결된 상태)
       condition: () => game.spellStats().damage >= 1,
     },
     {
-      targetId: 'saveBtn',
+      targetIds: ['saveBtn'],
       msgKey: 'tut2.step4',
       // 슬롯에 술식이 저장되면 진행
       condition: () => gameState.hasSavedSpell(),
     },
     {
-      targetId: 'startBattleBtn',
+      targetIds: ['startBattleBtn'],
       msgKey: 'tut2.step5',
       // 전투가 시작되면 진행
       condition: () => gameState.state === 'battle',
     },
     {
-      targetId: 'slots',
+      targetIds: ['slots'],
       msgKey: 'tut2.step6',
-      // 슬롯을 한 번이라도 발사하면 완료 (쿨다운 or 마나 감소 감지)
+      // 슬롯을 한 번이라도 발사하면 완료 (마나 감소 감지)
       condition: () => hasCastOnce,
     },
   ] as const;
@@ -97,24 +97,25 @@
   }
 
   // ── 스포트라이트 DOM 조작 ────────────────────────────────────
-  let prevTarget: Element | null = null;
+  let prevTargets: Element[] = [];
 
   async function updateSpotlight() {
-    // 이전 타겟 클래스 제거
-    prevTarget?.classList.remove('tut-spotlight');
+    // 이전 타겟 클래스 전체 제거
+    prevTargets.forEach(el => el.classList.remove('tut-spotlight'));
+    prevTargets = [];
 
     await tick();
-    const id = STEPS[step]?.targetId;
-    if (!id) return;
+    const ids = STEPS[step]?.targetIds;
+    if (!ids) return;
 
-    const el = document.getElementById(id);
-    if (!el) return;
+    const els = ids.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    if (els.length === 0) return;
 
-    el.classList.add('tut-spotlight');
-    prevTarget = el;
+    els.forEach(el => el.classList.add('tut-spotlight'));
+    prevTargets = els;
 
-    // 말풍선 위치 계산
-    positionTooltip(el);
+    // 말풍선은 첫 번째 타겟 기준
+    positionTooltip(els[0]);
   }
 
   function positionTooltip(el: Element) {
@@ -155,8 +156,8 @@
   });
 
   function finish() {
-    prevTarget?.classList.remove('tut-spotlight');
-    prevTarget = null;
+    prevTargets.forEach(el => el.classList.remove('tut-spotlight'));
+    prevTargets = [];
     active = false;
     game.saveTutorialSeen();
   }
@@ -167,11 +168,8 @@
 
   // 화면 리사이즈 시 말풍선 재계산
   function onResize() {
-    if (!active) return;
-    const id = STEPS[step]?.targetId;
-    if (!id) return;
-    const el = document.getElementById(id);
-    if (el) positionTooltip(el);
+    if (!active || prevTargets.length === 0) return;
+    positionTooltip(prevTargets[0]);
   }
 </script>
 
