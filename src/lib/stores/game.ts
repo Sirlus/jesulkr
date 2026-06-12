@@ -296,6 +296,12 @@ export class GameManager {
   /** 자동 마나 보존 값을 저장합니다 */
   saveAutoManaReserve() { StorageController.saveAutoManaReserve(this); }
 
+  /** 튜토리얼 완료 상태를 저장합니다 */
+  saveTutorialSeen() {
+    this.store.tutorialSeen = true;
+    Storage.saveTutorialSeen(true);
+  }
+
   /** 마우스 포인터 위치를 설계판 그리드 좌표로 변환합니다 */
   getBoardGridCoordFromPointer(e: { clientX: number; clientY: number }): { gx: number; gy: number } | null {
     return DesignerController.getBoardGridCoordFromPointer(this, e);

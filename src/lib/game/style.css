@@ -77,6 +77,29 @@ input{width:100%}.small{font-size:12px;color:var(--muted)}
 .toolIconSvg{width:42px;height:42px;display:block;overflow:visible}.toolIconSvg *{vector-effect:none}.toolIcon{position:relative;display:block;width:34px;height:34px}.toolIcon::before,.toolIcon::after{content:"";position:absolute;display:block}.srOnly{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);border:0}
 @media(max-width:1050px){.deckRow,.deckNameRow{grid-template-columns:1fr}.speedControls{width:100%;margin-left:0;justify-content:flex-start}}
 
+/* [튜토리얼 모달] */
+.tutorialOverlay{position:fixed;inset:0;display:grid;place-items:center;background:rgba(2,6,14,.82);backdrop-filter:blur(6px);z-index:100;padding:18px}
+.tutorialBox{width:min(540px,96vw);border:1px solid #345b8d;border-radius:22px;background:linear-gradient(180deg,rgba(17,35,60,.99),rgba(5,10,20,.99));box-shadow:0 24px 70px rgba(0,0,0,.6);padding:22px;display:flex;flex-direction:column;gap:18px}
+.tutorialHead{display:flex;justify-content:space-between;align-items:center}
+.tutorialStep{color:var(--muted);font-size:13px;font-weight:700}
+.tutorialSkip{padding:5px 12px;font-size:13px;color:var(--muted);border-color:#27456e;background:transparent;min-height:auto}
+.tutorialSkip:hover:not(:disabled){color:var(--text)}
+.tutorialSlide{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;min-height:240px;justify-content:center;padding:0 8px}
+.tutorialIcon{font-size:44px;line-height:1;filter:drop-shadow(0 0 12px rgba(81,168,255,.35))}
+.tutorialTitle{margin:0;font-size:22px;font-weight:900;color:#fff}
+.tutorialBody{margin:0;color:#c9dcf6;font-size:14px;line-height:1.75;white-space:pre-line;text-align:left;width:100%;max-width:440px;border-left:3px solid rgba(81,168,255,.4);padding-left:12px}
+.tutorialDots{display:flex;justify-content:center;gap:8px}
+.tutorialDot{width:10px;height:10px;border-radius:50%;border:2px solid #2e5284;background:#0b1424;padding:0;min-width:auto;cursor:pointer;transition:.15s background,.15s border-color}
+.tutorialDot.active{background:var(--blue);border-color:var(--blue);box-shadow:0 0 8px rgba(81,168,255,.5)}
+.tutorialFoot{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tutorialPrev{min-width:80px;font-size:13px;color:var(--muted);border-color:#27456e;background:transparent}
+.tutorialPrev:hover:not(:disabled){color:var(--text)}
+.tutorialNext{flex:1;min-height:44px;font-weight:900;font-size:15px}
+
+/* [빈 보드 힌트] */
+.emptyBoardHint{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:5}
+.emptyBoardHintInner{background:rgba(7,16,29,.82);border:1px dashed rgba(81,168,255,.35);border-radius:16px;padding:14px 20px;text-align:center;color:var(--muted);font-size:13px;line-height:1.65;max-width:220px}
+.emptyBoardHintInner b{display:block;color:#c9dcf6;font-size:15px;margin-bottom:6px}
 
 
 /* [언어 선택 첫 화면]
