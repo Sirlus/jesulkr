@@ -1,7 +1,7 @@
 // ============================================================
 // Designer — Component placement, collision, dimensions
 // ============================================================
-import type { Component, ComponentType } from '../types';
+import type { Component, ComponentType, ExtractorColor } from '../types';
 import { getDef } from './components/registry';
 
 export function dimensionsFor(type: string, rotation: number): { w: number; h: number; rotation: number } {
@@ -47,7 +47,12 @@ export function removeComponentAt(
 }
 
 export function createComponentFromGridCoord(
-  type: string, gx: number, gy: number, nextId: number, rotation: number,
+  type: string,
+  gx: number,
+  gy: number,
+  nextId: number,
+  rotation: number,
+  color?: ExtractorColor,
 ): Component {
   const dim = dimensionsFor(type, rotation);
   const x = Math.floor(gx);
@@ -55,9 +60,11 @@ export function createComponentFromGridCoord(
   return {
     id: nextId,
     type: type as ComponentType,
-    x, y,
+    x,
+    y,
     w: dim.w,
     h: dim.h,
     rotation: dim.rotation,
+    ...(color ? { color } : {}),
   };
 }
