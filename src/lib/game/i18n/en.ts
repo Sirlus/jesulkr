@@ -159,26 +159,15 @@ const en: Record<string, string> = {
   'hint.empty.board.title': 'Build Your First Spell',
   'hint.empty.board.body': '① Select Red Mana → ② Click board → ③ Place 1-cell Circuit next to it → ④ [Save to Slot]',
 
-  // ── Tutorial ───────────────────────────────────────────────
   'tut.skip': 'Skip',
-  'tut.prev': 'Prev',
-  'tut.next': 'Next',
-  'tut.start': 'Get Started',
 
-  'tut.s1.title': 'Spell Design Tower Defense',
-  'tut.s1.body': 'Design spells, save them to slots, and fire them in battle to stop monsters.\nThe loop is: design → save → battle → score → earn stars → unlock new parts.',
-
-  'tut.s2.title': 'Red Mana & Circuits',
-  'tut.s2.body': 'Place Red Mana next to a circuit to generate damage.\n• 1-cell Circuit: red mana count × 1\n• 2-cell Oval: floor(mana / 2) × 5\n• 2×2 Core: floor(mana / 3) × 12\n\nLarger frames mean longer cooldowns (width × height = ticks).',
-
-  'tut.s3.title': 'Wires & Blue Mana',
-  'tut.s3.body': 'Wires (unlocked in Map 2) connect mana to distant circuits.\nBlue Mana Generator requires red mana to be connected before it activates.\n\nThe 2-cell Hybrid Circuit pairs red + blue for ×8 high-efficiency damage.',
-
-  'tut.s4.title': 'Battle & Slots',
-  'tut.s4.body': 'Save up to 5 spells in slots.\n• Fire manually with keys 1–5 or by clicking\n• Toggle auto-fire per slot\n• Auto Mana Reserve: auto-fire stops if mana would drop below this value\n\nClick a monster to set it as the priority target.',
-
-  'tut.s5.title': 'Maps & Stars',
-  'tut.s5.body': 'Hit score targets to earn stars ⭐ and unlock new maps and parts.\n• Map 1: default\n• Map 2: 1 star on Map 1 → wires, blue mana, hybrid circuit\n• Map 3: 1 star on Map 2 → 9-cell hybrid core, advanced green circuits\n\n5+ total stars increases mana regen from 6 → 10 per second.',
+  // ── Spotlight tutorial steps ─────────────────────────────
+  'tut2.step1': 'Select 🔴 Red Mana from the palette on the left.',
+  'tut2.step2': 'Click the design board to place the mana.',
+  'tut2.step3': 'Select ⭕ 1-cell Circuit and place it directly next to the mana.',
+  'tut2.step4': 'Damage is live! Click [Save to Slot] on the right.',
+  'tut2.step5': 'Spell saved! Click [Start Battle] to begin.',
+  'tut2.step6': 'Press key 1 or click a slot to cast your spell!',
 };
 
 export default en;

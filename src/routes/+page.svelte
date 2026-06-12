@@ -9,7 +9,7 @@
   const componentStyles = getComponentStyles();
 
   import LanguageModal from '$lib/components/LanguageModal.svelte';
-  import TutorialModal from '$lib/components/TutorialModal.svelte';
+  import SpotlightTutorial from '$lib/components/SpotlightTutorial.svelte';
   import MainMenu from '$lib/components/MainMenu.svelte';
   import HUD from '$lib/components/HUD.svelte';
   import BattleSection from '$lib/components/BattleSection.svelte';
@@ -64,7 +64,7 @@
 />
 
 <LanguageModal />
-<TutorialModal />
+<SpotlightTutorial />
 <MainMenu
   onOpenKeySettings={() => keyModal?.open()}
   onOpenMapSelect={() => mapModal?.open()}

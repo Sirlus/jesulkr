@@ -43,7 +43,7 @@
     <span>{t('spell.slots')}</span>
   </div>
 
-  <div class="slots">
+  <div class="slots" id="slots">
     {#each gameState.slots as spell, i}
       <SlotCard index={i} {spell} />
     {/each}
