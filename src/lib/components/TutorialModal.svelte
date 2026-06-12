@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { game } from '$lib/stores/game';
   import * as Storage from '$lib/game/core/Storage';
   import { t } from '$lib/game/i18n';
@@ -32,8 +33,16 @@
     },
   ];
 
-  let visible = $state(!Storage.loadTutorialSeen());
+  // SSR-safe default: hidden until we know the user's localStorage state.
+  // Doing the read inside onMount avoids hydration mismatches.
+  let visible = $state(false);
   let step = $state(0);
+
+  onMount(() => {
+    if (!Storage.loadTutorialSeen()) {
+      visible = true;
+    }
+  });
 
   function close() {
     visible = false;
