@@ -3,10 +3,11 @@
   // SpotlightTutorial — 스포트라이트 기반 가이디드 투어
   //
   // 작동 방식:
-  //   - 게임 상태($derived)를 감지해 단계를 자동 진행
+  //   - 게임 상태($effect)를 감지해 단계를 자동 진행
   //   - 현재 단계에 해당하는 DOM 요소에 .tut-spotlight CSS 클래스 부여
   //   - box-shadow 트릭으로 해당 요소만 밝게, 나머지는 어둡게
   //   - 말풍선은 하이라이트 요소 위치 기준 동적 배치
+  //   - step 8(게임오버)은 스포트라이트 없이 중앙 메시지 + 버튼
   //   - 건너뛰기는 언제든 가능
   // ============================================================
   import { onMount, tick } from 'svelte';
@@ -16,45 +17,53 @@
   import { t } from '$lib/game/i18n';
 
   // ── 단계 정의 ────────────────────────────────────────────────
-  // targetIds: 하이라이트할 요소 id 배열 (복수 지원)
+  // targetIds: 하이라이트할 요소 id 배열 (복수 지원, 빈 배열 = 오버레이만)
   // msgKey: i18n 키
   // condition: 이 단계가 '완료'됐다고 판단하는 함수 (자동 진행)
+  // noOverlay: true면 어두운 배경 없이 말풍선만 표시 (게임오버 단계)
   const STEPS = [
     {
       targetIds: ['toolBar'],
       msgKey: 'tut2.step1',
-      // 빨간 마나 버튼을 실제로 클릭했을 때만 진행
       condition: () => redToolClicked,
     },
     {
       targetIds: ['designBoard'],
       msgKey: 'tut2.step2',
-      // 보드에 부품이 하나라도 배치되면 진행
       condition: () => gameState.designer.components.length >= 1,
     },
     {
       targetIds: ['toolBar', 'designBoard'],
       msgKey: 'tut2.step3',
-      // 데미지가 1 이상이면 진행 (회로가 연결된 상태)
       condition: () => game.spellStats().damage >= 1,
     },
     {
       targetIds: ['saveBtn'],
       msgKey: 'tut2.step4',
-      // 슬롯에 술식이 저장되면 진행
       condition: () => gameState.hasSavedSpell(),
     },
     {
       targetIds: ['startBattleBtn'],
       msgKey: 'tut2.step5',
-      // 전투가 시작되면 진행
       condition: () => gameState.state === 'battle',
     },
     {
       targetIds: ['slots'],
       msgKey: 'tut2.step6',
-      // 슬롯을 한 번이라도 발사하면 완료 (마나 감소 감지)
       condition: () => hasCastOnce,
+    },
+    {
+      targetIds: ['speedControls'],
+      msgKey: 'tut2.step7',
+      // 배속이 1배 초과로 바뀌면 진행
+      condition: () => speedChanged,
+    },
+    {
+      targetIds: [],
+      msgKey: 'tut2.step8',
+      noOverlay: true,
+      // 게임오버 = 이 단계는 자동 완료 없음 — 버튼으로만 닫힘
+      condition: () => false,
     },
   ] as const;
 
@@ -62,12 +71,12 @@
   let active = $state(false);
   let step = $state(0);
   let hasCastOnce = $state(false);
+  let speedChanged = $state(false);
   let tooltipStyle = $state('');
   let prevMana = $state(20);
-  // step 1: 초기 tool이 red라도 클릭 전까지는 진행 안 함
   let redToolClicked = $state(false);
 
-  // 전투 중 마나 감소 = 발사한 것으로 간주
+  // 전투 중 마나 감소 = 발사
   $effect(() => {
     if (gameState.state === 'battle') {
       const cur = gameState.battle.mana;
@@ -75,6 +84,23 @@
       prevMana = cur;
     }
   });
+
+  // 게임오버 감지 — step 6 이후(전투 진입 후) 게임오버가 되면 step 8로 점프
+  $effect(() => {
+    if (!active) return;
+    if (gameState.state === 'gameover' && step >= 5) {
+      jumpToGameOver();
+    }
+  });
+
+  async function jumpToGameOver() {
+    prevTargets.forEach(el => el.classList.remove('tut-spotlight'));
+    prevTargets = [];
+    step = STEPS.length - 1; // step 8
+    await tick();
+    // 게임오버 단계는 화면 중앙 고정
+    tooltipStyle = 'left:50%;top:50%;transform:translate(-50%,-50%)';
+  }
 
   // ── 단계 자동 진행 ───────────────────────────────────────────
   $effect(() => {
@@ -86,7 +112,6 @@
 
   async function advance() {
     if (step >= STEPS.length - 1) {
-      // 마지막 단계 완료 → 튜토리얼 종료
       await tick();
       finish();
       return;
@@ -100,21 +125,18 @@
   let prevTargets: Element[] = [];
 
   async function updateSpotlight() {
-    // 이전 타겟 클래스 전체 제거
     prevTargets.forEach(el => el.classList.remove('tut-spotlight'));
     prevTargets = [];
 
     await tick();
     const ids = STEPS[step]?.targetIds;
-    if (!ids) return;
+    if (!ids || ids.length === 0) return;
 
     const els = ids.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
     if (els.length === 0) return;
 
     els.forEach(el => el.classList.add('tut-spotlight'));
     prevTargets = els;
-
-    // 말풍선은 첫 번째 타겟 기준
     positionTooltip(els[0]);
   }
 
@@ -123,13 +145,11 @@
     const viewH = window.innerHeight;
     const viewW = window.innerWidth;
 
-    // 요소 아래 공간이 충분하면 아래, 아니면 위
     const spaceBelow = viewH - rect.bottom;
     const top = spaceBelow > 120
       ? rect.bottom + 12
-      : rect.top - 12; // translateY(-100%) 적용
+      : rect.top - 12;
 
-    // 가로: 요소 중앙 기준, 화면 밖으로 나가지 않게 클램프
     const centerX = rect.left + rect.width / 2;
     const left = Math.max(16, Math.min(viewW - 316, centerX - 150));
 
@@ -141,18 +161,26 @@
   onMount(() => {
     if (!Storage.loadTutorialSeen()) {
       active = true;
-      // 첫 단계 스포트라이트 설정 (다음 틱에)
       tick().then(() => updateSpotlight());
     }
 
-    // toolBar 클릭 감지 — step 1 진행 조건
+    // step 1: 빨간 마나 버튼 클릭 감지
     function onToolBarClick(e: MouseEvent) {
       if (!active || step !== 0) return;
-      const btn = (e.target as Element).closest('.toolBtn[data-tool="red"]');
-      if (btn) redToolClicked = true;
+      if ((e.target as Element).closest('.toolBtn[data-tool="red"]')) redToolClicked = true;
     }
+    // step 7: 배속 버튼 클릭 감지
+    function onSpeedClick(e: MouseEvent) {
+      if (!active || step !== 6) return;
+      if ((e.target as Element).closest('.speedBtn')) speedChanged = true;
+    }
+
     document.addEventListener('click', onToolBarClick, true);
-    return () => document.removeEventListener('click', onToolBarClick, true);
+    document.addEventListener('click', onSpeedClick, true);
+    return () => {
+      document.removeEventListener('click', onToolBarClick, true);
+      document.removeEventListener('click', onSpeedClick, true);
+    };
   });
 
   function finish() {
@@ -162,38 +190,58 @@
     game.saveTutorialSeen();
   }
 
-  function skip() {
+  function skip() { finish(); }
+
+  function onGameOverConfirm() {
     finish();
+    game.toggleDesigner();
   }
 
-  // 화면 리사이즈 시 말풍선 재계산
   function onResize() {
     if (!active || prevTargets.length === 0) return;
     positionTooltip(prevTargets[0]);
   }
+
+  // 현재 단계가 게임오버 단계인지
+  const isGameOverStep = $derived(active && step === STEPS.length - 1 && STEPS[step].noOverlay);
 </script>
 
 <svelte:window onresize={onResize} />
 
 {#if active && step < STEPS.length}
-  <!-- 어두운 배경 오버레이 (pointer-events: none — 클릭은 spotlight 요소로 통과) -->
-  <div class="tutSpotlightOverlay" aria-hidden="true"></div>
+  {#if !isGameOverStep}
+    <!-- 어두운 배경 오버레이 -->
+    <div class="tutSpotlightOverlay" aria-hidden="true"></div>
+  {/if}
 
-  <!-- 말풍선 -->
+  <!-- 말풍선 / 게임오버 카드 -->
   <div
     class="tutTooltip"
-    role="status"
-    aria-live="polite"
+    class:tutTooltipGameOver={isGameOverStep}
+    role={isGameOverStep ? 'dialog' : 'status'}
+    aria-live={isGameOverStep ? undefined : 'polite'}
+    aria-modal={isGameOverStep ? 'true' : undefined}
     style={tooltipStyle}
   >
     <div class="tutTooltipBody">
-      <span class="tutTooltipStep">{step + 1} / {STEPS.length}</span>
+      {#if !isGameOverStep}
+        <span class="tutTooltipStep">{step + 1} / {STEPS.length}</span>
+      {/if}
       <p class="tutTooltipMsg">{t(STEPS[step].msgKey)}</p>
     </div>
     <div class="tutTooltipFoot">
-      <button class="tutSkipBtn" type="button" onclick={skip}>
-        {t('tut.skip')}
-      </button>
+      {#if isGameOverStep}
+        <button class="tutConfirmBtn good" type="button" onclick={onGameOverConfirm}>
+          {t('tut2.step8.cta')}
+        </button>
+        <button class="tutSkipBtn" type="button" onclick={skip}>
+          {t('tut.skip')}
+        </button>
+      {:else}
+        <button class="tutSkipBtn" type="button" onclick={skip}>
+          {t('tut.skip')}
+        </button>
+      {/if}
     </div>
   </div>
 {/if}
