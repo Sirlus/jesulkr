@@ -31,7 +31,7 @@
 .tutSpotlightOverlay {
 	position: fixed;
 	inset: 0;
-	background: rgba(2, 6, 18, 0.72);
+	background: rgba(2, 6, 18, 0.5);
 	z-index: 200;
 	pointer-events: none;
 }
@@ -43,7 +43,7 @@
 	z-index: 201 !important;
 	box-shadow:
 		0 0 0 6px rgba(112, 255, 192, 0.55),
-		0 0 0 9999px rgba(2, 6, 18, 0.72) !important;
+		0 0 0 9999px rgba(2, 6, 18, 0.5) !important;
 	border-radius: inherit;
 	pointer-events: auto !important;
 }
