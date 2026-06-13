@@ -10,6 +10,9 @@
       ],
       "alwaysAllow": [
         "svelte-autofixer"
+      ],
+      "autoApprove": [
+        "svelte-autofixer"
       ]
     },
     "shell-workaround": {

@@ -160,6 +160,7 @@ const ko: Record<string, string> = {
   'hint.empty.board.body': '① 빨간 점 마나 선택 → ② 설계판 클릭 → ③ 옆에 1칸 회로 배치 → ④ [슬롯에 저장]',
 
   'tut.skip': '건너뛰기',
+  'tutorial.replay': '튜토리얼 다시 보기',
 
   // ── 스포트라이트 튜토리얼 단계 ───────────────────────────
   'tut2.step1': '왼쪽 팔레트에서 🔴 빨간 점 마나를 선택하세요.',

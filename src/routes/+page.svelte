@@ -69,6 +69,7 @@
   onOpenKeySettings={() => keyModal?.open()}
   onOpenMapSelect={() => mapModal?.open()}
   onToggleDeck={() => showDeck = !showDeck}
+  onStartTutorial={() => game.replayTutorial()}
 />
 <HUD />
 

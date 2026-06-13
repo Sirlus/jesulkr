@@ -160,6 +160,7 @@ const en: Record<string, string> = {
   'hint.empty.board.body': '① Select Red Mana → ② Click board → ③ Place 1-cell Circuit next to it → ④ [Save to Slot]',
 
   'tut.skip': 'Skip',
+  'tutorial.replay': 'Tutorial',
 
   // ── Spotlight tutorial steps ─────────────────────────────
   'tut2.step1': 'Select 🔴 Red Mana from the palette on the left.',

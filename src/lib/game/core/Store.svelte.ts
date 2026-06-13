@@ -104,6 +104,7 @@ export class Store {
 
   language = $state<Language>('ko');
   tutorialSeen = $state<boolean>(false);
+  tutorialReplayTrigger = $state<number>(0);
 
   designer = $state<DesignerState>(createDesignerState());
   battle = $state<BattleState>(createBattleState());

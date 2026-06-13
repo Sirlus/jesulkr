@@ -302,6 +302,11 @@ export class GameManager {
     Storage.saveTutorialSeen(true);
   }
 
+  /** 튜토리얼을 다시 시작합니다 (메뉴에서 수동 실행) */
+  replayTutorial() {
+    this.store.tutorialReplayTrigger += 1;
+  }
+
   /** 마우스 포인터 위치를 설계판 그리드 좌표로 변환합니다 */
   getBoardGridCoordFromPointer(e: { clientX: number; clientY: number }): { gx: number; gy: number } | null {
     return DesignerController.getBoardGridCoordFromPointer(this, e);

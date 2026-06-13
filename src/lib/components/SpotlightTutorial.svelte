@@ -71,6 +71,9 @@ const STEPS = [
     },
   ] as const;
 
+  // ── props ────────────────────────────────────────────────────
+  // (없음 — 튜토리얼 시작은 gameState.tutorialReplayTrigger로 감지)
+
   // ── 상태 ─────────────────────────────────────────────────────
   let active = $state(false);
   let step = $state(0);
@@ -199,6 +202,27 @@ async function updateSpotlight(targetStep?: number) {
 
     tooltipStyle = `left:${left}px;top:${top}px;${above ? 'transform:translateY(-100%) translateY(-12px)' : ''}`;
   }
+
+  // ── 외부에서 튜토리얼 강제 시작 ─────────────────────────────
+  function startTutorial() {
+    if (active) return;
+    if (!langState.selected) return;
+    // 상태 초기화
+    step = 0;
+    hasCastOnce = false;
+    speedChanged = false;
+    redToolClicked = false;
+    prevMana = 20;
+    active = true;
+    tick().then(() => updateSpotlight());
+  }
+
+  // gameState.tutorialReplayTrigger 증가 시 튜토리얼 재시작
+  $effect(() => {
+    if (gameState.tutorialReplayTrigger > 0) {
+      startTutorial();
+    }
+  });
 
   // ── 생명주기 ─────────────────────────────────────────────────
   // 언어 선택이 끝나기 전에는 튜토리얼을 시작하지 않습니다.
