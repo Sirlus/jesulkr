@@ -3,8 +3,8 @@
 // ============================================================
 import type { Monster, CastProjectile, VisualEffect, MapDef, SpellData, Records } from '../types';
 import { TICK_SEC, LANES, MAX_MANA } from '../constants';
-import { getAutoTarget, getCurrentTarget } from './TargetingSystem';
 import { resolveCast } from './DamageResolver';
+import { runAutoCast } from './AutoCaster';
 
 /** 전투 엔진이 외부 상태(슬롯, 해금, 기록 등)를 참조하기 위한 컨텍스트 */
 export interface BattleContext {
@@ -79,7 +79,7 @@ export function updateBattleTick(
   let nextSurvival = state.survival;
   let killedAny = false;
   let bossSpawned = false;
-  const casts2 = [...state.casts];
+  let casts2 = [...state.casts];
 
   // 1. Mana regen
   nextMana = Math.min(MAX_MANA, nextMana + regen * TICK_SEC);
@@ -90,38 +90,14 @@ export function updateBattleTick(
 
   // 3. Auto-cast
   if (ctx.runMode !== 'pure') {
-    // 이번 틱에 이미 타겟으로 지정된 몬스터 ID를 추적해 분산 타겟팅
-    const usedTargetIds = new Set<number>(
-      casts2.filter(c => c.remainingTicks > 0).map(c => c.targetId),
+    const ac = runAutoCast(
+      { monsters: m, casts: casts2, cooldowns: cds, selectedTargetId: sid, mana: nextMana, nextCastId: cId },
+      { slots: ctx.slots, slotAutoModes: ctx.slotAutoModes, autoManaReserve: ctx.autoManaReserve, runMode: ctx.runMode },
     );
-
-    for (let i = 0; i < 5; i++) {
-      if (!ctx.slotAutoModes[i]) continue;
-      if (cds[i] > 0) continue;
-      const sp = ctx.slots[i];
-      if (!sp) continue;
-      if (nextMana < sp.manaCost) continue;
-      if ((nextMana - sp.manaCost) < ctx.autoManaReserve) continue;
-
-      // 이미 타겟된 몬스터를 제외하고 우선순위대로 타겟 선택
-      // 선택된 타겟이 아직 안 쓰인 경우 우선 사용, 아니면 다음 위협 몬스터
-      const preferred = getCurrentTarget(m, sid);
-      const target =
-        preferred && !usedTargetIds.has(preferred.id)
-          ? preferred
-          : m.filter(x => x.hp > 0 && !usedTargetIds.has(x.id))
-              .sort((a, b) => b.y - a.y)[0] ?? preferred ?? null;
-
-      if (!target) continue;
-      usedTargetIds.add(target.id);
-      nextMana -= sp.manaCost;
-      cds[i] = sp.castTime;
-      casts2.push({
-        id: cId++, spell: JSON.parse(JSON.stringify(sp)),
-        targetId: target.id, slotIndex: i,
-        remainingTicks: 4, totalTicks: 4,
-      });
-    }
+    casts2 = ac.newCasts;
+    nextMana = ac.mana;
+    ac.cooldowns.forEach((v, i) => (cds[i] = v));
+    cId = ac.nextCastId;
   }
 
   // 4. Boss spawn
@@ -154,12 +130,11 @@ export function updateBattleTick(
   }
   m = m.filter(x => !x.reached && x.hp > 0);
 
-// 7. Resolve projectiles
+  // 7. Resolve projectiles
   const newCasts: CastProjectile[] = [];
   for (const c of casts2) {
     c.remainingTicks--;
     if (c.remainingTicks <= 0) {
-      // Use resolveCast from DamageResolver to avoid duplicate logic
       const result = resolveCast(c, m, ctx.canvasWidth, ctx.canvasHeight);
       m = result.monsters;
       e = e.concat(result.effects).concat(result.aoeEffects);
