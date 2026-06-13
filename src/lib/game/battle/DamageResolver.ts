@@ -3,7 +3,7 @@
 // ============================================================
 import type { Monster, CastProjectile, VisualEffect } from '../types';
 import { CORE_AOE_TARGET_LIMIT } from '../constants';
-import { getAutoTarget } from './TargetingSystem';
+import { getAutoTarget, getCurrentTarget } from './TargetingSystem';
 
 export interface ResolveResult {
   monsters: Monster[];
@@ -23,6 +23,7 @@ export function resolveCast(
   canvasWidth: number,
   canvasHeight: number,
 ): ResolveResult {
+  // 원래 타겟이 살아있으면 그대로, 죽었으면 현재 가장 위협적인 몬스터로 재조준
   let target = monsters.find(m => m.id === cast.targetId && m.hp > 0) ?? null;
   if (!target) target = getAutoTarget(monsters);
   if (!target) {

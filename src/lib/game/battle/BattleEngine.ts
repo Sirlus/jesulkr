@@ -3,7 +3,7 @@
 // ============================================================
 import type { Monster, CastProjectile, VisualEffect, MapDef, SpellData, Records } from '../types';
 import { TICK_SEC, LANES, MAX_MANA } from '../constants';
-import { getAutoTarget } from './TargetingSystem';
+import { getAutoTarget, getCurrentTarget } from './TargetingSystem';
 import { resolveCast } from './DamageResolver';
 
 /** 전투 엔진이 외부 상태(슬롯, 해금, 기록 등)를 참조하기 위한 컨텍스트 */
@@ -90,6 +90,11 @@ export function updateBattleTick(
 
   // 3. Auto-cast
   if (ctx.runMode !== 'pure') {
+    // 이번 틱에 이미 타겟으로 지정된 몬스터 ID를 추적해 분산 타겟팅
+    const usedTargetIds = new Set<number>(
+      casts2.filter(c => c.remainingTicks > 0).map(c => c.targetId),
+    );
+
     for (let i = 0; i < 5; i++) {
       if (!ctx.slotAutoModes[i]) continue;
       if (cds[i] > 0) continue;
@@ -97,8 +102,18 @@ export function updateBattleTick(
       if (!sp) continue;
       if (nextMana < sp.manaCost) continue;
       if ((nextMana - sp.manaCost) < ctx.autoManaReserve) continue;
-      const target = getAutoTarget(m);
+
+      // 이미 타겟된 몬스터를 제외하고 우선순위대로 타겟 선택
+      // 선택된 타겟이 아직 안 쓰인 경우 우선 사용, 아니면 다음 위협 몬스터
+      const preferred = getCurrentTarget(m, sid);
+      const target =
+        preferred && !usedTargetIds.has(preferred.id)
+          ? preferred
+          : m.filter(x => x.hp > 0 && !usedTargetIds.has(x.id))
+              .sort((a, b) => b.y - a.y)[0] ?? preferred ?? null;
+
       if (!target) continue;
+      usedTargetIds.add(target.id);
       nextMana -= sp.manaCost;
       cds[i] = sp.castTime;
       casts2.push({
