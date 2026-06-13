@@ -482,6 +482,9 @@
 		padding-bottom: 8px !important;
 		overflow-x: hidden;
 	}
+	body.mobile-layout.mode-design .mainMenuWrap {
+		display: none !important;
+	}
 	body.mobile-layout.mode-design .designerPanel {
 		margin: 0 !important;
 		width: 100% !important;
